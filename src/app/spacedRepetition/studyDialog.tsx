@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "ts-fsrs";
 import Word from "@/components/Word";
 import { WORD } from "@/types/types";
-import getWord from "@/utils/getWord";
 import { Skeleton } from "@/components/ui/skeleton";
 import getVerseWords from "@/utils/getVerseWords";
 import Verse from "@/components/Verse";
@@ -79,7 +78,12 @@ export default function StudyDialog() {
       if (filteredCards.length === 0) return; // if there are no cards at all
       if (signal.aborted) return;
       // sort by due date
-      const sortedCards = filteredCards.sort((a, b) => a[1].card.due.getTime() - b[1].card.due.getTime());
+      const sortedCards = filteredCards.sort(
+        (a, b) =>
+          a[1].card.state == 0
+            ? Math.random() - 0.5 // new cards go randomly
+            : a[1].card.due.getTime() - b[1].card.due.getTime() // otherwise sort by due date
+      );
       const currentWord = sortedCards[0];
 
       const wordIndex = currentWord[1].index as `${string}:${string}:${string}`;
@@ -139,6 +143,7 @@ export default function StudyDialog() {
                   {...{
                     verse,
                     highlightIndex: word ? +word.index.split(":")[2] - 1 : undefined,
+                    switchIndex: word ? +word.index.split(":")[2] - 1 : undefined,
                   }}
                 ></Verse>
                 <Translations {...{ index: `${word?.index.split(":")[0]}:${word?.index.split(":")[1]}` }}></Translations>
