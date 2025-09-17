@@ -235,7 +235,7 @@ export default function Page() {
                               setRedIndex(i);
                               setTimeout(() => {
                                 setRedIndex(undefined);
-                                penaltyFunc();
+                                reset();
                               }, 150);
                             } else {
                               if (userWords.length + 1 === verse.length) {
