@@ -9,14 +9,13 @@ import {
   ThemeSupa,
 } from "@supabase/auth-ui-shared";
 import { User } from "@supabase/supabase-js";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import ScrollDown from "@/components/ui/ScrollDown";
 import UpdatePassword from "@/components/ChangePassword";
 import Link from "@/components/ui/Link";
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { useOnlineStorage } from "@/stores/onlineStorage";
-import superJson from "superjson";
 
 export default function Home() {
   const [user, setUser] = useState<User | null>();
@@ -25,16 +24,10 @@ export default function Home() {
     supabase.auth.getUser().then(({ data, error }) => {
       setUser(data.user);
     });
-    supabase.auth.onAuthStateChange(async (event, session) => {
+    supabase.auth.onAuthStateChange((event, session) => {
       if (event == "SIGNED_IN") {
-        supabase.auth.getUser().then(({ data, error }) => {
-          setUser(data.user);
-        });
-
-        const { data, error } = await supabase.from("user_preference").select("*").single();
-        if (data?.preference && !error) {
-          useOnlineStorage.setState((superJson.parse(data.preference as string) as any).state);
-        }
+        setUser(session?.user);
+        useOnlineStorage.persist.rehydrate();
       }
       setTimeout(async () => {
         // await on other Supabase function here
@@ -47,7 +40,7 @@ export default function Home() {
       <ParticlesEffect />
       <div className="grid grid-rows-2 md:grid-cols-2 md:grid-rows-1 min-h-dvh">
         <div className="font-extrabold text-2xl p-8 text-justify content-center">
-          Learn <span className="text-green-500 dark:text-green-300">Quranic Arabic</span> Faster And More Effectively Using{" "}
+          Learn <span className="text-green-500 dark:text-green-300">Quranic Arabic</span> More Efficiently And Effectively Using{" "}
           <span className="text-green-500 dark:text-green-300">Spaced Repetition</span> And <span className="text-green-500 dark:text-green-300">Active Recall</span>
         </div>
         <div className="flex flex-col gap-2 justify-center items-center min-h-dvh">

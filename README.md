@@ -1,9 +1,6 @@
-<div>
-<a href="https://learn-quranic-arabic.vercel.app/buyMeACoffee" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
-</div>
-Learn Quranic Arabic Faster And More Effectively Using Cloze Testing And Spaced Repetition with Morphological Features
+# Learn Quranic Arabic More Efficiently And Effectively Using Spaced Repetition And Active Recall
 
-clone of Cloze master with Quran verses
+Immerse yourself in the Arabic language by taking whole sentences into your short-term memory to recognize the patterns in the language, instead of memorizing hundreds of words out of context, only to end up not being able to form any sentences despite knowing hundreds of words.
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 

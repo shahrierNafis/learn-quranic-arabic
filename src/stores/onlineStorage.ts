@@ -1,6 +1,5 @@
 // src/stores/counter-store.ts
 import { persist, PersistStorage } from "zustand/middleware";
-import { create } from "zustand";
 import { createWithEqualityFn } from "zustand/traditional";
 import { fontNames } from "@/utils/fontNames";
 import { createClient } from "@/utils/supabase/clients";
@@ -35,9 +34,10 @@ const defaultColours: { [key: string]: [string, string] } = {
   OBJ: ["#5c7085", "#8798AB"],
   others: ["#a8017b", "#FE48CE"],
 };
-import superJson from "superjson";
+import superjson from "superjson";
 import { Card } from "ts-fsrs";
 import reportIssue from "@/utils/reportIssue";
+import { useUserDataOutOfSyncStore } from "@/components/UserDataOutOfSync";
 
 const supabase = createClient<Database>();
 const storage: PersistStorage<PreferenceStore> = {
@@ -45,13 +45,13 @@ const storage: PersistStorage<PreferenceStore> = {
     const str = localStorage.getItem(name);
     if (!str) return null;
 
-    return superJson.parse(str);
+    return superjson.parse(str);
   },
   setItem: async (name, value) => {
     value.state.lastModified = new Date();
 
     // 1. Write to localStorage
-    localStorage.setItem(name, superJson.stringify(value) as string);
+    localStorage.setItem(name, superjson.stringify(value) as string);
 
     // 2. Write to Supabase
     const {
@@ -61,7 +61,7 @@ const storage: PersistStorage<PreferenceStore> = {
       if (user) {
         const a = await supabase
           .from("user_preference")
-          .upsert({ preference: superJson.stringify(value), user_id: user.id })
+          .upsert({ preference: superjson.stringify(value), user_id: user.id })
           .then();
         if (a.error)
           if (!navigator.onLine)
@@ -220,7 +220,7 @@ export const useOnlineStorage = createWithEqualityFn<PreferenceStore>()(
         },
         updateCard: (key: string, card: Card) => {
           set((state) => {
-            const wordList = superJson.parse<typeof state.wordList>(superJson.stringify(state.wordList)); // deep copy
+            const wordList = superjson.parse<typeof state.wordList>(superjson.stringify(state.wordList)); // deep copy
             if (wordList[key]) {
               wordList[key].card = card;
             }
@@ -269,15 +269,16 @@ useOnlineStorage.persist.onHydrate(async () => {
   } = await supabase.auth.getUser();
   if (user) {
     const { data, error } = await supabase.from("user_preference").select("*").single();
-    if (data?.preference && !error) {
-      useOnlineStorage.setState((state) => {
-        const serverState = (superJson.parse(data.preference as string) as any).state as PreferenceStore;
-        if (state.lastModified > serverState.lastModified) {
-          // If the local state is newer, keep it
-          return state;
-        }
-        return serverState;
-      });
+    if (!error && data.preference) {
+      const serverState = (superjson.parse(data.preference as string) as any).state as PreferenceStore;
+      if (useOnlineStorage.getState().lastModified > serverState.lastModified) {
+        useUserDataOutOfSyncStore.getState().setText("Your local user data is newer than the server.");
+      } else if (useOnlineStorage.getState().lastModified < serverState.lastModified) {
+        useUserDataOutOfSyncStore.getState().setText("Your local user data is older than the server.");
+      }
+      if (useOnlineStorage.getState().lastModified.getTime() !== serverState.lastModified.getTime()) {
+        useUserDataOutOfSyncStore.getState().setOpen(true);
+      }
     }
   }
 });

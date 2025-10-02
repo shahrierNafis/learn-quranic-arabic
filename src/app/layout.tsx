@@ -6,13 +6,13 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/app/app-sidebar";
 import { Toaster } from "@/components/ui/sonner";
+import UserDataOutOfSync from "@/components/UserDataOutOfSync";
 
 const comfortaa = Comfortaa({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Learn Quran/Arabic",
-  description:
-    "Using Cloze Testing And Spaced Repetition To Make Learning Arabic Faster And More Effective",
+  description: "Using Cloze Testing And Spaced Repetition To Make Learning Arabic Faster And More Effective",
 };
 
 export default function RootLayout({
@@ -25,18 +25,10 @@ export default function RootLayout({
       <head>
         <meta property="og:title" content="Learn Quran/Arabic" />
         <meta property="og:image" content="/image.jpg" />
-        <meta
-          property="og:description"
-          content="Using Cloze Testing And Spaced Repetition To Make Learning Arabic Faster And More Effective"
-        />
+        <meta property="og:description" content="Learn Quranic Arabic More Efficiently And Effectively Using Spaced Repetition And Active Recall" />
       </head>
       <body className={comfortaa.className}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <CheckAuth />
           <SidebarProvider defaultOpen={false}>
             <AppSidebar />
@@ -45,6 +37,7 @@ export default function RootLayout({
             </div>
 
             <main className="w-full">{children}</main>
+            <UserDataOutOfSync />
             <Toaster position="bottom-right" richColors />
           </SidebarProvider>
         </ThemeProvider>
