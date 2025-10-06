@@ -21,6 +21,8 @@ import getChapterLength from "./getChapterLength";
 import { createEmptyCard } from "ts-fsrs";
 import { toast } from "sonner";
 import MotionDiv from "@/components/MotionDiv";
+import { motion } from "framer-motion";
+// import div from "@/components/div";
 const wc = wordCount as { [key: number]: { [key: number]: string } };
 export default function Page() {
   const [extraWordsPerWord, chapters, VFSDialogOpen, difficulty] = useLocalStorage(
@@ -32,6 +34,7 @@ export default function Page() {
   const [hold, setHold] = useState(false);
 
   const [verse, setVerse] = useState<WORD[]>([]); // the actual verse
+  const [extraWords, setExtraWords] = useState<WORD[]>([]); // extra words for the verse
   const [words, setWords] = useState<WORD[]>([]); // the actual verse + extra words
   const [userWords, setUserWords] = useState<WORD[]>([]); // user input words
 
@@ -43,11 +46,9 @@ export default function Page() {
   const [green, setGreen] = useState(false);
 
   const reset = useCallback(() => {
-    setUserWords((userWords) => {
-      setWords((words) => _.shuffle([...words, ...userWords]));
-      return [];
-    });
-  }, []);
+    setUserWords([]);
+    setWords(_.shuffle([...verse, ...extraWords]));
+  }, [extraWords, verse]);
 
   const setNextVerse = useCallback(() => {
     const nextChapter = chapters.sort((a, b) => {
@@ -63,8 +64,8 @@ export default function Page() {
           `${nextChapter}:${Math.trunc((ARProgress[nextChapter] % getChapterLength(nextChapter)) + 1)}` // set the next verse
         )
       : setVerse_key(null);
-    reset(); // clear user input
-  }, [ARProgress, chapters, reset]);
+    setUserWords([]); // clear user input
+  }, [ARProgress, chapters]);
 
   const reload = useCallback(
     async (signal: AbortSignal) => {
@@ -76,7 +77,9 @@ export default function Page() {
         if (signal.aborted) return;
 
         const words: WORD[] = [];
-        words.push(...(await getVerseWords(verse_key as `${string}:${string}`)).filter((word) => word.char_type_name == "word"));
+        words.push(
+          ...(await getVerseWords(verse_key as `${string}:${string}`)).filter((word) => word.char_type_name == "word")
+        );
         setVerse(words.filter((word) => word.char_type_name == "word"));
 
         if (signal.aborted) return;
@@ -91,7 +94,9 @@ export default function Page() {
 
         if (signal.aborted) return;
 
-        setWords(_.shuffle([...words, ...extraWords.slice(0, extraWordsPerWord * words.length)]));
+        const slicedExtraWords = extraWords.slice(0, extraWordsPerWord * words.length);
+        setExtraWords(slicedExtraWords);
+        setWords(_.shuffle([...words, ...slicedExtraWords]));
       } catch (error: any) {
         // Only log non-abort errors
         if (error.name !== "AbortError") {
@@ -131,8 +136,9 @@ export default function Page() {
   }, [difficulty, reset]);
   return (
     <>
-      <div className="p-2 ">
-        <div className="flex flex-wrap items-end justify-center gap-4 my-4">
+      <div className="p-2 mb-8 overflow-hidden">
+        <Score />
+        <div className="flex flex-wrap items-end justify-center gap-4 mb-4">
           <SelectChapters />
           <Button
             variant={"outline"}
@@ -145,10 +151,10 @@ export default function Page() {
             difficulty: {difficulty}
           </Button>
           <ExtraWords />
-          <Score />
         </div>
         <div className="flex flex-col items-center justify-center gap-4">
           <div className="flex items-center justify-center gap-4">
+            {/* show verse Btn */}
             <Button
               variant={show ? "secondary" : "outline"}
               onClick={() => {
@@ -172,27 +178,40 @@ export default function Page() {
               {verse.length && verse.length === userWords.length ? "next" : "reload"}{" "}
             </Button>
           </div>
+          {/* verse */}
           {verse_key === null ? (
             <>no surah is selected</>
           ) : (
             <>
-              {show && verse && (
+              {(show || difficulty === 0.5) && verse && (
                 <>
-                  <MotionDiv dir="rtl" className="text-2xl md:text-3xl">
+                  <motion.div
+                    transition={{ duration: 0.25 }}
+                    initial={{ y: -20 }}
+                    animate={{ y: 0 }}
+                    exit={{ y: -20 }}
+                    layout
+                    dir="rtl"
+                    className="text-2xl md:text-3xl"
+                  >
                     <Verse {...{ verse }}></Verse>
-                  </MotionDiv>
+                  </motion.div>
                 </>
               )}
-              <Button size={"sm"} className="text-sm" disabled variant={"outline"}>
-                {verse.length ? (
-                  <>
-                    Verse {verse_key} with length {verse.length} and {Math.round(getScore(verse.length, extraWordsPerWord, difficulty))} score points
-                  </>
-                ) : (
-                  <>loading...</>
-                )}
-              </Button>
-
+              {/* verse Info */}
+              <MotionDiv>
+                <Button size={"sm"} className="text-sm" disabled variant={"outline"}>
+                  {verse.length ? (
+                    <>
+                      Verse {verse_key} with length {verse.length} and{" "}
+                      {Math.round(getScore(verse.length, extraWordsPerWord, difficulty))} score points
+                    </>
+                  ) : (
+                    <>loading...</>
+                  )}
+                </Button>
+              </MotionDiv>
+              {/* USER WORDS */}
               <div dir="rtl" className="flex flex-wrap items-center justify-center w-full gap-4">
                 {userWords.map((word) => {
                   return (
@@ -211,52 +230,26 @@ export default function Page() {
                 })}
               </div>
               {/* TRANSLATION */}
-              <Translations {...{ index: verse_key }}></Translations>
-              <div dir="rtl" className="flex flex-wrap items-center justify-center w-full gap-4 overflow-hidden">
+              <MotionDiv>
+                <Translations {...{ index: verse_key }}></Translations>
+              </MotionDiv>
+              <MotionDiv dir="rtl" className="flex flex-wrap items-center justify-center w-full gap-4">
+                {/* words */}
                 {words.length ? (
                   words.map((word, i) => {
+                    const userWordIds = userWords.map((w) => w.index);
                     return (
-                      <MotionDiv key={word.index}>
+                      <MotionDiv
+                        style={{ visibility: userWordIds.includes(word.index) ? "hidden" : "visible" }}
+                        key={word.index}
+                      >
                         <Button
-                          className={cn("text-2xl md:text-3xl")}
+                          className={cn("text-2xl md:text-3xl", `${redIndex === i && "ring ring-red-400"}`)}
                           variant={redIndex === i ? "destructive" : "outline"}
                           size={"lg"}
                           disabled={userWords.length == verse.length}
                           onClick={() => {
-                            difficulty > 0.5 && setShow(false); // hide verse if difficulty is high
-                            setOpenedVerse(undefined); // close audio
-                            if (
-                              //mistake
-                              !(
-                                verse[userWords.length].text_imlaei == word.text_imlaei ||
-                                verse[userWords.length].wordSegments.map((ws) => ws.buckwalter).join() == word.wordSegments.map((ws) => ws.buckwalter).join()
-                              )
-                            ) {
-                              setRedIndex(i);
-                              setTimeout(() => {
-                                setRedIndex(undefined);
-                                reset();
-                              }, 150);
-                            } else {
-                              if (userWords.length + 1 === verse.length) {
-                                // if verse is complete
-                                setGreen(true); // highlight next btn
-                                setTimeout(() => {
-                                  setGreen(false);
-                                }, 1500);
-
-                                setHold(true); // hold till next button is clicked
-
-                                addNewCards(verse);
-
-                                verse_key && useOnlineStorage.getState().addARProgress(+verse_key?.split(":")[0], 1);
-                                useOnlineStorage.getState().addARScore(getScore(verse.length, extraWordsPerWord, difficulty));
-                              }
-                              setUserWords((prev) => [...prev, word]);
-                              setWords((prev) => {
-                                return [...prev.filter((i) => i.index != word.index)];
-                              });
-                            }
+                            onWordClick(word, i);
                           }}
                         >
                           <Word
@@ -272,17 +265,23 @@ export default function Page() {
                     );
                   })
                 ) : (
+                  // if words are not loaded, show skeletons
                   <>
                     {userWords.length
                       ? ""
-                      : Array(verse.length > 0 ? verse.length * (extraWordsPerWord + 1) : 40)
+                      : Array(verse.length > 0 ? verse.length * (extraWordsPerWord + 1) : 10)
                           .fill(1)
                           .map((a, i) => {
-                            return <Skeleton key={i} className="w-[10vw] h-[48px] rounded-md" />;
+                            const randomWidth = Math.floor(Math.random() * (12 - 6 + 1)) + 6;
+                            return (
+                              <MotionDiv key={i}>
+                                <Skeleton style={{ width: `${randomWidth}rem` }} className={`h-[48px] rounded-md`} />
+                              </MotionDiv>
+                            );
                           })}
                   </>
                 )}
-              </div>
+              </MotionDiv>
             </>
           )}
         </div>
@@ -310,5 +309,40 @@ export default function Page() {
 
   function getScore(verseLength: number, extraWordsPerWord: number, difficulty: number) {
     return (verseLength * (extraWordsPerWord + 1)) ** difficulty;
+  }
+
+  function onWordClick(word: WORD, i: number) {
+    difficulty > 0.5 && setShow(false); // hide verse if difficulty is high
+    setOpenedVerse(undefined); // close audio
+    if (
+      //mistake
+      !(
+        verse[userWords.length].text_imlaei == word.text_imlaei ||
+        verse[userWords.length].wordSegments.map((ws) => ws.buckwalter).join() ==
+          word.wordSegments.map((ws) => ws.buckwalter).join()
+      )
+    ) {
+      setRedIndex(i);
+      setTimeout(() => {
+        setRedIndex(undefined);
+        reset();
+      }, 500);
+    } else {
+      if (userWords.length + 1 === verse.length) {
+        // if verse is complete
+        setGreen(true); // highlight next btn
+        setTimeout(() => {
+          setGreen(false);
+        }, 1500);
+
+        setHold(true); // hold till next button is clicked
+
+        addNewCards(verse);
+
+        verse_key && useOnlineStorage.getState().addARProgress(+verse_key?.split(":")[0], 1);
+        useOnlineStorage.getState().addARScore(getScore(verse.length, extraWordsPerWord, difficulty));
+      }
+      setUserWords((prev) => [...prev, word]);
+    }
   }
 }

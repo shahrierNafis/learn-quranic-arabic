@@ -20,6 +20,12 @@ function Translations({ translations, index }: { translations?: Awaited<ReturnTy
     return () => {};
   }, [translation_ids, index, translations]);
 
+  useEffect(() => {
+    if (!index) setTranslations(undefined);
+
+    return () => {};
+  }, [index]);
+
   return (
     <>
       {translation_ids.length ? (
