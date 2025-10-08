@@ -18,6 +18,7 @@ import { motion } from "framer-motion";
 import Translations from "@/components/Translations";
 import Word from "@/components/Word";
 import { Skeleton } from "@/components/ui/skeleton";
+import VerseInfo from "./VerseInfo";
 
 export default function Start({
   verse,
@@ -25,12 +26,14 @@ export default function Start({
   setNextVerse,
   hold,
   setHold,
+  practiceMode = false,
 }: {
   verse: WORD[];
   verse_key: string | null | undefined;
   setNextVerse: () => void;
   hold: boolean;
   setHold: React.Dispatch<React.SetStateAction<boolean>>;
+  practiceMode?: boolean;
 }) {
   const [redIndex, setRedIndex] = useState<number>();
   const [show, setShow] = useState(false);
@@ -39,7 +42,6 @@ export default function Start({
   const [open, setOpen] = useState(false);
 
   const { openedVerse, setOpenedVerse } = useVerseAudio();
-  const difficulty = useLocalStorage((state) => state.difficulty);
   const wordList = useOnlineStorage(useShallow((a) => a.wordList));
 
   const reset = useCallback(() => {
@@ -54,17 +56,20 @@ export default function Start({
   return (
     <>
       <Dialog modal={false} open={open} onOpenChange={setOpen}>
-        <DialogTrigger>
+        <DialogTrigger className="w-full">
           <Button
+            disabled={verse.length === 0}
             size={"lg"}
             variant="outline"
             onClick={() => {
               setHold(true);
               setShow(false);
             }}
-            className="font-black text-xl md:text-2xl"
+            className="font-black text-xl md:text-2xl w-full"
           >
-            {hold ? "continue" : "Start"}
+            {practiceMode
+              ? `Practice: ${Math.round(verse.length ** 0.5)}XP`
+              : (userWords.length ? `Continue` : `Start`) + `: ${verse.length ** 2}XP`}
           </Button>
         </DialogTrigger>
         <DialogContent className="w-full max-w-full h-full overflow-y-auto">
@@ -100,7 +105,7 @@ export default function Start({
               <>no surah is selected</>
             ) : (
               <>
-                {(show || difficulty === 0.5) && verse && (
+                {(show || practiceMode) && verse && (
                   <>
                     <motion.div
                       transition={{ duration: 0.25 }}
@@ -115,7 +120,7 @@ export default function Start({
                     </motion.div>
                   </>
                 )}
-
+                <VerseInfo {...{ verse_key, verse }} />
                 {/* USER WORDS */}
                 <div dir="rtl" className="flex flex-wrap items-center justify-center w-full gap-4">
                   {userWords.map((word) => {
@@ -197,7 +202,7 @@ export default function Start({
   );
 
   function onWordClick(word: WORD, i: number) {
-    difficulty > 0.5 && setShow(false); // hide verse if difficulty is high
+    !practiceMode && setShow(false); // hide verse if not in practice mode
     setOpenedVerse(undefined); // close audio
     if (
       //mistake
@@ -218,8 +223,9 @@ export default function Start({
 
         addNewCards(verse);
 
-        verse_key && useOnlineStorage.getState().addARProgress(+verse_key?.split(":")[0], 1);
-        useOnlineStorage.getState().addARScore(verse.length ** difficulty);
+        // add ARProgress if not in practice mode
+        !practiceMode && verse_key && useOnlineStorage.getState().addARProgress(+verse_key?.split(":")[0], 1);
+        useOnlineStorage.getState().addARScore(practiceMode ? verse.length ** 0.5 : verse.length ** 2);
       }
       setUserWords((prev) => [...prev, word]);
     }
@@ -229,10 +235,10 @@ export default function Start({
     if (
       userWords.length !== verse.length && // if verse is not complete
       userWords.length && // if userWords is not empty
-      openedVerse !== verse_key // if audio is not playing
-    ) {
-      if (difficulty >= 2) reset();
-    }
+      openedVerse !== verse_key && // if audio is not playing
+      !practiceMode
+    )
+      reset();
   }
 
   function addNewCards(verse: WORD[]) {

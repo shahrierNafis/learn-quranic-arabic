@@ -1,9 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 export const useLocalStorage = create<{
-  difficulty: number;
-  setDifficulty: (difficulty: number) => void;
-
   versesPerRound: number;
   setVersesPerRound: (versesPerRound: number) => void;
   mode: string;
@@ -21,9 +18,6 @@ export const useLocalStorage = create<{
 }>()(
   persist(
     (set) => ({
-      difficulty: 2,
-      setDifficulty: (difficulty: number) => set({ difficulty }),
-
       versesPerRound: 10,
       setVersesPerRound: (versesPerRound: number) => set({ versesPerRound }),
       mode: "",

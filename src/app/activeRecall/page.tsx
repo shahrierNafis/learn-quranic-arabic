@@ -15,6 +15,7 @@ import getVerseWords from "@/utils/getVerseWords";
 import Start from "./Start";
 import Verse from "@/components/Verse";
 import AnimationLoop from "./AnimationLoop";
+import VerseInfo from "./VerseInfo";
 // import div from "@/components/div";
 const wc = wordCount as { [key: number]: { [key: number]: string } };
 export default function Page() {
@@ -23,7 +24,7 @@ export default function Page() {
   const [hold, setHold] = useState(false);
 
   const ARProgress = useOnlineStorage(useShallow((state) => state.ARProgress));
-  const [chapters, difficulty] = useLocalStorage(useShallow((state) => [state.chapters, state.difficulty]));
+  const chapters = useLocalStorage(useShallow((state) => state.chapters));
 
   const reload = useCallback(
     async (signal: AbortSignal) => {
@@ -86,30 +87,9 @@ export default function Page() {
       <div className="absolute top-0 right-0 p-2 lg:w-1/2 w-screen h-screen flex flex-col items-center justify-center gap-4 overflow-hidden">
         <div>
           <SelectChapters />
-          <Button
-            variant={"outline"}
-            onClick={() => {
-              const myArray = [0.5, 1, 2];
-              const nextIndex = (myArray.indexOf(difficulty) + 1) % myArray.length;
-              useLocalStorage.getState().setDifficulty(myArray[nextIndex]);
-            }}
-          >
-            difficulty: {difficulty}
-          </Button>
         </div>
         {/* verse Info */}
-        <MotionDiv>
-          <Button size={"sm"} className="text-sm" disabled variant={"outline"}>
-            {verse.length ? (
-              <>
-                Verse {verse_key} with length {verse.length} and {Math.round(getScore(verse.length, difficulty))} score
-                points
-              </>
-            ) : (
-              <>loading...</>
-            )}
-          </Button>
-        </MotionDiv>
+        <VerseInfo {...{ verse_key, verse }} />
         <div className="flex items-center justify-center gap-2">
           {/* reload Btn */}
           <Button
@@ -120,7 +100,10 @@ export default function Page() {
           >
             reload
           </Button>
-          <Start {...{ verse, verse_key, setNextVerse, hold, setHold }} />
+          <div className="flex flex-col items-center justify-center gap-2">
+            <Start practiceMode {...{ verse, verse_key, setNextVerse, hold, setHold }} />
+            <Start {...{ verse, verse_key, setNextVerse, hold, setHold }} />
+          </div>
           <Button
             variant={"outline"}
             onClick={() => {
@@ -135,8 +118,4 @@ export default function Page() {
       </div>
     </>
   );
-
-  function getScore(verseLength: number, difficulty: number) {
-    return verseLength ** difficulty;
-  }
 }
