@@ -89,9 +89,16 @@ export default function AnimationLoop() {
           transition={{ duration: 0.5, ease: "easeInOut" }}
         ></motion.div>
       </div>
-      <Button disabled className="mt-2" size={"sm"} variant={"outline"}>
-        <div>Level {xp == 1500 ? 1000 : 999}</div>
-      </Button>
+      <motion.div animate={{ scale: xp == 1500 ? [1, 2] : 1 }} transition={{ duration: 1 }} className="">
+        <Button
+          disabled={xp !== 1500}
+          className={cn("mt-2 pointer-events-none", xp == 1500 && "ring-2 ring-green-500")}
+          size={"sm"}
+          variant={"outline"}
+        >
+          <div>Level {xp == 1500 ? 1000 : 999}</div>
+        </Button>
+      </motion.div>
       {/* array2 */}
       <div dir="rtl" className="flex flex-wrap items-start justify-start gap-2">
         {xp !== 1500 &&
@@ -112,7 +119,6 @@ export default function AnimationLoop() {
               );
             })}
       </div>
-
       {/* skeletons */}
       {xp !== 1500 && (
         <>
