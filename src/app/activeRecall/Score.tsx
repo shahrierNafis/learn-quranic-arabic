@@ -21,11 +21,8 @@ export default function Score() {
   const [score, setScore] = useOnlineStorage(useShallow((state) => [state.ARScore, state.setARScore]));
   let pretendScore = score;
   let level = 1;
-  const milestone = 1000;
-  const step = 100;
-  const scoreRequired = (score ? Math.ceil(score / milestone) : 1) * step;
+  const scoreRequired = 1500;
   while (true) {
-    const scoreRequired = Math.ceil(level / 10) * step;
     if (pretendScore - scoreRequired <= 0) {
       level += 1;
       break;
@@ -39,7 +36,7 @@ export default function Score() {
     <AlertDialog>
       <AlertDialogTrigger className="flex flex-col items-center justify-center w-full px-4">
         <div className="relative w-full text-center font-mono text-sm">
-          {Math.round(pretendScore)} / {scoreRequired}
+          XP {Math.round(pretendScore)} / {scoreRequired}
         </div>
         <div className="w-full h-[1rem] rounded-full bg-zinc-200 relative">
           <motion.div

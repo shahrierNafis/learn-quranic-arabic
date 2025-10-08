@@ -4,9 +4,6 @@ export const useLocalStorage = create<{
   difficulty: number;
   setDifficulty: (difficulty: number) => void;
 
-  extraWordsPerWord: number;
-  setExtraWordsPerWord: (extraWordsPerWord: number) => void;
-
   versesPerRound: number;
   setVersesPerRound: (versesPerRound: number) => void;
   mode: string;
@@ -21,17 +18,11 @@ export const useLocalStorage = create<{
   setChapters: (chapters: number[]) => void;
   addChapter: (chapter: number) => void;
   removeChapter: (chapter: number) => void;
-  VFSDialogOpen: boolean;
-  setVFSDialogOpen: (open: boolean) => void;
 }>()(
   persist(
     (set) => ({
       difficulty: 2,
       setDifficulty: (difficulty: number) => set({ difficulty }),
-
-      extraWordsPerWord: 0,
-      setExtraWordsPerWord: (extraWordsPerWord: number) =>
-        set({ extraWordsPerWord }),
 
       versesPerRound: 10,
       setVersesPerRound: (versesPerRound: number) => set({ versesPerRound }),
@@ -54,11 +45,6 @@ export const useLocalStorage = create<{
         set((state) => ({
           chapters: state.chapters.filter((i) => i !== chapter),
         }));
-      },
-
-      VFSDialogOpen: false,
-      setVFSDialogOpen: (VFSDialogOpen: boolean) => {
-        set({ VFSDialogOpen });
       },
     }),
     {

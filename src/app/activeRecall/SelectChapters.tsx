@@ -1,5 +1,12 @@
 import React from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useShallow } from "zustand/react/shallow";
@@ -10,8 +17,8 @@ import getChapterLength from "./getChapterLength";
 import { Edit } from "lucide-react";
 import getPretendIterationNum from "./getPretendIterationNum";
 export default function SelectChapters() {
-  const [chapters, addChapter, VFSDialogOpen, removeChapter, setVFSDialogOpen, setChapters] = useLocalStorage(
-    useShallow((state) => [state.chapters, state.addChapter, state.VFSDialogOpen, state.removeChapter, state.setVFSDialogOpen, state.setChapters])
+  const [chapters, addChapter, removeChapter, setChapters] = useLocalStorage(
+    useShallow((state) => [state.chapters, state.addChapter, state.removeChapter, state.setChapters])
   );
   const [ARProgress, setARProgress] = useOnlineStorage(useShallow((state) => [state.ARProgress, state.setARProgress]));
   const totalPercentage = (
@@ -20,9 +27,9 @@ export default function SelectChapters() {
     }, 0) / 6236
   ).toFixed(2);
   return (
-    <Dialog open={VFSDialogOpen} onOpenChange={(open) => setVFSDialogOpen(open)}>
+    <Dialog>
       <DialogTrigger>
-        <Button variant={"outline"}>chapters from {chapters.length} chapter/s</Button>
+        <Button variant={"outline"}>verses from {chapters.length} chapter/s</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -118,6 +125,9 @@ export default function SelectChapters() {
   );
   function getPretendProgressPercentage(chapter: number) {
     if (ARProgress[chapter] == 0) return 0;
-    return +((((ARProgress[chapter] - 0.0000001) % getChapterLength(chapter)) * 100) / getChapterLength(chapter)).toFixed(2);
+    return +(
+      (((ARProgress[chapter] - 0.0000001) % getChapterLength(chapter)) * 100) /
+      getChapterLength(chapter)
+    ).toFixed(2);
   }
 }
