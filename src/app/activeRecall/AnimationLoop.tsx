@@ -16,28 +16,29 @@ export default function AnimationLoop() {
 
   const fillArray1 = useCallback(() => {
     function get5Array(offset = 0) {
+      const oneFifth = (innerWidth - 98) / 5;
       return _.shuffle(
         Array(5)
           .fill(1)
           .map((a, i) => {
-            return { width: 15, id: i + offset };
+            return { width: oneFifth, id: i + offset };
           })
       ).map((a, i) => {
         switch (i) {
           case 0:
-            a.width += 2;
+            a.width += oneFifth * 0.15;
             break;
           case 1:
-            a.width += 5;
+            a.width += oneFifth * 0.3;
             break;
           case 2:
-            a.width += -1.5;
+            a.width += -oneFifth * 0.05;
             break;
           case 3:
-            a.width += -3.5;
+            a.width += -oneFifth * 0.25;
             break;
           case 4:
-            a.width += -2;
+            a.width += -oneFifth * 0.15;
             break;
         }
         return { ...a };
@@ -140,7 +141,7 @@ export default function AnimationLoop() {
                   return (
                     <MotionDiv className={""} key={a.id}>
                       <MotionDiv
-                        style={{ width: `${a.width}vw`, visibility: array2Ids.includes(a.id) ? "visible" : "hidden" }}
+                        style={{ width: `${a.width}px`, visibility: array2Ids.includes(a.id) ? "visible" : "hidden" }}
                         className={cn(
                           `h-[5vh] md:h-[10vh] rounded-md border bg-green-200 text-center content-center text-muted-foreground`
                         )}
@@ -169,7 +170,7 @@ export default function AnimationLoop() {
                 return (
                   <MotionDiv style={{ visibility: array2Ids.includes(a.id) ? "hidden" : "visible" }} key={a.id}>
                     <div
-                      style={{ width: `${a.width}vw` }}
+                      style={{ width: `${a.width}px` }}
                       className={cn(
                         `h-[5vh] md:h-[10vh] rounded-md border text-center content-center text-muted-foreground`,
                         a.id == array2.length && xp < 1500 && click && array2.length != 5 ? "bg-green-200" : "",
