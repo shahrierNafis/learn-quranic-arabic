@@ -19,6 +19,7 @@ import Word from "@/components/Word";
 import { Skeleton } from "@/components/ui/skeleton";
 import VerseInfo from "./VerseInfo";
 import LevelScore from "./LevelScore";
+import { Loader } from "lucide-react";
 
 export default function Start({
   verse,
@@ -51,6 +52,17 @@ export default function Start({
     setWords(_.shuffle(verse));
   }, [verse]);
 
+  useEffect(() => {
+    function handleReload() {
+      reset();
+      setShow(false);
+    } // handle reload
+    window.addEventListener("reload", handleReload);
+    return () => {
+      window.removeEventListener("reload", handleReload);
+    };
+  }, [reset]);
+
   return (
     <>
       <Dialog open={open} onOpenChange={setOpen}>
@@ -66,8 +78,9 @@ export default function Start({
             className="font-black text-xl md:text-2xl w-full"
           >
             {practiceMode
-              ? `Practice: ${Math.round(verse.length ** 0.5)}XP`
-              : (userWords.length ? `Continue` : `Start`) + `: ${verse.length ** 2}XP`}
+              ? `Practice:` + (verse.length !== 0 ? ` ${Math.round(verse.length ** 0.5)}XP` : "")
+              : (userWords.length ? `Continue: ` : `Start: `) + (verse.length !== 0 ? `${verse.length ** 2}XP` : "")}
+            {verse.length === 0 && <Loader className="animate-spin" />}
           </Button>
         </DialogTrigger>
         <DialogContent className="w-full max-w-full h-full overflow-y-auto flex flex-col items-center justify-center gap-2">

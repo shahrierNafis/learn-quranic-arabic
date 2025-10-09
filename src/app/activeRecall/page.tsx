@@ -7,17 +7,10 @@ import { Button } from "@/components/ui/button";
 import { WORD } from "@/types/types";
 import { useOnlineStorage } from "@/stores/onlineStorage";
 import { useLocalStorage } from "@/stores/localStorage";
-import SelectChapters from "./SelectChapters";
-import wordCount from "../../wordCount.json";
 import getChapterLength from "./getChapterLength";
-import MotionDiv from "@/components/MotionDiv";
 import getVerseWords from "@/utils/getVerseWords";
 import Start from "./Start";
-import Verse from "@/components/Verse";
 import AnimationLoop from "./AnimationLoop";
-import VerseInfo from "./VerseInfo";
-// import div from "@/components/div";
-const wc = wordCount as { [key: number]: { [key: number]: string } };
 export default function Page() {
   const [verse_key, setVerse_key] = useState<string | null>();
   const [verse, setVerse] = useState<WORD[]>([]); // the actual verse
@@ -91,6 +84,7 @@ export default function Page() {
               variant={"outline"}
               onClick={() => {
                 setNextVerse();
+                dispatchEvent(new Event("reload"));
               }}
             >
               reload
