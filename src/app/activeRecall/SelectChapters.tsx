@@ -27,101 +27,81 @@ export default function SelectChapters() {
     }, 0) / 6236
   ).toFixed(2);
   return (
-    <Dialog>
-      <DialogTrigger>
-        <Button variant={"outline"}>verses from {chapters.length} chapter/s</Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            <DialogTrigger>Select chapters</DialogTrigger>
-          </DialogTitle>
-          <DialogDescription className="overflow-y-auto max-h-[80vh]">
-            <div className="flex items-center w-full gap-2 p-2">
-              <Checkbox
-                className="flex-grow-0"
-                checked={_.isEqual(
-                  chapters,
-                  Array.from({ length: 114 }, (_, i) => i + 1)
-                )}
-                onCheckedChange={() => {
-                  if (
-                    _.isEqual(
-                      chapters,
-                      Array.from({ length: 114 }, (_, i) => i + 1)
-                    )
-                  ) {
-                    setChapters([]); // remove all
-                  } else {
-                    setChapters(Array.from({ length: 114 }, (_, i) => i + 1)); // add all
-                  }
+    <div className="flex flex-col w-full overflow-y-auto">
+      <div className="flex items-center w-full gap-2 p-2">
+        <Checkbox
+          className="flex-grow-0"
+          checked={chapters.length === 114}
+          onCheckedChange={() => {
+            if (chapters.length === 114) {
+              setChapters([]); // remove all
+            } else {
+              setChapters(Array.from({ length: 114 }, (_, i) => i + 1)); // add all
+            }
+          }}
+        />{" "}
+        <div className="relative flex items-center flex-grow ">
+          <div
+            className="absolute z-0 h-full rounded-md bg-gradient-to-r from-zinc-50 to-zinc-300"
+            style={{
+              width: `${totalPercentage}%`,
+            }}
+          ></div>
+          <div className="z-10 flex justify-center w-full p-2">All 114 surahs :</div>{" "}
+          <div className="z-10 flex flex-col items-center justify-center w-full p-2 ">
+            iteration{" "}
+            {_.min(
+              Array.from({ length: 114 }, (_, i) => i + 1).map((i) => {
+                return getPretendIterationNum(i, ARProgress);
+              })
+            )}
+          </div>
+          <div className="z-10 flex justify-center w-full p-2">{+totalPercentage}%</div>
+        </div>
+      </div>
+      {Array.from({ length: 114 }, (_, i) => i + 1).map((chapter) => (
+        <>
+          <div className="flex items-center w-full gap-2 p-2">
+            <Checkbox
+              className="flex-grow-0"
+              checked={chapters.includes(chapter)}
+              onCheckedChange={(checked) => {
+                if (checked) {
+                  addChapter(chapter);
+                } else {
+                  removeChapter(chapter);
+                }
+              }}
+            />
+            <div className="relative flex items-center flex-grow ">
+              <div
+                className="absolute z-0 h-full rounded-md bg-gradient-to-r from-zinc-50 to-zinc-300"
+                style={{
+                  width: `${getPretendProgressPercentage(chapter)}%`,
                 }}
-              />{" "}
-              <div className="relative flex items-center flex-grow ">
-                <div
-                  className="absolute z-0 h-full rounded-md bg-gradient-to-r from-zinc-50 to-zinc-300"
-                  style={{
-                    width: `${totalPercentage}%`,
-                  }}
-                ></div>
-                <div className="z-10 flex justify-center w-full p-2">All 114 surahs :</div>{" "}
-                <div className="z-10 flex flex-col items-center justify-center w-full p-2 ">
-                  iteration{" "}
-                  {_.min(
-                    Array.from({ length: 114 }, (_, i) => i + 1).map((i) => {
-                      return getPretendIterationNum(i, ARProgress);
-                    })
-                  )}
+              ></div>
+              <div className="z-10 flex justify-center w-full p-2">surah {chapter}:</div>
+              <div className="z-10 flex flex-col items-center w-full p-2">
+                <div> iteration {getPretendIterationNum(chapter, ARProgress)}</div>
+                <div className="flex">
+                  {ARProgress[chapter]} /{getChapterLength(chapter)}
                 </div>
-                <div className="z-10 flex justify-center w-full p-2">{+totalPercentage}%</div>
-              </div>
+              </div>{" "}
+              <Edit
+                className="z-10 hover:cursor-pointer"
+                size={64}
+                onClick={() => {
+                  const input = prompt("set progress", ARProgress[chapter] + "");
+                  if (input === null) return;
+                  setARProgress(chapter, Number(input));
+                }}
+              />
+              <div className="z-10 flex justify-center w-full p-2">{getPretendProgressPercentage(chapter)}%</div>
             </div>
-            {Array.from({ length: 114 }, (_, i) => i + 1).map((chapter) => (
-              <>
-                <div className="flex items-center w-full gap-2 p-2">
-                  <Checkbox
-                    className="flex-grow-0"
-                    checked={chapters.includes(chapter)}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        addChapter(chapter);
-                      } else {
-                        removeChapter(chapter);
-                      }
-                    }}
-                  />
-                  <div className="relative flex items-center flex-grow ">
-                    <div
-                      className="absolute z-0 h-full rounded-md bg-gradient-to-r from-zinc-50 to-zinc-300"
-                      style={{
-                        width: `${getPretendProgressPercentage(chapter)}%`,
-                      }}
-                    ></div>
-                    <div className="z-10 flex justify-center w-full p-2">surah {chapter}:</div>
-                    <div className="z-10 flex flex-col items-center w-full p-2">
-                      <div> iteration {getPretendIterationNum(chapter, ARProgress)}</div>
-                      <div className="flex">
-                        {ARProgress[chapter]} /{getChapterLength(chapter)}
-                      </div>
-                    </div>{" "}
-                    <Edit
-                      className="z-10 hover:cursor-pointer"
-                      size={64}
-                      onClick={() => {
-                        const input = prompt("set progress", ARProgress[chapter] + "");
-                        if (input === null) return;
-                        setARProgress(chapter, Number(input));
-                      }}
-                    />
-                    <div className="z-10 flex justify-center w-full p-2">{getPretendProgressPercentage(chapter)}%</div>
-                  </div>
-                </div>
-              </>
-            ))}
-          </DialogDescription>
-        </DialogHeader>
-      </DialogContent>
-    </Dialog>
+          </div>
+        </>
+      ))}
+    </div>
   );
   function getPretendProgressPercentage(chapter: number) {
     if (ARProgress[chapter] == 0) return 0;

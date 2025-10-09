@@ -16,6 +16,7 @@ import { LightAsync as SyntaxHighlighter } from "react-syntax-highlighter";
 import { androidstudio } from "react-syntax-highlighter/dist/esm/styles/hljs";
 import { useOnlineStorage } from "@/stores/onlineStorage";
 import { motion } from "framer-motion";
+import SelectChapters from "./SelectChapters";
 
 export default function Score() {
   const [score, setScore] = useOnlineStorage(useShallow((state) => [state.ARScore, state.setARScore]));
@@ -34,7 +35,7 @@ export default function Score() {
 
   return (
     <AlertDialog>
-      <AlertDialogTrigger className="flex flex-col items-center justify-center w-full px-8 absolute top-0 left-0 z-[1] md:pl-16">
+      <AlertDialogTrigger className="flex flex-col items-center justify-center w-full px-8">
         <div className="relative w-full text-center font-mono text-sm">
           XP {Math.round(pretendScore)} / {scoreRequired}
         </div>
@@ -51,15 +52,10 @@ export default function Score() {
           <div>Level {level - 1}</div>
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent className="max-w-fit">
-        <AlertDialogHeader>
-          <AlertDialogTitle>formula for calculating score</AlertDialogTitle>
-          <AlertDialogDescription className="max-w-[80vw] overflow-x-auto">
-            <SyntaxHighlighter language="mathematica" style={androidstudio}>
-              (verseLength * (extraWordsPerWord + 1)) ** difficulty
-            </SyntaxHighlighter>
-            <br />
-          </AlertDialogDescription>
+      <AlertDialogContent className="max-w-[80vw] flex flex-col  max-h-[80vh]">
+        <AlertDialogHeader className="overflow-y-scroll">
+          <AlertDialogTitle>Progress</AlertDialogTitle>
+          <SelectChapters />
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -70,7 +66,7 @@ export default function Score() {
               setScore(Number(input));
             }}
           >
-            Edit Score
+            Edit XP: {Math.round(score)}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

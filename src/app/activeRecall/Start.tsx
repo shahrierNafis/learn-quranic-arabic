@@ -4,7 +4,6 @@ import React, { useCallback, useEffect, useState } from "react";
 
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import Verse from "@/components/Verse";
-import { useLocalStorage } from "@/stores/localStorage";
 import { useShallow } from "zustand/shallow";
 import { WORD } from "@/types/types";
 
@@ -25,14 +24,12 @@ export default function Start({
   verse,
   verse_key,
   setNextVerse,
-  hold,
   setHold,
   practiceMode = false,
 }: {
   verse: WORD[];
   verse_key: string | null | undefined;
   setNextVerse: () => void;
-  hold: boolean;
   setHold: React.Dispatch<React.SetStateAction<boolean>>;
   practiceMode?: boolean;
 }) {
@@ -56,7 +53,7 @@ export default function Start({
 
   return (
     <>
-      <Dialog modal={false} open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger className="w-full">
           <Button
             disabled={verse.length === 0}

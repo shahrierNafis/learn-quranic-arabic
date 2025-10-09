@@ -82,39 +82,37 @@ export default function Page() {
   }, [chapters.length, hold, setNextVerse]);
   return (
     <>
-      <Score />
-      <AnimationLoop />
-      <div className="absolute top-0 right-0 p-2 lg:w-1/2 w-screen h-screen flex flex-col items-center justify-center gap-4 overflow-hidden">
-        <div>
-          <SelectChapters />
-        </div>
-        {/* verse Info */}
-        <VerseInfo {...{ verse_key, verse }} />
-        <div className="flex items-center justify-center gap-2">
-          {/* reload Btn */}
-          <Button
-            variant={"outline"}
-            onClick={() => {
-              setNextVerse();
-            }}
-          >
-            reload
-          </Button>
-          <div className="flex flex-col items-center justify-center gap-2">
-            <Start practiceMode {...{ verse, verse_key, setNextVerse, hold, setHold }} />
-            <Start {...{ verse, verse_key, setNextVerse, hold, setHold }} />
+      <div className="h-screen flex flex-col justify-between items-center">
+        <Score />
+        <div className="p-2 w-fit h-fit flex flex-col items-center justify-center gap-4 overflow-hidden">
+          <div className="grid grid-cols-3 items-center justify-center gap-2">
+            {/* reload Btn */}
+            <Button
+              variant={"outline"}
+              onClick={() => {
+                setNextVerse();
+              }}
+            >
+              reload
+            </Button>
+            <div className="flex flex-col items-center justify-center gap-2">
+              <AnimationLoop />
+              <Start practiceMode {...{ verse, verse_key, setNextVerse, setHold }} />
+              <Start {...{ verse, verse_key, setNextVerse, setHold }} />
+            </div>
+            <Button
+              variant={"outline"}
+              onClick={() => {
+                verse_key &&
+                  confirm("are you sure you want to skip this verse?") &&
+                  useOnlineStorage.getState().addARProgress(+verse_key?.split(":")[0], 1);
+              }}
+            >
+              Skip Verse {verse_key}
+            </Button>
           </div>
-          <Button
-            variant={"outline"}
-            onClick={() => {
-              verse_key &&
-                confirm("are you sure you want to skip this verse?") &&
-                useOnlineStorage.getState().addARProgress(+verse_key?.split(":")[0], 1);
-            }}
-          >
-            Skip
-          </Button>
         </div>
+        <div></div>
       </div>
     </>
   );
