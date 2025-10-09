@@ -19,6 +19,7 @@ import Translations from "@/components/Translations";
 import Word from "@/components/Word";
 import { Skeleton } from "@/components/ui/skeleton";
 import VerseInfo from "./VerseInfo";
+import LevelScore from "./LevelScore";
 
 export default function Start({
   verse,
@@ -72,7 +73,18 @@ export default function Start({
               : (userWords.length ? `Continue` : `Start`) + `: ${verse.length ** 2}XP`}
           </Button>
         </DialogTrigger>
-        <DialogContent className="w-full max-w-full h-full overflow-y-auto">
+        <DialogContent className="w-full max-w-full h-full overflow-y-auto flex flex-col items-center justify-center gap-2">
+          <LevelScore
+            {...{
+              score: practiceMode
+                ? userWords.length == verse.length
+                  ? Math.round(userWords.length ** 0.5) // full score if complete
+                  : +(userWords.length ** 0.5).toFixed(1) // fractional score if not complete
+                : userWords.length ** 2,
+              scoreRequired: practiceMode ? Math.round(verse.length ** 0.5) : verse.length ** 2,
+              parentage: Math.min(100, (userWords.length / verse.length) * 100),
+            }}
+          />
           <div className="flex flex-col items-center justify-center gap-4">
             <div className="flex items-center justify-center gap-4">
               {/* show verse Btn */}
