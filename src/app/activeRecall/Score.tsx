@@ -1,19 +1,15 @@
 import React from "react";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useShallow } from "zustand/react/shallow";
-import { LightAsync as SyntaxHighlighter } from "react-syntax-highlighter";
-import { androidstudio } from "react-syntax-highlighter/dist/esm/styles/hljs";
 import { useOnlineStorage } from "@/stores/onlineStorage";
 import { motion } from "framer-motion";
 import SelectChapters from "./SelectChapters";
@@ -34,8 +30,8 @@ export default function Score() {
   const parentage = Math.min(100, (pretendScore / scoreRequired) * 100);
 
   return (
-    <AlertDialog>
-      <AlertDialogTrigger className="flex flex-col items-center justify-center w-full px-8 self-start">
+    <Dialog>
+      <DialogTrigger className="flex flex-col items-center justify-center w-full px-8 self-start">
         <div className="relative w-full text-center font-mono text-sm">
           XP {Math.round(pretendScore)} / {scoreRequired}
         </div>
@@ -51,15 +47,17 @@ export default function Score() {
         <Button className="mt-2" variant={"outline"}>
           <div>Level {level - 1}</div>
         </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent className="max-w-[80vw] flex flex-col  max-h-[80vh]">
-        <AlertDialogHeader className="overflow-y-scroll">
-          <AlertDialogTitle>Progress</AlertDialogTitle>
+      </DialogTrigger>
+      <DialogContent className="max-w-[80vw] flex flex-col  max-h-[80vh]">
+        <DialogHeader className="overflow-y-auto">
+          <DialogTitle>Progress</DialogTitle>
           <SelectChapters />
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction
+        </DialogHeader>
+        <DialogFooter>
+          <DialogClose>
+            <Button>Close</Button>
+          </DialogClose>
+          <Button
             onClick={() => {
               const input = prompt("set progress", score + "");
               if (input === null) return;
@@ -67,9 +65,9 @@ export default function Score() {
             }}
           >
             Edit XP: {Math.round(score)}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

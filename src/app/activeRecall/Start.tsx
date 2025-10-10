@@ -20,6 +20,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import VerseInfo from "./VerseInfo";
 import LevelScore from "./LevelScore";
 import { Loader } from "lucide-react";
+import { useSound } from "react-sounds";
 
 export default function Start({
   verse,
@@ -39,6 +40,10 @@ export default function Start({
   const [words, setWords] = useState<WORD[]>([]); // the actual verse
   const [userWords, setUserWords] = useState<WORD[]>([]); // user input words
   const [open, setOpen] = useState(false);
+
+  const correctSoundEffect = useSound("/audio/duolingo-correct.mp3").play;
+  const incorrectSoundEffect = useSound("/audio/duolingo-incorrect.mp3").play;
+  const lessonFinishedSoundEffect = useSound("/audio/duolingo-lesson-finished.mp3").play;
 
   const { openedVerse, setOpenedVerse } = useVerseAudio();
   const wordList = useOnlineStorage(useShallow((a) => a.wordList));
@@ -239,6 +244,8 @@ export default function Start({
         setRedIndex(undefined);
         reset();
       }, 500);
+
+      incorrectSoundEffect();
     } else {
       if (userWords.length + 1 === verse.length) {
         // if verse is complete
@@ -248,7 +255,9 @@ export default function Start({
         // add ARProgress if not in practice mode
         !practiceMode && verse_key && useOnlineStorage.getState().addARProgress(+verse_key?.split(":")[0], 1);
         useOnlineStorage.getState().addARScore(practiceMode ? verse.length ** 0.5 : verse.length ** 2);
-      }
+
+        lessonFinishedSoundEffect();
+      } else correctSoundEffect();
       setUserWords((prev) => [...prev, word]);
     }
   }
