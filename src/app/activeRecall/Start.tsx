@@ -83,7 +83,7 @@ export default function Start({
             {verse.length === 0 && <Loader className="animate-spin" />}
           </Button>
         </DialogTrigger>
-        <DialogContent className="w-full max-w-full h-full overflow-y-auto flex flex-col items-center justify-center gap-2">
+        <DialogContent className="w-full max-w-full h-screen overflow-y-auto pt-0 grid-rows-[auto_1fr]">
           <LevelScore
             {...{
               score: practiceMode
@@ -95,7 +95,7 @@ export default function Start({
               parentage: Math.min(100, (userWords.length / verse.length) * 100),
             }}
           />
-          <div className="flex flex-col items-center justify-center gap-4">
+          <div className="flex flex-col items-center justify-start gap-4">
             <div className="flex items-center justify-center gap-4">
               {/* show verse Btn */}
               <Button

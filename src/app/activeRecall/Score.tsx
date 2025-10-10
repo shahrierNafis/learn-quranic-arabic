@@ -35,7 +35,7 @@ export default function Score() {
 
   return (
     <AlertDialog>
-      <AlertDialogTrigger className="flex flex-col items-center justify-center w-full px-8">
+      <AlertDialogTrigger className="flex flex-col items-center justify-center w-full px-8 self-start">
         <div className="relative w-full text-center font-mono text-sm">
           XP {Math.round(pretendScore)} / {scoreRequired}
         </div>

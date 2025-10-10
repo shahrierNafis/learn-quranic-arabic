@@ -75,10 +75,10 @@ export default function Page() {
   }, [chapters.length, hold, setNextVerse]);
   return (
     <>
-      <div className="h-screen flex flex-col justify-between items-center">
+      <div className="h-screen auto-cols-[100%] grid grid-rows-3 justify-items-center content-center items-center ">
         <Score />
         <div className="p-2 w-fit h-fit flex flex-col items-center justify-center gap-4 overflow-hidden">
-          <div className="grid grid-cols-3 items-center justify-center gap-2">
+          <div className="grid grid-cols-3 items-center content-center gap-2">
             {/* reload Btn */}
             <Button
               variant={"outline"}
@@ -106,7 +106,6 @@ export default function Page() {
             </Button>
           </div>
         </div>
-        <div></div>
       </div>
     </>
   );

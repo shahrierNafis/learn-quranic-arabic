@@ -11,7 +11,7 @@ export default function LevelScore({
   parentage?: number;
 }) {
   return (
-    <div className="flex flex-col gap-2 items-center justify-center w-full p-8 h-fit absolute top-0">
+    <div className="flex flex-col gap-2 items-center justify-center w-full p-8 h-fit self-start">
       <div className="relative w-full text-center font-mono text-sm">
         XP {score} / {scoreRequired}
       </div>
