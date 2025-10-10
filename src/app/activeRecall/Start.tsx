@@ -49,17 +49,16 @@ export default function Start({
 
   const reset = useCallback(() => {
     setUserWords([]);
-    setWords(_.shuffle([...verse]));
-  }, [verse]);
-
-  useEffect(() => {
     setWords(_.shuffle(verse));
   }, [verse]);
 
   useEffect(() => {
+    reset();
+  }, [reset, verse]);
+
+  useEffect(() => {
     function handleReload() {
       reset();
-      setShow(false);
     } // handle reload
     window.addEventListener("reload", handleReload);
     return () => {
@@ -70,7 +69,7 @@ export default function Start({
   return (
     <>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger className="w-full">
+        <DialogTrigger disabled={verse.length === 0} className="w-full">
           <Button
             disabled={verse.length === 0}
             size={"lg"}
