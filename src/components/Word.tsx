@@ -7,7 +7,21 @@ import useFont from "@/utils/useFont";
 import WordInfo from "./WordInfo";
 import { buckwalterToArabic } from "@/utils/arabic-buckwalter-transliteration";
 
-function Word({ wordSegments, noWordInfo, word, size }: { wordSegments: WordData; noWordInfo?: boolean; word?: WORD; size?: "default" | "sm" | "lg" | "icon" | null | undefined }) {
+function Word({
+  wordSegments,
+  noWordInfo,
+  word,
+  size,
+  pronounceOnClick,
+  asChild = false,
+}: {
+  wordSegments: WordData;
+  noWordInfo?: boolean;
+  word?: WORD;
+  size?: "default" | "sm" | "lg" | "icon" | null | undefined;
+  pronounceOnClick?: boolean;
+  asChild?: boolean;
+}) {
   const [colours] = useOnlineStorage(useShallow((a) => [a.colours]));
   const { systemTheme, theme } = useTheme();
   const [font] = useFont();
@@ -19,6 +33,8 @@ function Word({ wordSegments, noWordInfo, word, size }: { wordSegments: WordData
           disabled: noWordInfo,
           word,
           size,
+          pronounceOnClick,
+          asChild,
         }}
       >
         <div dir="rtl" className={font?.className}>
@@ -26,7 +42,9 @@ function Word({ wordSegments, noWordInfo, word, size }: { wordSegments: WordData
             <div
               key={segment.position + ":" + index}
               style={{
-                color: (colours[segment.partOfSpeech] ?? colours.others)[(theme == "system" ? systemTheme : theme) == "dark" ? 1 : 0],
+                color: (colours[segment.partOfSpeech] ?? colours.others)[
+                  (theme == "system" ? systemTheme : theme) == "dark" ? 1 : 0
+                ],
               }}
               className="inline"
             >

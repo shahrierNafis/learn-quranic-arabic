@@ -20,7 +20,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import VerseInfo from "./VerseInfo";
 import LevelScore from "./LevelScore";
 import { Loader } from "lucide-react";
-import { useSound } from "react-sounds";
+import { playSound, useSound } from "react-sounds";
 
 export default function Start({
   verse,
@@ -42,8 +42,7 @@ export default function Start({
   const [open, setOpen] = useState(false);
 
   const correctSoundEffect = useSound("/audio/duolingo-correct.mp3").play;
-  const incorrectSoundEffect = useSound("/audio/duolingo-incorrect.mp3").play;
-  const lessonFinishedSoundEffect = useSound("/audio/duolingo-lesson-finished.mp3").play;
+  const wrongSoundEffect = useSound("/audio/duolingo-wrong.mp3").play;
 
   const { openedVerse, setOpenedVerse } = useVerseAudio();
   const wordList = useOnlineStorage(useShallow((a) => a.wordList));
@@ -191,6 +190,7 @@ export default function Start({
                             }}
                           >
                             <Word
+                              asChild
                               {...{
                                 wordSegments: word.wordSegments,
                                 noWordInfo: true,
@@ -245,7 +245,7 @@ export default function Start({
         reset();
       }, 500);
 
-      incorrectSoundEffect();
+      wrongSoundEffect();
     } else {
       if (userWords.length + 1 === verse.length) {
         // if verse is complete
@@ -256,8 +256,13 @@ export default function Start({
         !practiceMode && verse_key && useOnlineStorage.getState().addARProgress(+verse_key?.split(":")[0], 1);
         useOnlineStorage.getState().addARScore(practiceMode ? verse.length ** 0.5 : verse.length ** 2);
 
-        lessonFinishedSoundEffect();
-      } else correctSoundEffect();
+        correctSoundEffect();
+      }
+      const [s, v, w] = word.index.split(":");
+      playSound(
+        "https://audio.qurancdn.com/" + `wbw/${s.padStart(3, "0")}_${v.padStart(3, "0")}_${w.padStart(3, "0")}.mp3`
+      );
+
       setUserWords((prev) => [...prev, word]);
     }
   }
