@@ -1,12 +1,10 @@
 import MotionDiv from "@/components/MotionDiv";
 import { Button } from "@/components/ui/button";
 import React, { useCallback, useEffect, useState } from "react";
-
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import Verse from "@/components/Verse";
 import { useShallow } from "zustand/shallow";
 import { WORD } from "@/types/types";
-
 import { createEmptyCard } from "ts-fsrs";
 import { toast } from "sonner";
 import { useOnlineStorage } from "@/stores/onlineStorage";
@@ -81,7 +79,7 @@ export default function Start({
             className="font-black text-xl md:text-2xl w-full"
           >
             {practiceMode
-              ? `Practice:` + (verse.length !== 0 ? ` ${Math.round(verse.length ** 0.5)}XP` : "")
+              ? `Practice:` + (verse.length !== 0 ? ` ${verse.length}XP` : "")
               : (userWords.length ? `Continue: ` : `Start: `) + (verse.length !== 0 ? `${verse.length ** 2}XP` : "")}
             {verse.length === 0 && <Loader className="animate-spin" />}
           </Button>
@@ -91,10 +89,10 @@ export default function Start({
             {...{
               score: practiceMode
                 ? userWords.length == verse.length
-                  ? Math.round(userWords.length ** 0.5) // full score if complete
-                  : +(userWords.length ** 0.5).toFixed(1) // fractional score if not complete
+                  ? userWords.length // full score if complete
+                  : +userWords.length.toFixed(1) // fractional score if not complete
                 : userWords.length ** 2,
-              scoreRequired: practiceMode ? Math.round(verse.length ** 0.5) : verse.length ** 2,
+              scoreRequired: practiceMode ? verse.length : verse.length ** 2,
               parentage: Math.min(100, (userWords.length / verse.length) * 100),
             }}
           />
@@ -253,7 +251,7 @@ export default function Start({
 
         // add ARProgress if not in practice mode
         !practiceMode && verse_key && useOnlineStorage.getState().addARProgress(+verse_key?.split(":")[0], 1);
-        useOnlineStorage.getState().addARScore(practiceMode ? verse.length ** 0.5 : verse.length ** 2);
+        useOnlineStorage.getState().addARScore(practiceMode ? verse.length : verse.length ** 2);
 
         correctSoundEffect();
       }
