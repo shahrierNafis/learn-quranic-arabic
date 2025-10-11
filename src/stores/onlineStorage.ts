@@ -37,7 +37,7 @@ const defaultColours: { [key: string]: [string, string] } = {
 import superjson from "superjson";
 import { Card } from "ts-fsrs";
 import reportIssue from "@/utils/reportIssue";
-import { useUserDataOutOfSyncStore } from "@/components/UserDataOutOfSync";
+import { pullFromTheServer, useUserDataOutOfSyncStore } from "@/components/UserDataOutOfSync";
 
 const supabase = createClient<Database>();
 const storage: PersistStorage<PreferenceStore> = {
@@ -135,7 +135,8 @@ export const useOnlineStorage = createWithEqualityFn<PreferenceStore>()(
         showTranslation: false,
         setShowTranslation: (showTranslation: boolean) => set({ showTranslation }),
         showTranslationOnHiddenWords: false,
-        setShowTranslationOnHiddenWords: (showTranslationOnHiddenWords: boolean) => set({ showTranslationOnHiddenWords }),
+        setShowTranslationOnHiddenWords: (showTranslationOnHiddenWords: boolean) =>
+          set({ showTranslationOnHiddenWords }),
         showTransliteration: false,
         setShowTransliteration: (showTransliteration: boolean) => set({ showTransliteration }),
         colours: defaultColours,
@@ -272,13 +273,8 @@ useOnlineStorage.persist.onHydrate(async () => {
     if (!error && data.preference) {
       const serverState = (superjson.parse(data.preference as string) as any).state as PreferenceStore;
       if (useOnlineStorage.getState().lastModified > serverState.lastModified) {
-        useUserDataOutOfSyncStore.getState().setText("Your local user data is newer than the server.");
-      } else if (useOnlineStorage.getState().lastModified < serverState.lastModified) {
-        useUserDataOutOfSyncStore.getState().setText("Your local user data is older than the server.");
-      }
-      if (useOnlineStorage.getState().lastModified.getTime() !== serverState.lastModified.getTime()) {
         useUserDataOutOfSyncStore.getState().setOpen(true);
-      }
+      } else if (useOnlineStorage.getState().lastModified < serverState.lastModified) pullFromTheServer();
     }
   }
 });
