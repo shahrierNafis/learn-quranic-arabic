@@ -25,11 +25,11 @@ const items = [
     url: "/",
     icon: Home,
   },
-  {
-    title: "Spaced Repetition",
-    url: "/spacedRepetition",
-    icon: Clock,
-  },
+  // {
+  //   title: "Spaced Repetition",
+  //   url: "/spacedRepetition",
+  //   icon: Clock,
+  // },
   {
     title: "Active Recall",
     url: "/activeRecall",

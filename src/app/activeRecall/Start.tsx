@@ -247,7 +247,7 @@ export default function Start({
       if (userWords.length + 1 === verse.length) {
         // if verse is complete
 
-        addNewCards(verse);
+        // addNewCards(verse);
 
         // add ARProgress if not in practice mode
         !practiceMode && verse_key && useOnlineStorage.getState().addARProgress(+verse_key?.split(":")[0], 1);
