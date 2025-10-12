@@ -10,7 +10,6 @@ import { useLocalStorage } from "@/stores/localStorage";
 import getChapterLength from "./getChapterLength";
 import getVerseWords from "@/utils/getVerseWords";
 import Start from "./Start";
-import AnimationLoop from "./AnimationLoop";
 export default function Page() {
   const [verse_key, setVerse_key] = useState<string | null>();
   const [verse, setVerse] = useState<WORD[]>([]); // the actual verse
@@ -67,7 +66,7 @@ export default function Page() {
     return () => {
       abortController.abort();
     };
-  }, [reload, verse_key]);
+  }, [reload]);
 
   useEffect(() => {
     !hold && chapters.length && setNextVerse(); // set a next verse if chapters is not empty
@@ -83,16 +82,16 @@ export default function Page() {
             <Button
               variant={"outline"}
               onClick={() => {
+                setVerse_key(undefined);
                 setNextVerse();
-                dispatchEvent(new Event("reload"));
               }}
             >
               reload
             </Button>
             <div className="flex flex-col items-center justify-center gap-2">
-              <AnimationLoop />
-              <Start practiceMode {...{ verse, verse_key, setNextVerse, setHold }} />
-              <Start {...{ verse, verse_key, setNextVerse, setHold }} />
+              <Start {...{ verse, verse_key, setNextVerse, setHold, difficulty: 1 }} />
+              <Start {...{ verse, verse_key, setNextVerse, setHold, difficulty: 2 }} />
+              <Start {...{ verse, verse_key, setNextVerse, setHold, difficulty: 3 }} />
             </div>
             <Button
               variant={"outline"}

@@ -12,5 +12,6 @@
     "preconfigured",
     "Supa",
     "surahs"
-  ]
+  ],
+  "typescript.tsdk": "node_modules/typescript/lib"
 }

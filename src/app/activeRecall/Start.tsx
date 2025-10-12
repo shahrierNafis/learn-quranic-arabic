@@ -25,13 +25,13 @@ export default function Start({
   verse_key,
   setNextVerse,
   setHold,
-  practiceMode = false,
+  difficulty = 2,
 }: {
   verse: WORD[];
   verse_key: string | null | undefined;
   setNextVerse: () => void;
   setHold: React.Dispatch<React.SetStateAction<boolean>>;
-  practiceMode?: boolean;
+  difficulty: number;
 }) {
   const [redIndex, setRedIndex] = useState<number>();
   const [show, setShow] = useState(false);
@@ -54,19 +54,16 @@ export default function Start({
     reset();
   }, [reset, verse]);
 
-  useEffect(() => {
-    function handleReload() {
-      reset();
-    } // handle reload
-    window.addEventListener("reload", handleReload);
-    return () => {
-      window.removeEventListener("reload", handleReload);
-    };
-  }, [reset]);
-
   return (
     <>
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog
+        open={open}
+        onOpenChange={() => {
+          userWords.length !== verse.length && addScore(userWords.length ** difficulty); // do not add score if verse is completed and score is already added
+          setOpen(!open);
+          reset();
+        }}
+      >
         <DialogTrigger disabled={verse.length === 0} className="w-full">
           <Button
             disabled={verse.length === 0}
@@ -78,22 +75,16 @@ export default function Start({
             }}
             className="font-black text-xl md:text-2xl w-full"
           >
-            {practiceMode
-              ? `Practice:` + (verse.length !== 0 ? ` ${verse.length}XP` : "")
-              : (userWords.length ? `Continue: ` : `Start: `) + (verse.length !== 0 ? `${verse.length ** 2}XP` : "")}
-            {verse.length === 0 && <Loader className="animate-spin" />}
+            {difficulty === 1 ? `Practice:` : difficulty === 2 ? `Medium:` : `Hard:`}
+            {verse.length === 0 ? <Loader className="animate-spin" /> : ` ${verse.length ** difficulty}XP`}
           </Button>
         </DialogTrigger>
         <DialogContent className="w-full max-w-full h-screen overflow-y-auto pt-0 grid-rows-[auto_1fr]">
           <LevelScore
             {...{
-              score: practiceMode
-                ? userWords.length == verse.length
-                  ? userWords.length // full score if complete
-                  : +userWords.length.toFixed(1) // fractional score if not complete
-                : userWords.length ** 2,
-              scoreRequired: practiceMode ? verse.length : verse.length ** 2,
-              parentage: Math.min(100, (userWords.length / verse.length) * 100),
+              score: userWords.length ** difficulty,
+              scoreRequired: verse.length ** difficulty,
+              parentage: Math.min(100, (userWords.length ** difficulty / verse.length ** difficulty) * 100),
             }}
           />
           <div className="flex flex-col items-center justify-start gap-4">
@@ -128,7 +119,7 @@ export default function Start({
               <>no surah is selected</>
             ) : (
               <>
-                {(show || practiceMode) && verse && (
+                {(show || difficulty === 1) && verse && (
                   <>
                     <motion.div
                       transition={{ duration: 0.25 }}
@@ -173,11 +164,17 @@ export default function Start({
                       const userWordIds = userWords.map((w) => w.index);
                       return (
                         <MotionDiv
-                          className={cn(userWordIds.includes(word.index) ? "border border-dashed rounded-md" : "")}
+                          className={cn(
+                            userWordIds.includes(word.index) && difficulty !== 3
+                              ? "border border-dashed rounded-md"
+                              : ""
+                          )}
                           key={word.index}
                         >
                           <Button
-                            style={{ visibility: userWordIds.includes(word.index) ? "hidden" : "visible" }}
+                            style={{
+                              visibility: userWordIds.includes(word.index) && difficulty !== 3 ? "hidden" : "visible",
+                            }}
                             className={cn(" text-2xl md:text-3xl", `${redIndex === i && "ring ring-red-400"}`)}
                             variant={redIndex === i ? "destructive" : "outline"}
                             size={"lg"}
@@ -226,16 +223,16 @@ export default function Start({
   );
 
   function onWordClick(word: WORD, i: number) {
-    !practiceMode && setShow(false); // hide verse if not in practice mode
     setOpenedVerse(undefined); // close audio
-    if (
-      //mistake
-      !(
-        verse[userWords.length].text_imlaei == word.text_imlaei ||
-        verse[userWords.length].wordSegments.map((ws) => ws.buckwalter).join() ==
-          word.wordSegments.map((ws) => ws.buckwalter).join()
-      )
-    ) {
+
+    const madeMistake = !(
+      verse[userWords.length].text_imlaei == word.text_imlaei ||
+      verse[userWords.length].wordSegments.map((ws) => ws.buckwalter).join() ==
+        word.wordSegments.map((ws) => ws.buckwalter).join()
+    );
+    const won = userWords.length + 1 === verse.length;
+    if (madeMistake) {
+      addScore(userWords.length ** difficulty);
       setRedIndex(i);
       setTimeout(() => {
         setRedIndex(undefined);
@@ -244,17 +241,16 @@ export default function Start({
 
       wrongSoundEffect();
     } else {
-      if (userWords.length + 1 === verse.length) {
-        // if verse is complete
-
+      if (won) {
         // addNewCards(verse);
 
         // add ARProgress if not in practice mode
-        !practiceMode && verse_key && useOnlineStorage.getState().addARProgress(+verse_key?.split(":")[0], 1);
-        useOnlineStorage.getState().addARScore(practiceMode ? verse.length : verse.length ** 2);
-
+        difficulty !== 1 && verse_key && useOnlineStorage.getState().addARProgress(+verse_key?.split(":")[0], 1);
         correctSoundEffect();
+        // add score
+        addScore((userWords.length + 1) ** difficulty);
       }
+      // game continues
       const [s, v, w] = word.index.split(":");
       playSound(
         "https://audio.qurancdn.com/" + `wbw/${s.padStart(3, "0")}_${v.padStart(3, "0")}_${w.padStart(3, "0")}.mp3`
@@ -269,7 +265,7 @@ export default function Start({
       userWords.length !== verse.length && // if verse is not complete
       userWords.length && // if userWords is not empty
       openedVerse !== verse_key && // if audio is not playing
-      !practiceMode
+      difficulty !== 1 // if not in practice mode
     )
       reset();
   }
@@ -290,5 +286,10 @@ export default function Start({
       }
     }
     newWordAdded && toast(`${newWordAdded} new words are added to your word list.`);
+  }
+  function addScore(score: number) {
+    useOnlineStorage.getState().addARScore(score);
+    score > 0 && // only show toast if user made some progress
+      toast.success(`You earned ${score} XP!`);
   }
 }

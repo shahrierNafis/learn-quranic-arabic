@@ -101,8 +101,8 @@ export default function AnimationLoop() {
   const parentage = Math.min(100, (xp / 1500) * 100);
   return (
     <Dialog {...{ open }} onOpenChange={setOpen}>
-      <DialogTrigger className="w-full">
-        <Button size={"lg"} variant="outline" onClick={() => {}} className="font-black text-xl md:text-2xl w-full">
+      <DialogTrigger className="">
+        <Button variant="outline" onClick={() => {}} className="">
           DEMO
         </Button>
       </DialogTrigger>
