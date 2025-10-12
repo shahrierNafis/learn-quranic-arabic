@@ -14,17 +14,18 @@ import { useOnlineStorage } from "@/stores/onlineStorage";
 import { motion } from "framer-motion";
 import SelectChapters from "./SelectChapters";
 import AnimationLoop from "./AnimationLoop";
+import { useLocalStorage } from "@/stores/localStorage";
 
 export default function Score() {
   const [score, setScore] = useOnlineStorage(useShallow((state) => [state.ARScore, state.setARScore]));
-  const scoreRequired = 100000;
-  const parentage = Math.min(100, ((score % scoreRequired) / scoreRequired) * 100);
+  const goal = useLocalStorage((state) => state.goal);
+  const parentage = Math.min(100, ((score % goal) / goal) * 100);
   const [open, setOpen] = useState(false);
   return (
     <Dialog open={open} onOpenChange={(o) => !o && setOpen(o) /* only closes*/}>
       <DialogTrigger className="flex flex-col items-center justify-center w-full px-8 self-start">
         <div onClick={() => setOpen(true)} className="relative w-full text-center font-mono text-sm">
-          XP {Math.round(score % scoreRequired)} / {scoreRequired}
+          Goal {Math.round(score % goal)}/{goal} XP
         </div>
         <div onClick={() => setOpen(true)} className="w-full h-[1rem] rounded-full bg-zinc-200 relative">
           <motion.div
@@ -38,7 +39,7 @@ export default function Score() {
         <div className="flex gap-2 items-center justify-center mt-2">
           <AnimationLoop />
           <Button onClick={() => setOpen(true)} className="" variant={"outline"}>
-            <div>Level {Math.floor(score / scoreRequired)}</div>
+            <div>Level {Math.floor(score / goal)}</div>
           </Button>
         </div>
       </DialogTrigger>
@@ -59,6 +60,17 @@ export default function Score() {
             }}
           >
             Edit XP: {Math.round(score)}
+          </Button>
+          <Button
+            onClick={() => {
+              const input = prompt("set goal", goal + "");
+              if (input === null) return;
+              useLocalStorage.setState(() => ({
+                goal: Number(input),
+              }));
+            }}
+          >
+            set Goal: {goal}
           </Button>
         </DialogFooter>
       </DialogContent>

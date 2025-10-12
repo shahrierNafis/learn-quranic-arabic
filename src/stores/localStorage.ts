@@ -15,6 +15,8 @@ export const useLocalStorage = create<{
   setChapters: (chapters: number[]) => void;
   addChapter: (chapter: number) => void;
   removeChapter: (chapter: number) => void;
+
+  goal: number;
 }>()(
   persist(
     (set) => ({
@@ -40,10 +42,11 @@ export const useLocalStorage = create<{
           chapters: state.chapters.filter((i) => i !== chapter),
         }));
       },
+      goal: 10000,
     }),
     {
       name: "useLocalStorage", // name of the item in the storage (must be unique)
-      version: 2,
+      version: 3,
     }
   )
 );

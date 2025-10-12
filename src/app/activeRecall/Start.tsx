@@ -224,7 +224,7 @@ export default function Start({
 
   function onWordClick(word: WORD, i: number) {
     setOpenedVerse(undefined); // close audio
-
+    setShow(false); // hide verse
     const madeMistake = !(
       verse[userWords.length].text_imlaei == word.text_imlaei ||
       verse[userWords.length].wordSegments.map((ws) => ws.buckwalter).join() ==
