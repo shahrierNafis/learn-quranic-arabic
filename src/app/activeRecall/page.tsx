@@ -91,7 +91,6 @@ export default function Page() {
             <div className="flex flex-col items-center justify-center gap-2">
               <Start {...{ verse, verse_key, setNextVerse, setHold, difficulty: 1 }} />
               <Start {...{ verse, verse_key, setNextVerse, setHold, difficulty: 2 }} />
-              <Start {...{ verse, verse_key, setNextVerse, setHold, difficulty: 3 }} />
             </div>
             <Button
               variant={"outline"}

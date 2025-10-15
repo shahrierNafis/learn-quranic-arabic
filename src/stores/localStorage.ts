@@ -42,7 +42,7 @@ export const useLocalStorage = create<{
           chapters: state.chapters.filter((i) => i !== chapter),
         }));
       },
-      goal: 10000,
+      goal: 1000,
     }),
     {
       name: "useLocalStorage", // name of the item in the storage (must be unique)

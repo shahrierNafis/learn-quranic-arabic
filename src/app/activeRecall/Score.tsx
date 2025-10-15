@@ -41,6 +41,18 @@ export default function Score() {
           <Button onClick={() => setOpen(true)} className="" variant={"outline"}>
             <div>Level {Math.floor(score / goal)}</div>
           </Button>
+          <Button
+            variant={"outline"}
+            onClick={() => {
+              const input = prompt("set goal", goal + "");
+              if (input === null) return;
+              useLocalStorage.setState(() => ({
+                goal: Number(input),
+              }));
+            }}
+          >
+            set Goal
+          </Button>
         </div>
       </DialogTrigger>
       <DialogContent className="max-w-[80vw] flex flex-col  max-h-[80vh]">
@@ -60,17 +72,6 @@ export default function Score() {
             }}
           >
             Edit XP: {Math.round(score)}
-          </Button>
-          <Button
-            onClick={() => {
-              const input = prompt("set goal", goal + "");
-              if (input === null) return;
-              useLocalStorage.setState(() => ({
-                goal: Number(input),
-              }));
-            }}
-          >
-            set Goal: {goal}
           </Button>
         </DialogFooter>
       </DialogContent>

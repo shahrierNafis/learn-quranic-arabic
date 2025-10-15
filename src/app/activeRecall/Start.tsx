@@ -75,7 +75,7 @@ export default function Start({
             }}
             className="font-black text-xl md:text-2xl w-full"
           >
-            {difficulty === 1 ? `Practice:` : difficulty === 2 ? `Medium:` : `Hard:`}
+            {difficulty === 1 ? `Practice:` : `Start:`}
             {verse.length === 0 ? <Loader className="animate-spin" /> : ` ${verse.length ** difficulty}XP`}
           </Button>
         </DialogTrigger>
@@ -164,16 +164,12 @@ export default function Start({
                       const userWordIds = userWords.map((w) => w.index);
                       return (
                         <MotionDiv
-                          className={cn(
-                            userWordIds.includes(word.index) && difficulty !== 3
-                              ? "border border-dashed rounded-md"
-                              : ""
-                          )}
+                          className={cn(userWordIds.includes(word.index) ? "border border-dashed rounded-md" : "")}
                           key={word.index}
                         >
                           <Button
                             style={{
-                              visibility: userWordIds.includes(word.index) && difficulty !== 3 ? "hidden" : "visible",
+                              visibility: userWordIds.includes(word.index) ? "hidden" : "visible",
                             }}
                             className={cn(" text-2xl md:text-3xl", `${redIndex === i && "ring ring-red-400"}`)}
                             variant={redIndex === i ? "destructive" : "outline"}
