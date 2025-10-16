@@ -25,7 +25,10 @@ export default function RootLayout({
       <head>
         <meta property="og:title" content="Learn Quran/Arabic" />
         <meta property="og:image" content="/image.jpg" />
-        <meta property="og:description" content="Learn Quranic Arabic More Efficiently And Effectively Using Spaced Repetition And Active Recall" />
+        <meta
+          property="og:description"
+          content="Learn Quranic Arabic More Efficiently And Effectively Using Spaced Repetition And Active Recall"
+        />
       </head>
       <body className={comfortaa.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
@@ -38,7 +41,7 @@ export default function RootLayout({
 
             <main className="w-full">{children}</main>
             <UserDataOutOfSync />
-            <Toaster position="bottom-right" richColors />
+            <Toaster position="top-left" richColors />
           </SidebarProvider>
         </ThemeProvider>
       </body>

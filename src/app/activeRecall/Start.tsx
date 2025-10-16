@@ -19,6 +19,7 @@ import VerseInfo from "./VerseInfo";
 import LevelScore from "./LevelScore";
 import { Loader } from "lucide-react";
 import { playSound, useSound } from "react-sounds";
+import { useLocalStorage } from "@/stores/localStorage";
 
 export default function Start({
   verse,
@@ -59,7 +60,7 @@ export default function Start({
       <Dialog
         open={open}
         onOpenChange={() => {
-          userWords.length !== verse.length && addScore(userWords.length ** difficulty); // do not add score if verse is completed and score is already added
+          userWords.length !== verse.length && addScore(userWords.length ** difficulty, true); // do not add score if verse is completed and score is already added
           setOpen(!open);
           reset();
         }}
@@ -242,7 +243,7 @@ export default function Start({
 
         // add ARProgress if not in practice mode
         difficulty !== 1 && verse_key && useOnlineStorage.getState().addARProgress(+verse_key?.split(":")[0], 1);
-        correctSoundEffect();
+
         // add score
         addScore((userWords.length + 1) ** difficulty);
       }
@@ -283,9 +284,36 @@ export default function Start({
     }
     newWordAdded && toast(`${newWordAdded} new words are added to your word list.`);
   }
-  function addScore(score: number) {
-    useOnlineStorage.getState().addARScore(score);
-    score > 0 && // only show toast if user made some progress
-      toast.success(`You earned ${score} XP!`);
+  function addScore(score: number, noDrawer?: boolean) {
+    if (score > 0) {
+      // only show toast if user made some progress
+
+      if (!noDrawer) {
+        dispatchEvent(new CustomEvent("openScoreDrawer", { detail: { score } }));
+      }
+
+      setTimeout(() => {
+        const ARScore = useOnlineStorage.getState().ARScore;
+        const goal = useLocalStorage.getState().goal;
+        if ((ARScore % goal) + score > goal) {
+          const two = ((ARScore % goal) + score) % goal;
+          const one = score - two - 0.1;
+          correctSoundEffect();
+          useOnlineStorage.getState().addARScore(one);
+
+          setTimeout(() => {
+            useOnlineStorage.getState().addARScore(0.1);
+          }, 500);
+          setTimeout(() => {
+            correctSoundEffect();
+            useOnlineStorage.getState().addARScore(two);
+          }, 1000);
+        } else {
+          correctSoundEffect();
+          useOnlineStorage.getState().addARScore(score);
+        }
+        toast.success(`You earned ${score} XP!`, {});
+      }, 1000);
+    }
   }
 }

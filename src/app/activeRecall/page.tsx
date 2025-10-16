@@ -10,6 +10,7 @@ import { useLocalStorage } from "@/stores/localStorage";
 import getChapterLength from "./getChapterLength";
 import getVerseWords from "@/utils/getVerseWords";
 import Start from "./Start";
+import ScoreDrawer from "./ScoreDrawer";
 export default function Page() {
   const [verse_key, setVerse_key] = useState<string | null>();
   const [verse, setVerse] = useState<WORD[]>([]); // the actual verse
@@ -74,6 +75,7 @@ export default function Page() {
   }, [chapters.length, hold, setNextVerse]);
   return (
     <>
+      <ScoreDrawer />
       <div className="h-screen auto-cols-[100%] grid grid-rows-3 justify-items-center content-center items-center ">
         <Score />
         <div className="p-2 w-fit h-fit flex flex-col items-center justify-center gap-4 overflow-hidden">

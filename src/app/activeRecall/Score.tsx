@@ -16,7 +16,7 @@ import SelectChapters from "./SelectChapters";
 import AnimationLoop from "./AnimationLoop";
 import { useLocalStorage } from "@/stores/localStorage";
 
-export default function Score() {
+export default function Score({ noButtons }: { noButtons?: boolean }) {
   const [score, setScore] = useOnlineStorage(useShallow((state) => [state.ARScore, state.setARScore]));
   const goal = useLocalStorage((state) => state.goal);
   const parentage = Math.min(100, ((score % goal) / goal) * 100);
@@ -36,24 +36,32 @@ export default function Score() {
             }}
           />
         </div>
-        <div className="flex gap-2 items-center justify-center mt-2">
-          <AnimationLoop />
-          <Button onClick={() => setOpen(true)} className="" variant={"outline"}>
-            <div>Level {Math.floor(score / goal)}</div>
-          </Button>
-          <Button
-            variant={"outline"}
-            onClick={() => {
-              const input = prompt("set goal", goal + "");
-              if (input === null) return;
-              useLocalStorage.setState(() => ({
-                goal: Number(input),
-              }));
-            }}
-          >
-            set Goal
-          </Button>
-        </div>
+        {noButtons ? (
+          ""
+        ) : (
+          <div className="flex gap-2 items-center justify-center mt-2">
+            <AnimationLoop />
+            <Button onClick={() => setOpen(true)} className="" variant={"outline"}>
+              <div>Level {Math.floor(score / goal)}</div>
+            </Button>
+            <Button
+              variant={"outline"}
+              onClick={() => {
+                const input = prompt("set goal", goal + "");
+                if (input === null) return;
+                useLocalStorage.setState(() => ({
+                  goal: Number(input),
+                }));
+                confirm("Change XP accordingly?") &&
+                  useOnlineStorage.setState((state) => ({
+                    ARScore: (state.ARScore / goal) * Number(input),
+                  }));
+              }}
+            >
+              set Goal
+            </Button>
+          </div>
+        )}
       </DialogTrigger>
       <DialogContent className="max-w-[80vw] flex flex-col  max-h-[80vh]">
         <DialogHeader className="overflow-y-auto">
