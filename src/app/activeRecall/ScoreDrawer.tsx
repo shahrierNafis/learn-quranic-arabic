@@ -19,8 +19,8 @@ export default function ScoreDrawer() {
   }, [handleOpen]);
 
   return (
-    <Drawer {...{ open }} onOpenChange={setOpen} direction="bottom">
-      <DrawerContent className="qtop-0 qbottom-auto h-fit m-0 py-2">
+    <Drawer modal={false} dismissible={false} {...{ open }} onOpenChange={setOpen} direction="bottom">
+      <DrawerContent className="h-fit m-0 py-2">
         <Score />
       </DrawerContent>
     </Drawer>

@@ -7,7 +7,7 @@ export default function Ad() {
   return (
     <>
       <div className="flex justify-center flex-col items-center gap-2">
-        <AtlosDialog />
+        {/* <AtlosDialog /> */}
         <Italki />
       </div>{" "}
     </>
