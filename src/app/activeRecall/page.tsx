@@ -16,7 +16,8 @@ export default function Page() {
   const [verse, setVerse] = useState<WORD[]>([]); // the actual verse
   const [hold, setHold] = useState(false);
 
-  const ARProgress = useOnlineStorage(useShallow((state) => state.ARProgress));
+  const ARProgress = useOnlineStorage((state) => state.ARProgress);
+  const addARProgress = useOnlineStorage((state) => state.addARProgress);
   const chapters = useLocalStorage(useShallow((state) => state.chapters));
 
   const reload = useCallback(
@@ -44,6 +45,7 @@ export default function Page() {
   );
 
   const setNextVerse = useCallback(() => {
+    setVerse_key(undefined);
     const nextChapter = chapters.sort((a, b) => {
       const iterationA = Math.floor(ARProgress[a] / getChapterLength(a));
       const iterationB = Math.floor(ARProgress[b] / getChapterLength(b));
@@ -67,12 +69,12 @@ export default function Page() {
     return () => {
       abortController.abort();
     };
-  }, [reload]);
+  }, [reload, verse_key]);
 
   useEffect(() => {
-    !hold && chapters.length && setNextVerse(); // set a next verse if chapters is not empty
+    !hold && setNextVerse(); // set a next verse if chapters is not empty
     return () => {};
-  }, [chapters.length, hold, setNextVerse]);
+  }, [chapters, hold, setNextVerse]);
   return (
     <>
       <ScoreDrawer />
@@ -84,7 +86,6 @@ export default function Page() {
             <Button
               variant={"outline"}
               onClick={() => {
-                setVerse_key(undefined);
                 setNextVerse();
               }}
             >
@@ -99,7 +100,7 @@ export default function Page() {
               onClick={() => {
                 verse_key &&
                   confirm("are you sure you want to skip this verse?") &&
-                  useOnlineStorage.getState().addARProgress(+verse_key?.split(":")[0], 1);
+                  addARProgress(+verse_key?.split(":")[0], 1);
               }}
             >
               Skip Verse {verse_key}

@@ -62,6 +62,7 @@ export default function Start({
         onOpenChange={() => {
           userWords.length !== verse.length && addScore(userWords.length ** difficulty, true); // do not add score if verse is completed and score is already added
           setOpen(!open);
+          setHold(!open);
           reset();
         }}
       >
@@ -71,7 +72,6 @@ export default function Start({
             size={"lg"}
             variant="outline"
             onClick={() => {
-              setHold(true);
               setShow(false);
             }}
             className="font-black text-xl md:text-2xl w-full"
@@ -95,6 +95,8 @@ export default function Start({
                 variant={show ? "secondary" : "outline"}
                 onClick={() => {
                   setShow(!show);
+                  // add score
+                  userWords.length && addScore(userWords.length ** difficulty);
                   penaltyFunc();
                 }}
               >
@@ -239,6 +241,7 @@ export default function Start({
       wrongSoundEffect();
     } else {
       if (won) {
+        setHold(true);
         // addNewCards(verse);
 
         // add ARProgress if not in practice mode
