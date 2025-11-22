@@ -41,7 +41,7 @@ export default function RootLayout({
 
             <main className="w-full">{children}</main>
             <UserDataOutOfSync />
-            <Toaster position="top-left" richColors />
+            <Toaster position="bottom-left" richColors />
           </SidebarProvider>
         </ThemeProvider>
       </body>

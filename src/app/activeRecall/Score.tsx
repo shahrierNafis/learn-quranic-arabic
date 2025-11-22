@@ -16,10 +16,20 @@ import SelectChapters from "./SelectChapters";
 import AnimationLoop from "./AnimationLoop";
 import { useLocalStorage } from "@/stores/localStorage";
 
-export default function Score({ noButtons }: { noButtons?: boolean }) {
+export default function Score({
+  noButtons,
+  currentScore,
+  fullScore,
+}: {
+  noButtons?: boolean;
+  currentScore: number;
+  fullScore: number;
+}) {
   const [score, setScore] = useOnlineStorage(useShallow((state) => [state.ARScore, state.setARScore]));
   const goal = useLocalStorage((state) => state.goal);
-  const parentage = Math.min(100, ((score % goal) / goal) * 100);
+  const percentage = Math.min(100, (((score - currentScore) % goal) / goal) * 100);
+  const percentageCurrentScore = Math.min(100, (currentScore / goal) * 100);
+  const percentageFullScore = Math.min(100, ((fullScore - currentScore) / goal) * 100);
   const [open, setOpen] = useState(false);
   return (
     <Dialog open={open} onOpenChange={(o) => !o && setOpen(o) /* only closes*/}>
@@ -27,12 +37,33 @@ export default function Score({ noButtons }: { noButtons?: boolean }) {
         <div onClick={() => setOpen(true)} className="relative w-full text-center font-mono text-sm">
           Goal {Math.round(score % goal)}/{goal} XP
         </div>
-        <div onClick={() => setOpen(true)} className="w-full h-[1rem] rounded-full bg-zinc-200 relative">
+        <div
+          onClick={() => setOpen(true)}
+          className="w-full h-[1rem] rounded-full bg-zinc-200 relative flex justify-start"
+        >
           <motion.div
-            className="h-full rounded-full bg-green-500 flex items-center justify-center"
-            initial={{ width: parentage + "%" }}
+            className="h-full rounded-full rounded-r-none bg-green-500 flex items-center justify-center shrink-0"
+            initial={{ width: percentage + "%" }}
             animate={{
-              width: `${parentage}%`,
+              width: `${percentage}%`,
+            }}
+          />
+          <motion.div
+            className="h-full bg-yellow-300 flex items-center justify-center shrink-0"
+            initial={{ width: percentageCurrentScore + "%" }}
+            style={{
+              borderTopRightRadius: currentScore !== fullScore ? "0px" : "9999px",
+              borderBottomRightRadius: currentScore !== fullScore ? "0px" : "9999px",
+            }}
+            animate={{
+              width: `${percentageCurrentScore}%`,
+            }}
+          />
+          <motion.div
+            className="h-full rounded-full rounded-l-none bg-green-500 opacity-25 flex items-center justify-center shrink"
+            initial={{ width: percentageFullScore + "%" }}
+            animate={{
+              width: `${percentageFullScore}%`,
             }}
           />
         </div>

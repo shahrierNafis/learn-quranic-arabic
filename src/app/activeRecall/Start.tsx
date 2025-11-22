@@ -5,7 +5,6 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import Verse from "@/components/Verse";
 import { useShallow } from "zustand/shallow";
 import { WORD } from "@/types/types";
-import { createEmptyCard } from "ts-fsrs";
 import { toast } from "sonner";
 import { useOnlineStorage } from "@/stores/onlineStorage";
 import useVerseAudio from "@/components/useVerseAudio";
@@ -16,10 +15,10 @@ import Translations from "@/components/Translations";
 import Word from "@/components/Word";
 import { Skeleton } from "@/components/ui/skeleton";
 import VerseInfo from "./VerseInfo";
-import LevelScore from "./LevelScore";
 import { Loader } from "lucide-react";
 import { playSound, useSound } from "react-sounds";
 import { useLocalStorage } from "@/stores/localStorage";
+import Score from "./Score";
 
 export default function Start({
   verse,
@@ -60,7 +59,6 @@ export default function Start({
       <Dialog
         open={open}
         onOpenChange={() => {
-          userWords.length !== verse.length && addScore(userWords.length ** difficulty, true); // do not add score if verse is completed and score is already added
           setOpen(!open);
           setHold(!open);
           reset();
@@ -81,13 +79,17 @@ export default function Start({
           </Button>
         </DialogTrigger>
         <DialogContent className="w-full max-w-full h-screen overflow-y-auto pt-0 grid-rows-[auto_1fr]">
-          <LevelScore
-            {...{
-              score: userWords.length ** difficulty,
-              scoreRequired: verse.length ** difficulty,
-              parentage: Math.min(100, (userWords.length ** difficulty / verse.length ** difficulty) * 100),
-            }}
-          />
+          {/* <div>
+            {" "}
+            <currentScore
+              {...{
+                score: userWords.length ** difficulty,
+                fullScore: verse.length ** difficulty,
+                parentage: Math.min(100, (userWords.length ** difficulty / verse.length ** difficulty) * 100),
+              }}
+            /> */}
+          <Score currentScore={userWords.length ** difficulty} fullScore={verse.length ** difficulty} />
+          {/* </div> */}
           <div className="flex flex-col items-center justify-start gap-4">
             <div className="flex items-center justify-center gap-4">
               {/* show verse Btn */}
@@ -95,8 +97,6 @@ export default function Start({
                 variant={show ? "secondary" : "outline"}
                 onClick={() => {
                   setShow(!show);
-                  // add score
-                  userWords.length && addScore(userWords.length ** difficulty);
                   penaltyFunc();
                 }}
               >
@@ -230,27 +230,34 @@ export default function Start({
         word.wordSegments.map((ws) => ws.buckwalter).join()
     );
     const won = userWords.length + 1 === verse.length;
+    const score = (userWords.length + 1) ** difficulty - userWords.length ** difficulty;
+
     if (madeMistake) {
-      addScore(userWords.length ** difficulty);
       setRedIndex(i);
+
       setTimeout(() => {
         setRedIndex(undefined);
         reset();
       }, 500);
-
+      userWords.length &&
+        toast.success(`You made a mistake!!! but still earned ${userWords.length ** difficulty} points!`, {});
       wrongSoundEffect();
     } else {
       if (won) {
         setHold(true);
-        // addNewCards(verse);
-
+        toast.success(`You earned ${(userWords.length + 1) ** difficulty} points!`, {});
+        correctSoundEffect();
         // add ARProgress if not in practice mode
         difficulty !== 1 && verse_key && useOnlineStorage.getState().addARProgress(+verse_key?.split(":")[0], 1);
-
-        // add score
-        addScore((userWords.length + 1) ** difficulty);
       }
-      // game continues
+      const ARScore = useOnlineStorage.getState().ARScore;
+      const goal = useLocalStorage.getState().goal;
+      if ((ARScore % goal) + score > goal) {
+        correctSoundEffect();
+        toast.success(`Level Up!`, {});
+      }
+      // add score
+      useOnlineStorage.getState().addARScore(score);
       const [s, v, w] = word.index.split(":");
       playSound(
         "https://audio.qurancdn.com/" + `wbw/${s.padStart(3, "0")}_${v.padStart(3, "0")}_${w.padStart(3, "0")}.mp3`
@@ -268,55 +275,5 @@ export default function Start({
       difficulty !== 1 // if not in practice mode
     )
       reset();
-  }
-
-  function addNewCards(verse: WORD[]) {
-    let newWordAdded = 0;
-    for (const word of verse) {
-      if (word.char_type_name != "word") continue;
-      for (const segment of word.wordSegments) {
-        if (!(segment.arPartOfSpeech === "ism" || segment.arPartOfSpeech === "fiʿil")) continue; // if not a noun or verb
-        if (!segment.lemma) continue;
-        if (wordList[segment.lemma]) continue; // if already in wordList
-        useOnlineStorage.getState().addToWordList(segment.lemma, {
-          card: createEmptyCard(),
-          index: word.index,
-        });
-        newWordAdded++;
-      }
-    }
-    newWordAdded && toast(`${newWordAdded} new words are added to your word list.`);
-  }
-  function addScore(score: number, noDrawer?: boolean) {
-    if (score > 0) {
-      // only show toast if user made some progress
-
-      if (!noDrawer) {
-        dispatchEvent(new CustomEvent("openScoreDrawer", { detail: { score } }));
-      }
-
-      setTimeout(() => {
-        const ARScore = useOnlineStorage.getState().ARScore;
-        const goal = useLocalStorage.getState().goal;
-        if ((ARScore % goal) + score > goal) {
-          const two = ((ARScore % goal) + score) % goal;
-          const one = score - two - 0.1;
-          correctSoundEffect();
-          useOnlineStorage.getState().addARScore(one);
-
-          setTimeout(() => {
-            useOnlineStorage.getState().addARScore(0.1);
-          }, 500);
-          setTimeout(() => {
-            correctSoundEffect();
-            useOnlineStorage.getState().addARScore(two);
-          }, 1000);
-        } else {
-          correctSoundEffect();
-          useOnlineStorage.getState().addARScore(score);
-        }
-        toast.success(`You earned ${score} XP!`, {});
-      }, 1000);
-    }
   }
 }
