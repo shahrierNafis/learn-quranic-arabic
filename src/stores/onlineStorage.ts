@@ -259,7 +259,7 @@ export const useOnlineStorage = createWithEqualityFn<PreferenceStore>()(
       version: 8,
       name: "preference-storage",
       storage: storage,
-      skipHydration: true,
+      // skipHydration: true,
     }
   )
 );

@@ -11,7 +11,7 @@ import getChapterLength from "./getChapterLength";
 import getVerseWords from "@/utils/getVerseWords";
 import Start from "./Start";
 export default function Page() {
-  const [verse_key, setVerse_key] = useState<string | null>();
+  const [verse_key, setVerse_key] = useState<string | null>(null);
   const [verse, setVerse] = useState<WORD[]>([]); // the actual verse
   const [hold, setHold] = useState(false);
 
@@ -44,8 +44,8 @@ export default function Page() {
   );
 
   const setNextVerse = useCallback(() => {
-    setVerse_key(undefined);
-    const nextChapter = chapters.sort((a, b) => {
+    setVerse_key(null);
+    const nextChapter = [...chapters].sort((a, b) => {
       const iterationA = Math.floor(ARProgress[a] / getChapterLength(a));
       const iterationB = Math.floor(ARProgress[b] / getChapterLength(b));
       if (iterationA == iterationB) {
@@ -84,10 +84,9 @@ export default function Page() {
             <Button
               variant={"outline"}
               onClick={() => {
-                setVerse_key(undefined);
+                setVerse_key(null);
                 setHold(false);
                 setVerse([]);
-                useOnlineStorage.getState().ARProgress;
                 setNextVerse();
               }}
             >

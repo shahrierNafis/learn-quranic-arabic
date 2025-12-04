@@ -10,7 +10,14 @@ export default function CheckAuth() {
   const pathname = usePathname();
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user }, error }) => {
-      if (error && !user && (pathname.startsWith("/dashboard") || pathname.startsWith("/collection") || pathname.startsWith("/play") || pathname.startsWith("/review"))) {
+      if (
+        error &&
+        !user &&
+        (pathname.startsWith("/dashboard") ||
+          pathname.startsWith("/collection") ||
+          pathname.startsWith("/play") ||
+          pathname.startsWith("/review"))
+      ) {
         alert(error.message);
         window.location.href = "/";
       }
@@ -19,10 +26,6 @@ export default function CheckAuth() {
 
     return () => {};
   }, [pathname, supabase.auth]);
-  useEffect(() => {
-    useOnlineStorage.persist.rehydrate();
-    return () => {};
-  }, []);
 
   if (isLoading) {
     return <LoadingScreen />;
