@@ -252,7 +252,7 @@ export default function Start({
       }
       const ARScore = useOnlineStorage.getState().ARScore;
       const goal = useLocalStorage.getState().goal;
-      if ((ARScore % goal) + score > goal) {
+      if ((ARScore % goal) + score >= goal) {
         correctSoundEffect();
         toast.success(`Level Up!`, {});
       }

@@ -27,8 +27,11 @@ export default function Score({
 }) {
   const [score, setScore] = useOnlineStorage(useShallow((state) => [state.ARScore, state.setARScore]));
   const goal = useLocalStorage((state) => state.goal);
-  const percentage = Math.min(100, (((score - currentScore) % goal) / goal) * 100);
-  const percentageCurrentScore = Math.min(100, (currentScore / goal) * 100);
+  const darkGreen = (score - currentScore) % goal;
+  const LevelUpped = darkGreen + currentScore >= goal;
+  const percentageDarkGreen = LevelUpped ? 0 : Math.min(100, (darkGreen / goal) * 100);
+  const gold = LevelUpped ? currentScore - (goal - darkGreen) : currentScore;
+  const percentageGold = Math.min(100, (gold / goal) * 100);
   const percentageFullScore = Math.min(100, ((fullScore - currentScore) / goal) * 100);
   const [open, setOpen] = useState(false);
   return (
@@ -43,20 +46,22 @@ export default function Score({
         >
           <motion.div
             className="h-full rounded-full rounded-r-none bg-green-500 flex items-center justify-center shrink-0"
-            initial={{ width: percentage + "%" }}
+            initial={{ width: percentageDarkGreen + "%" }}
             animate={{
-              width: `${percentage}%`,
+              width: `${percentageDarkGreen}%`,
             }}
           />
           <motion.div
             className="h-full bg-yellow-300 flex items-center justify-center shrink-0"
-            initial={{ width: percentageCurrentScore + "%" }}
+            initial={{ width: percentageGold + "%" }}
             style={{
               borderTopRightRadius: currentScore !== fullScore ? "0px" : "9999px",
               borderBottomRightRadius: currentScore !== fullScore ? "0px" : "9999px",
+              borderTopLeftRadius: LevelUpped ? "9999px" : "0px",
+              borderBottomLeftRadius: LevelUpped ? "9999px" : "0px",
             }}
             animate={{
-              width: `${percentageCurrentScore}%`,
+              width: `${percentageGold}%`,
             }}
           />
           <motion.div
