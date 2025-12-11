@@ -26,7 +26,12 @@ export default function Score({
   fullScore: number;
 }) {
   const [score, setScore] = useOnlineStorage(useShallow((state) => [state.ARScore, state.setARScore]));
-  const goal = useLocalStorage((state) => state.goal);
+  const [goal, lastScore] = useLocalStorage(useShallow((state) => [state.goal, state.lastScore]));
+  if (lastScore == 0 && typeof window !== "undefined") {
+    useLocalStorage.setState(() => ({
+      lastScore: score,
+    }));
+  }
   const darkGreen = (score - currentScore) % goal;
   const LevelUpped = darkGreen + currentScore >= goal;
   const percentageDarkGreen = LevelUpped ? 0 : Math.min(100, (darkGreen / goal) * 100);
@@ -38,7 +43,14 @@ export default function Score({
     <Dialog open={open} onOpenChange={(o) => !o && setOpen(o) /* only closes*/}>
       <DialogTrigger className="flex flex-col items-center justify-center w-full px-8 self-start">
         <div onClick={() => setOpen(true)} className="relative w-full text-center font-mono text-sm">
-          Goal {Math.round(score % goal)}/{goal} XP
+          Goal{" "}
+          {(() => {
+            Math.round(lastScore % goal);
+            const diff = score - lastScore;
+            if (diff == 0) return Math.round(lastScore % goal);
+            return Math.round(lastScore % goal) + "+" + diff;
+          })()}
+          /{goal} XP
         </div>
         <div
           onClick={() => setOpen(true)}
@@ -78,7 +90,12 @@ export default function Score({
           <div className="flex gap-2 items-center justify-center mt-2">
             <AnimationLoop />
             <Button onClick={() => setOpen(true)} className="" variant={"outline"}>
-              <div>Level {Math.floor(score / goal)}</div>
+              <div>
+                Level{" "}
+                {(() => {
+                  return Math.floor(score / goal);
+                })()}
+              </div>
             </Button>
             <Button
               variant={"outline"}
@@ -88,10 +105,14 @@ export default function Score({
                 useLocalStorage.setState(() => ({
                   goal: Number(input),
                 }));
-                confirm("Change XP accordingly?") &&
+                if (confirm("Change XP accordingly?")) {
                   useOnlineStorage.setState((state) => ({
                     ARScore: (state.ARScore / goal) * Number(input),
                   }));
+                  useLocalStorage.setState((state) => ({
+                    lastScore: (useOnlineStorage.getState().ARScore / goal) * Number(input),
+                  }));
+                }
               }}
             >
               set Goal
@@ -113,6 +134,9 @@ export default function Score({
               const input = prompt("set progress", score + "");
               if (input === null) return;
               setScore(Number(input));
+              useLocalStorage.setState(() => ({
+                lastScore: 0,
+              }));
             }}
           >
             Edit XP: {Math.round(score)}

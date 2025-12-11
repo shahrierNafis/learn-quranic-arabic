@@ -243,19 +243,22 @@ export default function Start({
         toast.success(`You made a mistake!!! but still earned ${userWords.length ** difficulty} points!`, {});
       wrongSoundEffect();
     } else {
+      const ARScore = useOnlineStorage.getState().ARScore;
+      const goal = useLocalStorage.getState().goal;
       if (won) {
         setHold(true);
-        toast.success(`You earned ${(userWords.length + 1) ** difficulty} points!`, {});
+        toast.success(`You earned ${ARScore - useLocalStorage.getState().lastScore + score} points!`, {});
         correctSoundEffect();
         // add ARProgress if not in practice mode
         difficulty !== 1 && verse_key && useOnlineStorage.getState().addARProgress(+verse_key?.split(":")[0], 1);
       }
-      const ARScore = useOnlineStorage.getState().ARScore;
-      const goal = useLocalStorage.getState().goal;
-      if ((ARScore % goal) + score >= goal) {
+      const leveledUpped = (ARScore % goal) + score >= goal;
+      if (leveledUpped) {
         correctSoundEffect();
-        toast.success(`Level Up!`, {});
+        toast.success(`Level Up!`, { position: "top-center" });
+        toast.success(ARScore - useLocalStorage.getState().lastScore + score + " XP");
       }
+      if (won || leveledUpped) useLocalStorage.setState(() => ({ lastScore: ARScore + score }));
       // add score
       useOnlineStorage.getState().addARScore(score);
       const [s, v, w] = word.index.split(":");
