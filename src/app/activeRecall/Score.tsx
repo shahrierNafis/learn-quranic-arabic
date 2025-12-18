@@ -26,31 +26,31 @@ export default function Score({
   fullScore: number;
 }) {
   const [score, setScore] = useOnlineStorage(useShallow((state) => [state.ARScore, state.setARScore]));
-  const [goal, lastScore] = useLocalStorage(useShallow((state) => [state.goal, state.lastScore]));
-  if (lastScore == 0 && typeof window !== "undefined") {
+  const [goal] = useLocalStorage(useShallow((state) => [state.goal, state.lastScore]));
+  if (useLocalStorage.getState().lastScore == 0 && typeof window !== "undefined") {
     useLocalStorage.setState(() => ({
       lastScore: score,
     }));
   }
-  const darkGreen = (score - currentScore) % goal;
+  const won = currentScore == fullScore;
+  currentScore = !won ? currentScore : 0;
+  const lastScore = useLocalStorage.getState().lastScore;
+  const blue = Math.max(0, score - lastScore - currentScore);
+  const percentageBlue = Math.min(100, (blue / goal) * 100);
+  const darkGreen = (score - currentScore - blue) % goal;
   const LevelUpped = darkGreen + currentScore >= goal;
   const percentageDarkGreen = LevelUpped ? 0 : Math.min(100, (darkGreen / goal) * 100);
   const gold = LevelUpped ? currentScore - (goal - darkGreen) : currentScore;
   const percentageGold = Math.min(100, (gold / goal) * 100);
-  const percentageFullScore = Math.min(100, ((fullScore - currentScore) / goal) * 100);
+  const percentageLightGreen = won ? 0 : Math.min(100, ((fullScore - currentScore) / goal) * 100);
   const [open, setOpen] = useState(false);
   return (
     <Dialog open={open} onOpenChange={(o) => !o && setOpen(o) /* only closes*/}>
       <DialogTrigger className="flex flex-col items-center justify-center w-full px-8 self-start">
-        <div onClick={() => setOpen(true)} className="relative w-full text-center font-mono text-sm">
-          Goal{" "}
-          {(() => {
-            Math.round(lastScore % goal);
-            const diff = score - lastScore;
-            if (diff == 0) return Math.round(lastScore % goal);
-            return Math.round(lastScore % goal) + "+" + diff;
-          })()}
-          /{goal} XP
+        <div onClick={() => setOpen(true)} className="relative w-full text-center font-mono text-sm [&>*]:inline">
+          <div> Goal {Math.round(lastScore % goal)}</div>
+          <div className="text-blue-500">{blue > 0 ? "+" + blue : ""}</div>
+          <div className="text-yellow-600">{gold ? "+" + gold : ""}</div> <div>/{goal} XP</div>
         </div>
         <div
           onClick={() => setOpen(true)}
@@ -62,6 +62,11 @@ export default function Score({
             animate={{
               width: `${percentageDarkGreen}%`,
             }}
+          />
+          <motion.div
+            className="h-full bg-blue-500 flex items-center justify-center shrink-0"
+            initial={{ width: `${percentageBlue}%` }}
+            animate={{ width: `${percentageBlue}%` }}
           />
           <motion.div
             className="h-full bg-yellow-300 flex items-center justify-center shrink-0"
@@ -78,9 +83,9 @@ export default function Score({
           />
           <motion.div
             className="h-full rounded-full rounded-l-none bg-green-500 opacity-25 flex items-center justify-center shrink"
-            initial={{ width: percentageFullScore + "%" }}
+            initial={{ width: percentageLightGreen + "%" }}
             animate={{
-              width: `${percentageFullScore}%`,
+              width: `${percentageLightGreen}%`,
             }}
           />
         </div>
@@ -106,12 +111,14 @@ export default function Score({
                   goal: Number(input),
                 }));
                 if (confirm("Change XP accordingly?")) {
-                  useOnlineStorage.setState((state) => ({
-                    ARScore: (state.ARScore / goal) * Number(input),
-                  }));
-                  useLocalStorage.setState((state) => ({
-                    lastScore: (useOnlineStorage.getState().ARScore / goal) * Number(input),
-                  }));
+                  useOnlineStorage.setState((state) => {
+                    useLocalStorage.setState(() => ({
+                      lastScore: (state.ARScore / goal) * Number(input),
+                    }));
+                    return {
+                      ARScore: (state.ARScore / goal) * Number(input),
+                    };
+                  });
                 }
               }}
             >
