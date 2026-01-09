@@ -10,6 +10,8 @@ import { useLocalStorage } from "@/stores/localStorage";
 import getChapterLength from "./getChapterLength";
 import getVerseWords from "@/utils/getVerseWords";
 import Start from "./Start";
+import { toast } from "sonner";
+import { useSound } from "react-sounds";
 export default function Page() {
   const [verse_key, setVerse_key] = useState<string | null>(null);
   const [verse, setVerse] = useState<WORD[]>([]); // the actual verse
@@ -18,6 +20,7 @@ export default function Page() {
   const ARProgress = useOnlineStorage((state) => state.ARProgress);
   const addARProgress = useOnlineStorage(useShallow((state) => state.addARProgress));
   const chapters = useLocalStorage((state) => state.chapters);
+  const correctSoundEffect = useSound("/audio/duolingo-correct.mp3").play;
 
   const reload = useCallback(
     async (signal: AbortSignal) => {
@@ -99,6 +102,10 @@ export default function Page() {
             <Button
               variant={"outline"}
               onClick={() => {
+                const ARScore = useOnlineStorage.getState().ARScore;
+                toast.success(`You earned ${ARScore - useLocalStorage.getState().lastScore} points!`, {});
+                correctSoundEffect();
+                useLocalStorage.setState(() => ({ lastScore: ARScore }));
                 verse_key &&
                   confirm("are you sure you want to skip this verse?") &&
                   addARProgress(+verse_key?.split(":")[0], 1);

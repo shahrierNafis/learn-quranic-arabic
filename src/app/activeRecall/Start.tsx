@@ -43,7 +43,6 @@ export default function Start({
   const wrongSoundEffect = useSound("/audio/duolingo-wrong.mp3").play;
 
   const { openedVerse, setOpenedVerse } = useVerseAudio();
-  const wordList = useOnlineStorage(useShallow((a) => a.wordList));
 
   const reset = useCallback(() => {
     setUserWords([]);
