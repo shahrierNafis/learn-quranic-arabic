@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import React, { useCallback, useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import Verse from "@/components/Verse";
-import { useShallow } from "zustand/shallow";
 import { WORD } from "@/types/types";
 import { toast } from "sonner";
 import { useOnlineStorage } from "@/stores/onlineStorage";
@@ -15,7 +14,7 @@ import Translations from "@/components/Translations";
 import Word from "@/components/Word";
 import { Skeleton } from "@/components/ui/skeleton";
 import VerseInfo from "./VerseInfo";
-import { Loader } from "lucide-react";
+import { Heart, Loader } from "lucide-react";
 import { playSound, useSound } from "react-sounds";
 import { useLocalStorage } from "@/stores/localStorage";
 import Score from "./Score";
@@ -38,7 +37,7 @@ export default function Start({
   const [words, setWords] = useState<WORD[]>([]); // the actual verse
   const [userWords, setUserWords] = useState<WORD[]>([]); // user input words
   const [open, setOpen] = useState(false);
-
+  const [lives, setLives] = useState(3);
   const correctSoundEffect = useSound("/audio/duolingo-correct.mp3").play;
   const wrongSoundEffect = useSound("/audio/duolingo-wrong.mp3").play;
 
@@ -78,17 +77,7 @@ export default function Start({
           </Button>
         </DialogTrigger>
         <DialogContent className="w-full max-w-full h-screen overflow-y-auto pt-0 grid-rows-[auto_1fr]">
-          {/* <div>
-            {" "}
-            <currentScore
-              {...{
-                score: userWords.length ** difficulty,
-                fullScore: verse.length ** difficulty,
-                parentage: Math.min(100, (userWords.length ** difficulty / verse.length ** difficulty) * 100),
-              }}
-            /> */}
           <Score currentScore={userWords.length ** difficulty} fullScore={verse.length ** difficulty} />
-          {/* </div> */}
           <div className="flex flex-col items-center justify-start gap-4">
             <div className="flex items-center justify-center gap-4">
               {/* show verse Btn */}
@@ -216,7 +205,27 @@ export default function Start({
             )}
           </div>
         </DialogContent>
-      </Dialog>
+      </Dialog>{" "}
+      {open && (
+        <div className="flex items-center justify-center gap-2 fixed bottom-4 right-4 z-[999]">
+          {Array.from({ length: 3 - lives })
+            .map((_, i) => i + 1)
+            .reverse()
+            .map((l) => (
+              <div key={"life " + l}>
+                <Heart className="w-8 " />
+              </div>
+            ))}{" "}
+          {Array.from({ length: lives })
+            .map((_, i) => i + 1)
+            .reverse()
+            .map((l) => (
+              <div key={"life " + l}>
+                <Heart className="w-8 fill-red-500" />
+              </div>
+            ))}
+        </div>
+      )}
     </>
   );
 
@@ -232,16 +241,20 @@ export default function Start({
     const score = (userWords.length + 1) ** difficulty - userWords.length ** difficulty;
 
     if (madeMistake) {
+      setLives((prev) => prev - 1);
       setRedIndex(i);
 
       setTimeout(() => {
         setRedIndex(undefined);
-        reset();
+        if (lives - 1 === 0) {
+          reset();
+          toast.error(`You made 3 mistakes in a row!!! game resets`, {});
+          setLives(3);
+        }
       }, 500);
-      userWords.length &&
-        toast.success(`You made a mistake!!! but still earned ${userWords.length ** difficulty} points!`, {});
       wrongSoundEffect();
     } else {
+      setLives((prev) => (prev + 1 > 3 ? 3 : prev + 1));
       const ARScore = useOnlineStorage.getState().ARScore;
       const goal = useLocalStorage.getState().goal;
       if (won) {
@@ -262,7 +275,7 @@ export default function Start({
       useOnlineStorage.getState().addARScore(score);
       const [s, v, w] = word.index.split(":");
       playSound(
-        "https://audio.qurancdn.com/" + `wbw/${s.padStart(3, "0")}_${v.padStart(3, "0")}_${w.padStart(3, "0")}.mp3`
+        "https://audio.qurancdn.com/" + `wbw/${s.padStart(3, "0")}_${v.padStart(3, "0")}_${w.padStart(3, "0")}.mp3`,
       );
 
       setUserWords((prev) => [...prev, word]);
