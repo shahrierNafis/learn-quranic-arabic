@@ -45,7 +45,7 @@ export default function Start({
 
   const reset = useCallback(() => {
     setUserWords([]);
-    setWords(_.shuffle(verse));
+    setWords(verse.toSorted((a, b) => a.text_imlaei.localeCompare(b.text_imlaei)));
   }, [verse]);
 
   useEffect(() => {
