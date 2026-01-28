@@ -45,7 +45,7 @@ export default function Start({
 
   const reset = useCallback(() => {
     setUserWords([]);
-    setWords(verse.toSorted((a, b) => a.text_imlaei.localeCompare(b.text_imlaei)));
+    setWords(_.shuffle(verse));
   }, [verse]);
 
   useEffect(() => {
@@ -77,7 +77,10 @@ export default function Start({
           </Button>
         </DialogTrigger>
         <DialogContent className="w-full max-w-full h-screen overflow-y-auto pt-0 grid-rows-[auto_1fr]">
-          <Score currentScore={userWords.length ** difficulty} fullScore={verse.length ** difficulty} />
+          <Score
+            currentScore={(verse.length ** difficulty / verse.length) * userWords.length}
+            fullScore={verse.length ** difficulty}
+          />
           <div className="flex flex-col items-center justify-start gap-4">
             <div className="flex items-center justify-center gap-4">
               {/* show verse Btn */}
@@ -238,7 +241,7 @@ export default function Start({
         word.wordSegments.map((ws) => ws.buckwalter).join()
     );
     const won = userWords.length + 1 === verse.length;
-    const score = (userWords.length + 1) ** difficulty - userWords.length ** difficulty;
+    const score = verse.length ** difficulty / verse.length;
 
     if (madeMistake) {
       setLives((prev) => prev - 1);
