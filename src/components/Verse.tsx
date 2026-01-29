@@ -16,6 +16,7 @@ export default function Verse({
   switchIndex,
   hideAudioPlayer,
   children,
+  offset,
 }: {
   verse: WORD[] | undefined;
   highlightIndex?: number;
@@ -23,10 +24,11 @@ export default function Verse({
   switchIndex?: number;
   hideAudioPlayer?: boolean;
   children?: ReactNode;
+  offset?: number;
 }) {
   const [switchOn, setSwitchOn] = useState(false);
   const [showTranslation, showTransliteration, showTranslationOnHiddenWords] = useOnlineStorage(
-    useShallow((a) => [a.showTranslation, a.showTransliteration, a.showTranslationOnHiddenWords])
+    useShallow((a) => [a.showTranslation, a.showTransliteration, a.showTranslationOnHiddenWords]),
   );
   useEffect(() => {
     setSwitchOn(false);
@@ -56,9 +58,14 @@ export default function Verse({
                 ) : (
                   <>
                     <div key={word.index} className="flex flex-col justify-center items-center ">
-                      <div className={""}>{"_?_?_?_"}</div> {showTransliteration && <div className="dark:text-green-100 text-green-950  text-sm">_ _ _ _</div>}
+                      <div className={""}>{"_?_?_?_"}</div>{" "}
+                      {showTransliteration && (
+                        <div className="dark:text-green-100 text-green-950  text-sm">_ _ _ _</div>
+                      )}
                       {showTranslation && (
-                        <div className="dark:text-red-100 text-red-950 text-xs justify-self-end">{showTranslationOnHiddenWords ? word.translation.text : <>_ _ _ _</>}</div>
+                        <div className="dark:text-red-100 text-red-950 text-xs justify-self-end">
+                          {showTranslationOnHiddenWords ? word.translation.text : <>_ _ _ _</>}
+                        </div>
                       )}{" "}
                     </div>
                   </>
@@ -68,7 +75,9 @@ export default function Verse({
                   <>
                     <div key={word.index} className="flex flex-col justify-center items-center">
                       <div className="dark:text-red-100 text-red-950 p-3">{word.translation.text}</div>
-                      {showTransliteration && <div className="dark:text-green-100 text-green-950 px-0 h-5 text-sm"> </div>}
+                      {showTransliteration && (
+                        <div className="dark:text-green-100 text-green-950 px-0 h-5 text-sm"> </div>
+                      )}
                       {showTranslation && <div className="dark:text-red-100 text-red-950 h-4 justify-self-end"> </div>}
                     </div>
                   </>
@@ -76,12 +85,26 @@ export default function Verse({
               }
               return (
                 <>
-                  <div key={word.index} className="flex flex-col justify-center items-center">
+                  <div
+                    key={word.index}
+                    className={cn(
+                      "flex flex-col justify-center items-center",
+                      offset &&
+                        word.position >= verse.length - offset &&
+                        "opacity-25 pointer-events-none cursor-not-allowed rounded",
+                    )}
+                  >
                     <div className={cn(index == highlightIndex && "border-2 rounded border-green-500")} dir="rtl">
                       <Word {...{ wordSegments: word.wordSegments, word }} />
                     </div>
-                    {showTransliteration && <div className="dark:text-green-100 text-green-950  text-sm px-1">{word.transliteration.text}</div>}
-                    {showTranslation && <div className="dark:text-red-100 text-red-950 text-xs px-1">{word.translation.text} </div>}
+                    {showTransliteration && (
+                      <div className="dark:text-green-100 text-green-950  text-sm px-1">
+                        {word.transliteration.text}
+                      </div>
+                    )}
+                    {showTranslation && (
+                      <div className="dark:text-red-100 text-red-950 text-xs px-1">{word.translation.text} </div>
+                    )}
                   </div>
                 </>
               );
@@ -93,7 +116,12 @@ export default function Verse({
           )}
         </div>{" "}
         {
-          <Button size={"icon"} variant={switchOn ? "default" : "ghost"} className="rounded-full" onClick={() => setSwitchOn(!switchOn)}>
+          <Button
+            size={"icon"}
+            variant={switchOn ? "default" : "ghost"}
+            className="rounded-full"
+            onClick={() => setSwitchOn(!switchOn)}
+          >
             <ArrowLeftRight />
           </Button>
         }{" "}

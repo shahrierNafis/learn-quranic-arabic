@@ -18,6 +18,7 @@ import { Heart, Loader } from "lucide-react";
 import { playSound, useSound } from "react-sounds";
 import { useLocalStorage } from "@/stores/localStorage";
 import Score from "./Score";
+import { Input } from "@/components/ui/input";
 
 export default function Start({
   verse,
@@ -40,13 +41,17 @@ export default function Start({
   const [lives, setLives] = useState(3);
   const correctSoundEffect = useSound("/audio/duolingo-correct.mp3").play;
   const wrongSoundEffect = useSound("/audio/duolingo-wrong.mp3").play;
+  const [offset, setOffset] = useState(0);
 
   const { openedVerse, setOpenedVerse } = useVerseAudio();
 
-  const reset = useCallback(() => {
-    setUserWords([]);
-    setWords(_.shuffle(verse));
-  }, [verse]);
+  const reset = useCallback(
+    (noShuffle = false) => {
+      setUserWords([]);
+      !noShuffle && setWords(_.shuffle(verse));
+    },
+    [verse],
+  );
 
   useEffect(() => {
     reset();
@@ -78,11 +83,23 @@ export default function Start({
         </DialogTrigger>
         <DialogContent className="w-full max-w-full h-screen overflow-y-auto pt-0 grid-rows-[auto_1fr]">
           <Score
-            currentScore={(verse.length ** difficulty / verse.length) * userWords.length}
-            fullScore={verse.length ** difficulty}
+            currentScore={((verse.length - offset) ** difficulty / (verse.length - offset)) * userWords.length}
+            fullScore={(verse.length - offset) ** difficulty}
           />
           <div className="flex flex-col items-center justify-start gap-4">
             <div className="flex items-center justify-center gap-4">
+              <Input
+                value={offset}
+                min="0"
+                className="w-16"
+                type="number"
+                onChange={(e) => {
+                  reset(true);
+                  setOffset(
+                    Number(+e.target.value < 0 ? 0 : +e.target.value > verse.length ? verse.length : +e.target.value),
+                  );
+                }}
+              />
               {/* show verse Btn */}
               <Button
                 variant={show ? "secondary" : "outline"}
@@ -124,7 +141,7 @@ export default function Start({
                       dir="rtl"
                       className="text-2xl md:text-3xl"
                     >
-                      <Verse {...{ verse }}></Verse>
+                      <Verse {...{ verse, offset }}></Verse>
                     </motion.div>
                   </>
                 )}
@@ -163,7 +180,10 @@ export default function Start({
                         >
                           <Button
                             style={{
-                              visibility: userWordIds.includes(word.index) ? "hidden" : "visible",
+                              visibility:
+                                userWordIds.includes(word.index) || word.position >= verse.length - offset + 1
+                                  ? "hidden"
+                                  : "visible",
                             }}
                             className={cn(" text-2xl md:text-3xl", `${redIndex === i && "ring ring-red-400"}`)}
                             variant={redIndex === i ? "destructive" : "outline"}
@@ -240,8 +260,8 @@ export default function Start({
       verse[userWords.length].wordSegments.map((ws) => ws.buckwalter).join() ==
         word.wordSegments.map((ws) => ws.buckwalter).join()
     );
-    const won = userWords.length + 1 === verse.length;
-    const score = verse.length ** difficulty / verse.length;
+    const won = userWords.length + 1 === verse.length - offset;
+    const score = (verse.length - offset) ** difficulty / (verse.length - offset);
 
     if (madeMistake) {
       setLives((prev) => prev - 1);
@@ -257,6 +277,7 @@ export default function Start({
       }, 500);
       wrongSoundEffect();
     } else {
+      setUserWords((prev) => [...prev, word]);
       setLives((prev) => (prev + 1 > 3 ? 3 : prev + 1));
       const ARScore = useOnlineStorage.getState().ARScore;
       const goal = useLocalStorage.getState().goal;
@@ -264,8 +285,12 @@ export default function Start({
         setHold(true);
         toast.success(`You earned ${ARScore - useLocalStorage.getState().lastScore + score} points!`, {});
         correctSoundEffect();
-        // add ARProgress if not in practice mode
-        difficulty !== 1 && verse_key && useOnlineStorage.getState().addARProgress(+verse_key?.split(":")[0], 1);
+        // add ARProgress if not in practice mode and no offset
+        offset === 0 &&
+          difficulty !== 1 &&
+          verse_key &&
+          useOnlineStorage.getState().addARProgress(+verse_key?.split(":")[0], 1);
+        offset && reset();
       }
       const leveledUpped = (ARScore % goal) + score >= goal;
       if (leveledUpped) {
@@ -280,8 +305,6 @@ export default function Start({
       playSound(
         "https://audio.qurancdn.com/" + `wbw/${s.padStart(3, "0")}_${v.padStart(3, "0")}_${w.padStart(3, "0")}.mp3`,
       );
-
-      setUserWords((prev) => [...prev, word]);
     }
   }
 
