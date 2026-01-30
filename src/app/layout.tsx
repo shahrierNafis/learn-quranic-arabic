@@ -27,7 +27,7 @@ export default function RootLayout({
         <meta property="og:image" content="/image.jpg" />
         <meta
           property="og:description"
-          content="Learn Quranic Arabic More Efficiently And Effectively Using Spaced Repetition And Active Recall"
+          content="Learn Quranic Arabic More Efficiently And Effectively Using Spaced Repetition And Active Read"
         />
       </head>
       <body className={comfortaa.className}>

@@ -21,7 +21,7 @@ export default function StudyDialog() {
     (a, b) => {
       const c = deepEqual(a, b);
       return c;
-    }
+    },
   );
 
   const [verse, setVerse] = useState<WORD[]>();
@@ -61,7 +61,7 @@ export default function StudyDialog() {
             if (a[1].isSuspended) return false; // skip suspended cards
             if (a[1].card.state !== 0) return false; // skip cards that are not new
             return true;
-          })
+          }),
         );
       }
       if (filteredCards.length === 0) {
@@ -72,7 +72,7 @@ export default function StudyDialog() {
             if (a[1].isSuspended) return false; // skip suspended cards
             if (!(a[1].card.state === 1 || a[1].card.state === 3)) return false; // skip cards that are not in the Learning state
             return true;
-          })
+          }),
         );
       }
       if (filteredCards.length === 0) return; // if there are no cards at all
@@ -82,7 +82,7 @@ export default function StudyDialog() {
         (a, b) =>
           a[1].card.state == 0
             ? Math.random() - 0.5 // new cards go randomly
-            : a[1].card.due.getTime() - b[1].card.due.getTime() // otherwise sort by due date
+            : a[1].card.due.getTime() - b[1].card.due.getTime(), // otherwise sort by due date
       );
       const currentWord = sortedCards[0];
 
@@ -92,7 +92,11 @@ export default function StudyDialog() {
 
       // fetch verse and word
       const words: WORD[] = [];
-      words.push(...(await getVerseWords(wordIndex as `${string}:${string}`, signal)).filter((word) => word.char_type_name == "word"));
+      words.push(
+        ...(await getVerseWords(wordIndex as `${string}:${string}`, signal)).filter(
+          (word) => word.char_type_name == "word",
+        ),
+      );
       if (signal.aborted) return;
       setVerse(words.filter((word) => word.char_type_name == "word"));
       setWord(words.filter((word) => word.index == wordIndex)[0]);
@@ -126,9 +130,9 @@ export default function StudyDialog() {
             ) : card === undefined ? (
               <MotionDiv className="text-base text-center">
                 No words are due. Go to
-                <Link href="/activeRecall">
+                <Link href="/activeRead">
                   <Button size={"sm"} variant={"outline"}>
-                    active recall page
+                    active read page
                   </Button>
                 </Link>
                 to add new words to your word list.
@@ -146,7 +150,9 @@ export default function StudyDialog() {
                     switchIndex: word ? +word.index.split(":")[2] - 1 : undefined,
                   }}
                 ></Verse>
-                <Translations {...{ index: `${word?.index.split(":")[0]}:${word?.index.split(":")[1]}` }}></Translations>
+                <Translations
+                  {...{ index: `${word?.index.split(":")[0]}:${word?.index.split(":")[1]}` }}
+                ></Translations>
               </MotionDiv>
             )}
           </div>

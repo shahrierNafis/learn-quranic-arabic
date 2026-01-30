@@ -49,8 +49,10 @@ export default function Score({
       <DialogTrigger className="flex flex-col items-center justify-center w-full px-8 self-start">
         <div onClick={() => setOpen(true)} className="relative w-full text-center font-mono text-sm [&>*]:inline">
           <div> Goal {Math.round(lastScore % goal)}</div>
-          <div className="text-blue-500">{blue > 0 ? "+" + blue : ""}</div>
-          <div className="text-yellow-600">{gold ? "+" + gold : ""}</div> <div>/{goal} XP</div>
+          <div className="text-blue-500">{blue > 0 ? "+" + Math.round(blue * 100) / 100 : ""}</div>
+          <div className="text-yellow-600">{gold ? "+" + Math.round(gold * 100) / 100 : ""}</div> <div>/{goal} XP </div>
+          Remaining: <div className="text-green-500">{Math.max(0, Math.round(fullScore - currentScore))}</div>
+          <div> XP</div>
         </div>
         <div
           onClick={() => setOpen(true)}
@@ -82,12 +84,12 @@ export default function Score({
             }}
           />
           <motion.div
-            className="h-full rounded-full rounded-l-none bg-green-500 opacity-25 flex items-center justify-center shrink"
+            className="h-full rounded-full rounded-l-none bg-green-500/25 flex items-center justify-center shrink"
             initial={{ width: percentageLightGreen + "%" }}
             animate={{
               width: `${percentageLightGreen}%`,
             }}
-          />
+          ></motion.div>
         </div>
         {noButtons ? (
           ""

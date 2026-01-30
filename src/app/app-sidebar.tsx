@@ -31,8 +31,8 @@ const items = [
   //   icon: Clock,
   // },
   {
-    title: "Active Recall",
-    url: "/activeRecall",
+    title: "Active Read",
+    url: "/activeRead",
     icon: BrainCircuit,
   },
 ];

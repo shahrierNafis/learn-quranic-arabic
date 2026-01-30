@@ -16,7 +16,6 @@ export default function Verse({
   switchIndex,
   hideAudioPlayer,
   children,
-  offset,
 }: {
   verse: WORD[] | undefined;
   highlightIndex?: number;
@@ -24,7 +23,6 @@ export default function Verse({
   switchIndex?: number;
   hideAudioPlayer?: boolean;
   children?: ReactNode;
-  offset?: number;
 }) {
   const [switchOn, setSwitchOn] = useState(false);
   const [showTranslation, showTransliteration, showTranslationOnHiddenWords] = useOnlineStorage(
@@ -85,15 +83,7 @@ export default function Verse({
               }
               return (
                 <>
-                  <div
-                    key={word.index}
-                    className={cn(
-                      "flex flex-col justify-center items-center",
-                      offset &&
-                        word.position >= verse.length - offset &&
-                        "opacity-25 pointer-events-none cursor-not-allowed rounded",
-                    )}
-                  >
+                  <div key={word.index} className={cn("flex flex-col justify-center items-center")}>
                     <div className={cn(index == highlightIndex && "border-2 rounded border-green-500")} dir="rtl">
                       <Word {...{ wordSegments: word.wordSegments, word }} />
                     </div>

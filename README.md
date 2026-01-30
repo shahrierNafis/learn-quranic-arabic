@@ -1,4 +1,4 @@
-# Learn Quranic Arabic More Efficiently And Effectively Using Spaced Repetition And Active Recall
+# Learn Quranic Arabic More Efficiently And Effectively Using Spaced Repetition And Active Read
 
 Immerse yourself in the Arabic language by taking whole sentences into your short-term memory to recognize the patterns in the language, instead of memorizing hundreds of words out of context, only to end up not being able to form any sentences despite knowing hundreds of words.
 

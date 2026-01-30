@@ -1,6 +1,6 @@
 import MotionDiv from "@/components/MotionDiv";
 import { Button } from "@/components/ui/button";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { use, useCallback, useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import Verse from "@/components/Verse";
 import { WORD } from "@/types/types";
@@ -35,23 +35,21 @@ export default function Start({
 }) {
   const [redIndex, setRedIndex] = useState<number>();
   const [show, setShow] = useState(false);
-  const [words, setWords] = useState<WORD[]>([]); // the actual verse
-  const [userWords, setUserWords] = useState<WORD[]>([]); // user input words
+  const [divisions, setDivisions] = useState<WORD[][]>([[]]); // the actual verse
+  const [userWords, setUserWords] = useState<WORD[]>([]); // user input divisions
   const [open, setOpen] = useState(false);
   const [lives, setLives] = useState(3);
   const correctSoundEffect = useSound("/audio/duolingo-correct.mp3").play;
   const wrongSoundEffect = useSound("/audio/duolingo-wrong.mp3").play;
-  const [offset, setOffset] = useState(0);
+  const [divideBy, setDivideBy] = useState(1);
 
   const { openedVerse, setOpenedVerse } = useVerseAudio();
 
-  const reset = useCallback(
-    (noShuffle = false) => {
-      setUserWords([]);
-      !noShuffle && setWords(_.shuffle(verse));
-    },
-    [verse],
-  );
+  const reset = useCallback(() => {
+    setUserWords([]);
+    const chunkedArray = chunkArray(verse, Math.ceil(verse.length / divideBy));
+    setDivisions(chunkedArray.map((chunk) => _.shuffle(chunk)));
+  }, [divideBy, verse]);
 
   useEffect(() => {
     reset();
@@ -83,20 +81,20 @@ export default function Start({
         </DialogTrigger>
         <DialogContent className="w-full max-w-full h-screen overflow-y-auto pt-0 grid-rows-[auto_1fr]">
           <Score
-            currentScore={((verse.length - offset) ** difficulty / (verse.length - offset)) * userWords.length}
-            fullScore={(verse.length - offset) ** difficulty}
+            currentScore={userWords.length ** difficulty / divideBy}
+            fullScore={verse.length ** difficulty / divideBy}
           />
           <div className="flex flex-col items-center justify-start gap-4">
             <div className="flex items-center justify-center gap-4">
               <Input
-                value={offset}
-                min="0"
+                value={divideBy}
+                min="1"
                 className="w-16"
                 type="number"
                 onChange={(e) => {
-                  reset(true);
-                  setOffset(
-                    Number(+e.target.value < 0 ? 0 : +e.target.value > verse.length ? verse.length : +e.target.value),
+                  reset();
+                  setDivideBy(
+                    Number(+e.target.value < 1 ? 1 : +e.target.value > verse.length ? verse.length : +e.target.value),
                   );
                 }}
               />
@@ -141,12 +139,12 @@ export default function Start({
                       dir="rtl"
                       className="text-2xl md:text-3xl"
                     >
-                      <Verse {...{ verse, offset }}></Verse>
+                      <Verse {...{ verse }}></Verse>
                     </motion.div>
                   </>
                 )}
                 <VerseInfo {...{ verse_key, verse }} />
-                {/* USER WORDS */}
+                {/* USER DIVISIONS */}
                 <div dir="rtl" className="flex flex-wrap items-center justify-center w-full gap-4">
                   {userWords.map((word) => {
                     return (
@@ -168,47 +166,58 @@ export default function Start({
                 <MotionDiv>
                   <Translations {...{ index: verse_key }}></Translations>
                 </MotionDiv>
-                <MotionDiv dir="rtl" className="flex flex-wrap items-center justify-center w-full gap-4">
-                  {/* words */}
-                  {words.length ? (
-                    words.map((word, i) => {
-                      const userWordIds = userWords.map((w) => w.index);
-                      return (
+
+                {/* divisions */}
+                {divisions.length ? (
+                  divisions.map((division, i) => {
+                    return (
+                      <>
                         <MotionDiv
-                          className={cn(userWordIds.includes(word.index) ? "border border-dashed rounded-md" : "")}
-                          key={word.index}
+                          dir="rtl"
+                          className="flex flex-wrap items-center justify-center w-full gap-4 mb-4 pb-4 shadow-xl"
                         >
-                          <Button
-                            style={{
-                              visibility:
-                                userWordIds.includes(word.index) || word.position >= verse.length - offset + 1
-                                  ? "hidden"
-                                  : "visible",
-                            }}
-                            className={cn(" text-2xl md:text-3xl", `${redIndex === i && "ring ring-red-400"}`)}
-                            variant={redIndex === i ? "destructive" : "outline"}
-                            size={"lg"}
-                            disabled={userWords.length == verse.length}
-                            onClick={() => {
-                              onWordClick(word, i);
-                            }}
-                          >
-                            <Word
-                              asChild
-                              {...{
-                                wordSegments: word.wordSegments,
-                                noWordInfo: true,
-                                word,
-                                size: "lg",
-                              }}
-                            />
-                          </Button>
+                          {division.map((word) => {
+                            const userWordIds = userWords.map((w) => w.index);
+                            return (
+                              <MotionDiv
+                                className={cn(
+                                  userWordIds.includes(word.index) ? "border border-dashed rounded-md" : "",
+                                )}
+                                key={word.index}
+                              >
+                                <Button
+                                  style={{
+                                    visibility: userWordIds.includes(word.index) ? "hidden" : "visible",
+                                  }}
+                                  className={cn(" text-2xl md:text-3xl", `${redIndex === i && "ring ring-red-400"}`)}
+                                  variant={redIndex === i ? "destructive" : "outline"}
+                                  size={"lg"}
+                                  disabled={userWords.length == verse.length}
+                                  onClick={() => {
+                                    onWordClick(word, i);
+                                  }}
+                                >
+                                  <Word
+                                    asChild
+                                    {...{
+                                      wordSegments: word.wordSegments,
+                                      noWordInfo: true,
+                                      word,
+                                      size: "lg",
+                                    }}
+                                  />
+                                </Button>
+                              </MotionDiv>
+                            );
+                          })}
                         </MotionDiv>
-                      );
-                    })
-                  ) : (
-                    // if words are not loaded, show skeletons
-                    <>
+                      </>
+                    );
+                  })
+                ) : (
+                  // if divisions are not loaded, show skeletons
+                  <>
+                    <MotionDiv dir="rtl" className="flex flex-wrap items-center justify-center w-full gap-4">
                       {userWords.length
                         ? ""
                         : Array(verse.length > 0 ? verse.length : 10)
@@ -221,9 +230,9 @@ export default function Start({
                                 </MotionDiv>
                               );
                             })}
-                    </>
-                  )}
-                </MotionDiv>
+                    </MotionDiv>
+                  </>
+                )}
               </>
             )}
           </div>
@@ -260,8 +269,8 @@ export default function Start({
       verse[userWords.length].wordSegments.map((ws) => ws.buckwalter).join() ==
         word.wordSegments.map((ws) => ws.buckwalter).join()
     );
-    const won = userWords.length + 1 === verse.length - offset;
-    const score = (verse.length - offset) ** difficulty / (verse.length - offset);
+    const won = userWords.length + 1 === verse.length;
+    const score = ((userWords.length + 1) ** difficulty - userWords.length ** difficulty) / divideBy;
 
     if (madeMistake) {
       setLives((prev) => prev - 1);
@@ -285,12 +294,8 @@ export default function Start({
         setHold(true);
         toast.success(`You earned ${ARScore - useLocalStorage.getState().lastScore + score} points!`, {});
         correctSoundEffect();
-        // add ARProgress if not in practice mode and no offset
-        offset === 0 &&
-          difficulty !== 1 &&
-          verse_key &&
-          useOnlineStorage.getState().addARProgress(+verse_key?.split(":")[0], 1);
-        offset && reset();
+        // add ARProgress if not in practice mode
+        difficulty !== 1 && verse_key && useOnlineStorage.getState().addARProgress(+verse_key?.split(":")[0], 1);
       }
       const leveledUpped = (ARScore % goal) + score >= goal;
       if (leveledUpped) {
@@ -317,4 +322,13 @@ export default function Start({
     )
       reset();
   }
+}
+function chunkArray<T>(array: T[], chunkSize: number): T[][] {
+  const chunkedArray = [];
+  for (let i = 0; i < array.length; i += chunkSize) {
+    // Slice a portion of the array from the current index up to the chunk size
+    const chunk = array.slice(i, i + chunkSize);
+    chunkedArray.push(chunk);
+  }
+  return chunkedArray;
 }
