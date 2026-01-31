@@ -18,7 +18,7 @@ import { Heart, Loader } from "lucide-react";
 import { playSound, useSound } from "react-sounds";
 import { useLocalStorage } from "@/stores/localStorage";
 import Score from "./Score";
-import { Input } from "@/components/ui/input";
+import { EasingFactorSelector } from "./EasingFactorSelector";
 
 export default function Start({
   verse,
@@ -47,7 +47,7 @@ export default function Start({
 
   const reset = useCallback(() => {
     setUserWords([]);
-    const chunkedArray = chunkArray(verse, Math.ceil(verse.length / divideBy));
+    const chunkedArray = chunkArray(verse, Math.floor(verse.length / divideBy));
     setDivisions(chunkedArray.map((chunk) => _.shuffle(chunk)));
   }, [divideBy, verse]);
 
@@ -86,18 +86,18 @@ export default function Start({
           />
           <div className="flex flex-col items-center justify-start gap-4">
             <div className="flex items-center justify-center gap-4">
-              <Input
+              <EasingFactorSelector {...{ divideBy, setDivideBy, verseLength: verse.length }} />
+              {/* <Input
                 value={divideBy}
-                min="1"
                 className="w-16"
-                type="number"
+                type=""
                 onChange={(e) => {
                   reset();
                   setDivideBy(
                     Number(+e.target.value < 1 ? 1 : +e.target.value > verse.length ? verse.length : +e.target.value),
                   );
                 }}
-              />
+              /> */}
               {/* show verse Btn */}
               <Button
                 variant={show ? "secondary" : "outline"}
@@ -118,6 +118,8 @@ export default function Start({
                   setNextVerse();
                   setShow(false);
                   setUserWords([]);
+                  setLives(3);
+                  setDivideBy(1);
                 }}
               >
                 Done
@@ -326,6 +328,10 @@ export default function Start({
 function chunkArray<T>(array: T[], chunkSize: number): T[][] {
   const chunkedArray = [];
   for (let i = 0; i < array.length; i += chunkSize) {
+    if (i + chunkSize > array.length) {
+      chunkedArray[chunkedArray.length - 1].push(array[array.length - 1]);
+      break;
+    }
     // Slice a portion of the array from the current index up to the chunk size
     const chunk = array.slice(i, i + chunkSize);
     chunkedArray.push(chunk);

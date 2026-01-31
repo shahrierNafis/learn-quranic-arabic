@@ -36,7 +36,7 @@ export default function Score({
   currentScore = !won ? currentScore : 0;
   const lastScore = useLocalStorage.getState().lastScore;
   const blue = Math.max(0, score - lastScore - currentScore);
-  const percentageBlue = Math.min(100, (blue / goal) * 100);
+  const percentageBlue = Math.min(100, (Math.round(blue) / goal) * 100);
   const darkGreen = (score - currentScore - blue) % goal;
   const LevelUpped = darkGreen + currentScore >= goal;
   const percentageDarkGreen = LevelUpped ? 0 : Math.min(100, (darkGreen / goal) * 100);
@@ -49,7 +49,7 @@ export default function Score({
       <DialogTrigger className="flex flex-col items-center justify-center w-full px-8 self-start">
         <div onClick={() => setOpen(true)} className="relative w-full text-center font-mono text-sm [&>*]:inline">
           <div> Goal {Math.round(lastScore % goal)}</div>
-          <div className="text-blue-500">{blue > 0 ? "+" + Math.round(blue * 100) / 100 : ""}</div>
+          <div className="text-blue-500">{Math.round(blue) > 0 ? "+" + Math.round(blue * 100) / 100 : ""}</div>
           <div className="text-yellow-600">{gold ? "+" + Math.round(gold * 100) / 100 : ""}</div> <div>/{goal} XP </div>
           Remaining: <div className="text-green-500">{Math.max(0, Math.round(fullScore - currentScore))}</div>
           <div> XP</div>
