@@ -124,6 +124,16 @@ export default function Start({
               >
                 Done
               </Button>
+              <Button
+                variant={"outline"}
+                onClick={() => {
+                  reset();
+                  verse_key &&
+                    useOnlineStorage.getState().setARProgress(+verse_key?.split(":")[0], +verse_key?.split(":")[1] - 1);
+                }}
+              >
+                Redo
+              </Button>
             </div>
             {/* verse */}
             {verse_key === null ? (
@@ -271,6 +281,7 @@ export default function Start({
       verse[userWords.length].wordSegments.map((ws) => ws.buckwalter).join() ==
         word.wordSegments.map((ws) => ws.buckwalter).join()
     );
+
     const won = userWords.length + 1 === verse.length;
     const score = ((userWords.length + 1) ** difficulty - userWords.length ** difficulty) / divideBy;
 
