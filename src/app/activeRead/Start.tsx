@@ -108,6 +108,16 @@ export default function Start({
               >
                 Read/Listen Verse
               </Button>
+              <Button
+                variant={"outline"}
+                onClick={() => {
+                  reset();
+                  verse_key &&
+                    useOnlineStorage.getState().setARProgress(+verse_key?.split(":")[0], +verse_key?.split(":")[1] - 1);
+                }}
+              >
+                Redo
+              </Button>
               {/* Done Btn */}
               <Button
                 variant={"outline"}
@@ -123,16 +133,6 @@ export default function Start({
                 }}
               >
                 Done
-              </Button>
-              <Button
-                variant={"outline"}
-                onClick={() => {
-                  reset();
-                  verse_key &&
-                    useOnlineStorage.getState().setARProgress(+verse_key?.split(":")[0], +verse_key?.split(":")[1] - 1);
-                }}
-              >
-                Redo
               </Button>
             </div>
             {/* verse */}
