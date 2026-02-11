@@ -47,7 +47,7 @@ export default function Start({
 
   const reset = useCallback(() => {
     setUserWords([]);
-    const chunkedArray = chunkArray(verse, Math.floor(verse.length / divideBy));
+    const chunkedArray = chunkArray(verse, verse.length / divideBy);
     setDivisions(chunkedArray.map((chunk) => _.shuffle(chunk)));
   }, [divideBy, verse]);
 
@@ -87,17 +87,6 @@ export default function Start({
           <div className="flex flex-col items-center justify-start gap-4">
             <div className="flex items-center justify-center gap-4">
               <EasingFactorSelector {...{ divideBy, setDivideBy, verseLength: verse.length }} />
-              {/* <Input
-                value={divideBy}
-                className="w-16"
-                type=""
-                onChange={(e) => {
-                  reset();
-                  setDivideBy(
-                    Number(+e.target.value < 1 ? 1 : +e.target.value > verse.length ? verse.length : +e.target.value),
-                  );
-                }}
-              /> */}
               {/* show verse Btn */}
               <Button
                 variant={show ? "secondary" : "outline"}
@@ -308,7 +297,9 @@ export default function Start({
         toast.success(`You earned ${ARScore - useLocalStorage.getState().lastScore + score} points!`, {});
         correctSoundEffect();
         // add ARProgress if not in practice mode
-        difficulty !== 1 && verse_key && useOnlineStorage.getState().addARProgress(+verse_key?.split(":")[0], 1);
+        difficulty !== 1 &&
+          verse_key &&
+          useOnlineStorage.getState().setARProgress(+verse_key?.split(":")[0], +verse_key?.split(":")[1]);
       }
       const leveledUpped = (ARScore % goal) + score >= goal;
       if (leveledUpped) {
