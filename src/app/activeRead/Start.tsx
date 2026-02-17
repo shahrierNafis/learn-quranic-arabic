@@ -146,7 +146,7 @@ export default function Start({
                 )}
                 <VerseInfo {...{ verse_key, verse }} />
                 {/* USER DIVISIONS */}
-                <div dir="rtl" className="flex flex-wrap items-center justify-center w-full gap-4">
+                <div dir="rtl" className="flex flex-wrap items-center justify-center w-full gap-2">
                   {userWords.map((word) => {
                     return (
                       <MotionDiv key={word.index}>
@@ -171,11 +171,14 @@ export default function Start({
                 {/* divisions */}
                 {divisions.length ? (
                   divisions.map((division, i) => {
-                    return (
-                      <>
+                    if (division.every((word) => userWords.map((w) => w.index).includes(word.index))) {
+                      return <></>;
+                    } else {
+                      return (
                         <MotionDiv
+                          key={"division-" + i}
                           dir="rtl"
-                          className="flex flex-wrap items-center justify-center w-full gap-4 mb-4 pb-4 shadow-xl"
+                          className="flex flex-wrap items-center justify-center w-full gap-2 p-4 shadow-xl border rounded-md"
                         >
                           {division.map((word) => {
                             const userWordIds = userWords.map((w) => w.index);
@@ -212,8 +215,8 @@ export default function Start({
                             );
                           })}
                         </MotionDiv>
-                      </>
-                    );
+                      );
+                    }
                   })
                 ) : (
                   // if divisions are not loaded, show skeletons
