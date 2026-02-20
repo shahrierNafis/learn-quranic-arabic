@@ -46,7 +46,7 @@ export default function Score({
   const [open, setOpen] = useState(false);
   return (
     <Dialog open={open} onOpenChange={(o) => !o && setOpen(o) /* only closes*/}>
-      <DialogTrigger className="flex flex-col items-center justify-center w-full px-8 self-start">
+      <DialogTrigger className="flex flex-col items-center justify-center w-full px-8 self-start my-8 md:m-0">
         <div onClick={() => setOpen(true)} className="relative w-full text-center font-mono text-sm [&>*]:inline">
           <div> Goal {Math.round(lastScore % goal)}</div>
           <div className="text-blue-500">{Math.round(blue) > 0 ? "+" + Math.round(blue * 100) / 100 : ""}</div>

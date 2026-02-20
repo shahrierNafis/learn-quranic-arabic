@@ -18,6 +18,7 @@ export const useLocalStorage = create<{
 
   goal: number;
   lastScore: number;
+  maxLives: number;
 }>()(
   persist(
     (set) => ({
@@ -45,10 +46,11 @@ export const useLocalStorage = create<{
       },
       goal: 1000,
       lastScore: 0,
+      maxLives: 3,
     }),
     {
       name: "useLocalStorage", // name of the item in the storage (must be unique)
       version: 3,
-    }
-  )
+    },
+  ),
 );

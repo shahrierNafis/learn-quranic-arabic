@@ -19,6 +19,9 @@ import { playSound, useSound } from "react-sounds";
 import { useLocalStorage } from "@/stores/localStorage";
 import Score from "./Score";
 import { EasingFactorSelector } from "./EasingFactorSelector";
+import { Input } from "@/components/ui/input";
+import Fuse from "fuse.js";
+import { Label } from "@/components/ui/label";
 
 export default function Start({
   verse,
@@ -38,16 +41,18 @@ export default function Start({
   const [divisions, setDivisions] = useState<WORD[][]>([[]]); // the actual verse
   const [userWords, setUserWords] = useState<WORD[]>([]); // user input divisions
   const [open, setOpen] = useState(false);
-  const [lives, setLives] = useState(3);
+  const maxLives = useLocalStorage((state) => state.maxLives);
+  const [lives, setLives] = useState(maxLives);
   const correctSoundEffect = useSound("/audio/duolingo-correct.mp3").play;
   const wrongSoundEffect = useSound("/audio/duolingo-wrong.mp3").play;
   const [divideBy, setDivideBy] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const { openedVerse, setOpenedVerse } = useVerseAudio();
 
   const reset = useCallback(() => {
     setUserWords([]);
-    const chunkedArray = chunkArray(verse, verse.length / divideBy);
+    const chunkedArray = chunkArray(verse, Math.floor(verse.length / divideBy));
     setDivisions(chunkedArray.map((chunk) => _.shuffle(chunk)));
   }, [divideBy, verse]);
 
@@ -73,20 +78,42 @@ export default function Start({
             onClick={() => {
               setShow(false);
             }}
-            className="font-black text-xl md:text-2xl w-full"
+            className="font-black text-base md:text-2xl w-full"
           >
             {difficulty === 1 ? `Practice:` : `Start:`}
             {verse.length === 0 ? <Loader className="animate-spin" /> : ` ${verse.length ** difficulty}XP`}
           </Button>
         </DialogTrigger>
-        <DialogContent className="w-full max-w-full h-screen overflow-y-auto pt-0 grid-rows-[auto_1fr]">
+        <DialogContent className="w-full max-w-full h-screen overflow-y-auto pt-0 grid-rows-[auto_1fr] auto-cols-[100%] ">
           <Score
-            currentScore={userWords.length ** difficulty / divideBy}
-            fullScore={verse.length ** difficulty / divideBy}
+            currentScore={userWords.length ** difficulty / (divideBy * (maxLives > 0 ? maxLives : 1))}
+            fullScore={verse.length ** difficulty / (divideBy * (maxLives > 0 ? maxLives : 1))}
           />
           <div className="flex flex-col items-center justify-start gap-4">
-            <div className="flex items-center justify-center gap-4">
+            <div className="flex items-center justify-center gap-4 flex-wrap w-full">
               <EasingFactorSelector {...{ divideBy, setDivideBy, verseLength: verse.length }} />
+              <div className="relative w-fit shrink-0">
+                <Input
+                  id="max-lives"
+                  type="number"
+                  className="text-right w-36"
+                  value={maxLives}
+                  max={verse.length}
+                  onChange={(e) => {
+                    const value = +e.target.value > 0 ? +e.target.value : 1;
+                    useLocalStorage.setState((state) => ({ ...state, maxLives: value }));
+                    setLives(value);
+                    userWords.length != 0 && reset();
+                  }}
+                  placeholder="Max Lives"
+                />
+                <Label
+                  className="absolute top-1/2 -translate-y-1/2 left-3 text-muted-foreground text-sm transition-all peer-placeholder-shown:top-3 peer-focus:top-2 peer-focus:text-xs"
+                  htmlFor="max-lives"
+                >
+                  Max Lives:
+                </Label>
+              </div>
               {/* show verse Btn */}
               <Button
                 variant={show ? "secondary" : "outline"}
@@ -100,7 +127,7 @@ export default function Start({
               <Button
                 variant={"outline"}
                 onClick={() => {
-                  reset();
+                  userWords.length !== 0 && reset();
                   verse_key &&
                     useOnlineStorage.getState().setARProgress(+verse_key?.split(":")[0], +verse_key?.split(":")[1] - 1);
                 }}
@@ -117,7 +144,7 @@ export default function Start({
                   setNextVerse();
                   setShow(false);
                   setUserWords([]);
-                  setLives(3);
+                  setLives(maxLives);
                   setDivideBy(1);
                 }}
               >
@@ -167,10 +194,27 @@ export default function Start({
                 <MotionDiv>
                   <Translations {...{ index: verse_key }}></Translations>
                 </MotionDiv>
-
+                <Input
+                  value={searchTerm}
+                  className="max-w-md"
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Type to search words..."
+                />
                 {/* divisions */}
                 {divisions.length ? (
                   divisions.map((division, i) => {
+                    const options = {
+                      includeScore: true,
+                      // Search in `author` and in `tags` array
+                      keys: ["text_imlaei", "transliteration.text"],
+                    };
+
+                    const fuse = new Fuse(division, options);
+
+                    const result = searchTerm
+                      ? fuse.search(searchTerm)
+                      : division.map((word) => ({ item: word, score: 1 }));
+
                     if (division.every((word) => userWords.map((w) => w.index).includes(word.index))) {
                       return <></>;
                     } else {
@@ -178,9 +222,12 @@ export default function Start({
                         <MotionDiv
                           key={"division-" + i}
                           dir="rtl"
-                          className="flex flex-wrap items-center justify-center w-full gap-2 p-4 shadow-xl border rounded-md"
+                          className={cn(
+                            "flex flex-wrap items-center justify-center w-full gap-2 p-4 shadow-xl border rounded-md ",
+                          )}
                         >
-                          {division.map((word) => {
+                          {result.map((FuseResult) => {
+                            const word = FuseResult.item;
                             const userWordIds = userWords.map((w) => w.index);
                             return (
                               <MotionDiv
@@ -244,7 +291,7 @@ export default function Start({
       </Dialog>{" "}
       {open && (
         <div className="flex items-center justify-center gap-2 fixed bottom-4 right-4 z-[999]">
-          {Array.from({ length: 3 - lives })
+          {Array.from({ length: maxLives - lives })
             .map((_, i) => i + 1)
             .reverse()
             .map((l) => (
@@ -275,7 +322,9 @@ export default function Start({
     );
 
     const won = userWords.length + 1 === verse.length;
-    const score = ((userWords.length + 1) ** difficulty - userWords.length ** difficulty) / divideBy;
+    const score =
+      ((userWords.length + 1) ** difficulty - userWords.length ** difficulty) /
+      (divideBy * (maxLives > 0 ? maxLives : 1));
 
     if (madeMistake) {
       setLives((prev) => prev - 1);
@@ -285,14 +334,14 @@ export default function Start({
         setRedIndex(undefined);
         if (lives - 1 === 0) {
           reset();
-          toast.error(`You made 3 mistakes in a row!!! game resets`, {});
-          setLives(3);
+          toast.error(`You lost all your lives`, {});
+          setLives(maxLives);
         }
       }, 500);
       wrongSoundEffect();
     } else {
       setUserWords((prev) => [...prev, word]);
-      setLives((prev) => (prev + 1 > 3 ? 3 : prev + 1));
+      setLives((prev) => (prev + 1 > maxLives ? maxLives : prev + 1));
       const ARScore = useOnlineStorage.getState().ARScore;
       const goal = useLocalStorage.getState().goal;
       if (won) {

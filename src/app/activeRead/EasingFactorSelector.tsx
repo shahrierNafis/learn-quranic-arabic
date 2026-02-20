@@ -21,7 +21,7 @@ export function EasingFactorSelector(params: {
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
-          <SelectLabel>easing factor</SelectLabel>
+          <SelectLabel>Easing Factor</SelectLabel>
           {validChunkSizes(params.verseLength)
             .sort((a, b) => a - b)
             .filter((divisor) => Math.floor(params.verseLength / divisor) > 1)
