@@ -52,13 +52,18 @@ export default function Start({
 
   const reset = useCallback(() => {
     setUserWords([]);
-    const chunkedArray = chunkArray(verse, Math.floor(verse.length / divideBy));
+    const chunkedArray = chunkArray(verse, +(verse.length / divideBy).toFixed(2));
     setDivisions(chunkedArray.map((chunk) => _.shuffle(chunk)));
   }, [divideBy, verse]);
 
   useEffect(() => {
     reset();
   }, [reset, verse]);
+
+  function redo() {
+    userWords.length !== 0 && reset();
+    verse_key && useOnlineStorage.getState().setARProgress(+verse_key?.split(":")[0], +verse_key?.split(":")[1] - 1);
+  }
 
   return (
     <>
@@ -91,7 +96,7 @@ export default function Start({
           />
           <div className="flex flex-col items-center justify-start gap-4">
             <div className="flex items-center justify-center gap-4 flex-wrap w-full">
-              <EasingFactorSelector {...{ divideBy, setDivideBy, verseLength: verse.length }} />
+              <EasingFactorSelector {...{ divideBy, setDivideBy, verseLength: verse.length, onValueChange: redo }} />
               <div className="relative w-fit shrink-0">
                 <Input
                   id="max-lives"
@@ -103,7 +108,7 @@ export default function Start({
                     const value = +e.target.value > 0 ? +e.target.value : 1;
                     useLocalStorage.setState((state) => ({ ...state, maxLives: value }));
                     setLives(value);
-                    userWords.length != 0 && reset();
+                    redo();
                   }}
                   placeholder="Max Lives"
                 />
@@ -124,14 +129,7 @@ export default function Start({
               >
                 Read/Listen Verse
               </Button>
-              <Button
-                variant={"outline"}
-                onClick={() => {
-                  userWords.length !== 0 && reset();
-                  verse_key &&
-                    useOnlineStorage.getState().setARProgress(+verse_key?.split(":")[0], +verse_key?.split(":")[1] - 1);
-                }}
-              >
+              <Button variant={"outline"} onClick={redo}>
                 Redo
               </Button>
               {/* Done Btn */}
@@ -232,6 +230,7 @@ export default function Start({
                             return (
                               <MotionDiv
                                 className={cn(
+                                  "border border-transparent rounded-md",
                                   userWordIds.includes(word.index) ? "border border-dashed rounded-md" : "",
                                 )}
                                 key={word.index}
@@ -240,7 +239,10 @@ export default function Start({
                                   style={{
                                     visibility: userWordIds.includes(word.index) ? "hidden" : "visible",
                                   }}
-                                  className={cn(" text-2xl md:text-3xl", `${redIndex === i && "ring ring-red-400"}`)}
+                                  className={cn(
+                                    " text-2xl md:text-3xl",
+                                    `${redIndex === i && "border border-input ring ring-red-400"}`,
+                                  )}
                                   variant={redIndex === i ? "destructive" : "outline"}
                                   size={"lg"}
                                   disabled={userWords.length == verse.length}

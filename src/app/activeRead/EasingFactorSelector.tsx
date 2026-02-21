@@ -13,9 +13,16 @@ export function EasingFactorSelector(params: {
   divideBy: number;
   setDivideBy: (n: number) => void;
   verseLength: number;
+  onValueChange?: (value?: number) => void;
 }) {
   return (
-    <Select onValueChange={(value) => params.setDivideBy(Number(value))}>
+    <Select
+      onValueChange={(value) => {
+        const numValue = Number(value);
+        params.setDivideBy(numValue);
+        params.onValueChange && params.onValueChange(numValue);
+      }}
+    >
       <SelectTrigger className="w-full max-w-48">
         <SelectValue placeholder={`easing factor: ${params.divideBy}`} />
       </SelectTrigger>

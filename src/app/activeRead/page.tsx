@@ -31,7 +31,7 @@ export default function Page() {
 
         const words: WORD[] = [];
         words.push(
-          ...(await getVerseWords(verse_key as `${string}:${string}`)).filter((word) => word.char_type_name == "word")
+          ...(await getVerseWords(verse_key as `${string}:${string}`)).filter((word) => word.char_type_name == "word"),
         );
         setVerse(words.filter((word) => word.char_type_name == "word"));
 
@@ -43,7 +43,7 @@ export default function Page() {
         }
       }
     },
-    [verse_key]
+    [verse_key],
   );
 
   const setNextVerse = useCallback(() => {
@@ -58,7 +58,7 @@ export default function Page() {
     })[0];
     nextChapter
       ? setVerse_key(
-          `${nextChapter}:${Math.trunc((ARProgress[nextChapter] % getChapterLength(nextChapter)) + 1)}` // set the next verse
+          `${nextChapter}:${Math.trunc((ARProgress[nextChapter] % getChapterLength(nextChapter)) + 1)}`, // set the next verse
         )
       : setVerse_key(null);
   }, [ARProgress, chapters]);
@@ -80,7 +80,7 @@ export default function Page() {
   return (
     <>
       <div className="h-screen auto-cols-[100%] grid grid-rows-3 justify-items-center content-center items-center ">
-        <Score currentScore={0} fullScore={verse.length ** 2} />
+        <Score currentScore={0} fullScore={verse.length ** 2 / useLocalStorage.getState().maxLives} />
         <div className="p-2 w-fit h-fit flex flex-col items-center justify-center gap-4 overflow-hidden">
           <div className="grid grid-cols-3 items-center content-center gap-2">
             {/* reload Btn */}
