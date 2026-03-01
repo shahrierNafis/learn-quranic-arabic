@@ -384,7 +384,7 @@ export default function Start({
 function chunkArray<T>(array: T[], chunkSize: number): T[][] {
   const chunkedArray = [];
   for (let i = 0; i < array.length; i += chunkSize) {
-    if (i + chunkSize > array.length) {
+    if (i + 1 > array.length) {
       chunkedArray[chunkedArray.length - 1].push(array[array.length - 1]);
       break;
     }

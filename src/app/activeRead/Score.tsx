@@ -112,16 +112,16 @@ export default function Score({
                 useLocalStorage.setState(() => ({
                   goal: Number(input),
                 }));
-                if (confirm("Change XP accordingly?")) {
-                  useOnlineStorage.setState((state) => {
-                    useLocalStorage.setState(() => ({
-                      lastScore: (state.ARScore / goal) * Number(input),
-                    }));
-                    return {
-                      ARScore: (state.ARScore / goal) * Number(input),
-                    };
-                  });
-                }
+                // if (confirm("Change XP accordingly?")) {
+                //   useOnlineStorage.setState((state) => {
+                //     useLocalStorage.setState(() => ({
+                //       lastScore: (state.ARScore / goal) * Number(input),
+                //     }));
+                //     return {
+                //       ARScore: (state.ARScore / goal) * Number(input),
+                //     };
+                //   });
+                // }
               }}
             >
               set Goal
