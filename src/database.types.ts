@@ -163,6 +163,12 @@ export type Database = {
           name: string | null
           words: string[]
         }[]
+        SetofOptions: {
+          from: "*"
+          to: "word_groups"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       get_word_groups: {
         Args: { collection_id: number }
@@ -173,6 +179,12 @@ export type Database = {
           name: string | null
           words: string[]
         }[]
+        SetofOptions: {
+          from: "*"
+          to: "word_groups"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
     }
     Enums: {

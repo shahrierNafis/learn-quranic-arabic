@@ -125,6 +125,8 @@ type PreferenceStore = {
   resetWordList: () => void;
   maximumInterval: number;
   setMaximumInterval: (maximumInterval: number) => void;
+
+  highlightedRoots: string[];
 };
 export const useOnlineStorage = createWithEqualityFn<PreferenceStore>()(
   persist(
@@ -253,6 +255,7 @@ export const useOnlineStorage = createWithEqualityFn<PreferenceStore>()(
         },
         maximumInterval: 365,
         setMaximumInterval: (maximumInterval: number) => set({ maximumInterval }),
+        highlightedRoots: [],
       };
     },
     {
@@ -260,8 +263,8 @@ export const useOnlineStorage = createWithEqualityFn<PreferenceStore>()(
       name: "preference-storage",
       storage: storage,
       // skipHydration: true,
-    }
-  )
+    },
+  ),
 );
 
 useOnlineStorage.persist.onHydrate(async () => {

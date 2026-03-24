@@ -6,6 +6,7 @@ import { useTheme } from "next-themes";
 import useFont from "@/utils/useFont";
 import WordInfo from "./WordInfo";
 import { buckwalterToArabic } from "@/utils/arabic-buckwalter-transliteration";
+import { cn } from "@/lib/utils";
 
 function Word({
   wordSegments,
@@ -22,7 +23,8 @@ function Word({
   pronounceOnClick?: boolean;
   asChild?: boolean;
 }) {
-  const [colours] = useOnlineStorage(useShallow((a) => [a.colours]));
+  const [colours, highlightedRoots] = useOnlineStorage(useShallow((a) => [a.colours, a.highlightedRoots]));
+
   const { systemTheme, theme } = useTheme();
   const [font] = useFont();
   return (
@@ -37,7 +39,15 @@ function Word({
           asChild,
         }}
       >
-        <div dir="rtl" className={font?.className}>
+        <div
+          dir="rtl"
+          className={cn(
+            font?.className,
+            "px-2 rounded",
+            wordSegments.some((s) => s.root && highlightedRoots.includes(s.root)) &&
+              "bg-green-100 dark:bg-green-900/30 rounded",
+          )}
+        >
           {wordSegments.map((segment, index) => (
             <div
               key={segment.position + ":" + index}
