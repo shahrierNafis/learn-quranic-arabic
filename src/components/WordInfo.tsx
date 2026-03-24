@@ -13,7 +13,7 @@ import { Volume2 } from "lucide-react";
 import { Button, buttonVariants } from "./ui/button";
 import { cn } from "@/lib/utils";
 import Word from "./Word";
-import { useSound } from "react-sounds";
+import useSound from "use-sound";
 
 export default function WordInfo({
   children,
@@ -38,8 +38,8 @@ export default function WordInfo({
 
   const [s, v, w] = word?.index.split(":") ?? ["112", "2", "1"];
 
-  const { play } = useSound(
-    "https://audio.qurancdn.com/" + `wbw/${s.padStart(3, "0")}_${v.padStart(3, "0")}_${w.padStart(3, "0")}.mp3`
+  const [play] = useSound(
+    "https://audio.qurancdn.com/" + `wbw/${s.padStart(3, "0")}_${v.padStart(3, "0")}_${w.padStart(3, "0")}.mp3`,
   );
 
   return (

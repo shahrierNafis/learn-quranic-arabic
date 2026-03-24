@@ -11,7 +11,7 @@ import getChapterLength from "./getChapterLength";
 import getVerseWords from "@/utils/getVerseWords";
 import Start from "./Start";
 import { toast } from "sonner";
-import { useSound } from "react-sounds";
+import useSound from "use-sound";
 export default function Page() {
   const [verse_key, setVerse_key] = useState<string | null>(null);
   const [verse, setVerse] = useState<WORD[]>([]); // the actual verse
@@ -20,7 +20,8 @@ export default function Page() {
   const ARProgress = useOnlineStorage((state) => state.ARProgress);
   const addARProgress = useOnlineStorage(useShallow((state) => state.addARProgress));
   const chapters = useLocalStorage((state) => state.chapters);
-  const correctSoundEffect = useSound("/audio/duolingo-correct.mp3").play;
+  const maxLives = useLocalStorage((state) => state.maxLives);
+  const correctSoundEffect = useSound("/audio/duolingo-correct.mp3")[0];
 
   const reload = useCallback(
     async (signal: AbortSignal) => {
@@ -80,7 +81,7 @@ export default function Page() {
   return (
     <>
       <div className="h-screen auto-cols-[100%] grid grid-rows-3 justify-items-center content-center items-center ">
-        <Score currentScore={0} fullScore={verse.length ** 2 / useLocalStorage.getState().maxLives} />
+        <Score currentScore={0} fullScore={verse.length ** 2 / maxLives} />
         <div className="p-2 w-fit h-fit flex flex-col items-center justify-center gap-4 overflow-hidden">
           <div className="grid grid-cols-3 items-center content-center gap-2">
             {/* reload Btn */}

@@ -1,6 +1,6 @@
 import MotionDiv from "@/components/MotionDiv";
 import { Button } from "@/components/ui/button";
-import React, { use, useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import Verse from "@/components/Verse";
 import { WORD } from "@/types/types";
@@ -15,7 +15,7 @@ import Word from "@/components/Word";
 import { Skeleton } from "@/components/ui/skeleton";
 import VerseInfo from "./VerseInfo";
 import { Heart, Loader } from "lucide-react";
-import { playSound, useSound } from "react-sounds";
+import useSound from "use-sound";
 import { useLocalStorage } from "@/stores/localStorage";
 import Score from "./Score";
 import { EasingFactorSelector } from "./EasingFactorSelector";
@@ -43,8 +43,8 @@ export default function Start({
   const [open, setOpen] = useState(false);
   const maxLives = useLocalStorage((state) => state.maxLives);
   const [lives, setLives] = useState(maxLives);
-  const correctSoundEffect = useSound("/audio/duolingo-correct.mp3").play;
-  const wrongSoundEffect = useSound("/audio/duolingo-wrong.mp3").play;
+  const correctSoundEffect = useSound("/audio/duolingo-correct.mp3")[0];
+  const wrongSoundEffect = useSound("/audio/duolingo-wrong.mp3")[0];
   const [divideBy, setDivideBy] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -365,9 +365,9 @@ export default function Start({
       // add score
       useOnlineStorage.getState().addARScore(score);
       const [s, v, w] = word.index.split(":");
-      playSound(
+      new Audio(
         "https://audio.qurancdn.com/" + `wbw/${s.padStart(3, "0")}_${v.padStart(3, "0")}_${w.padStart(3, "0")}.mp3`,
-      );
+      ).play();
     }
   }
 
