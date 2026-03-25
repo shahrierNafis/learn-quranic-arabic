@@ -346,9 +346,10 @@ export default function Start({
       setLives((prev) => (prev + 1 > maxLives ? maxLives : prev + 1));
       const ARScore = useOnlineStorage.getState().ARScore;
       const goal = useLocalStorage.getState().goal;
+      const relativeScore = ARScore - useLocalStorage.getState().lastScore + score;
       if (won) {
         setHold(true);
-        toast.success(`You earned ${ARScore - useLocalStorage.getState().lastScore + score} points!`, {});
+        toast.success(`You earned ${Math.round(relativeScore * 100) / 100} points!`, {});
         correctSoundEffect();
         // add ARProgress if not in practice mode
         difficulty !== 1 &&
@@ -359,7 +360,7 @@ export default function Start({
       if (leveledUpped) {
         correctSoundEffect();
         toast.success(`Level Up!`, { position: "top-center" });
-        toast.success(ARScore - useLocalStorage.getState().lastScore + score + " XP");
+        toast.success(`${Math.round(relativeScore * 100) / 100} XP`);
       }
       if (won || leveledUpped) useLocalStorage.setState(() => ({ lastScore: ARScore + score }));
       // add score

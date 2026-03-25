@@ -104,7 +104,8 @@ export default function Page() {
               variant={"outline"}
               onClick={() => {
                 const ARScore = useOnlineStorage.getState().ARScore;
-                toast.success(`You earned ${ARScore - useLocalStorage.getState().lastScore} points!`, {});
+                const relativeScore = ARScore - useLocalStorage.getState().lastScore;
+                toast.success(`You earned ${Math.round(relativeScore * 100) / 100} points!`, {});
                 correctSoundEffect();
                 useLocalStorage.setState(() => ({ lastScore: ARScore }));
                 verse_key &&
