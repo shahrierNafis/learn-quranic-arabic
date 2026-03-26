@@ -15,6 +15,7 @@ import { motion } from "framer-motion";
 import SelectChapters from "./SelectChapters";
 import AnimationLoop from "./AnimationLoop";
 import { useLocalStorage } from "@/stores/localStorage";
+import { cn } from "@/lib/utils";
 
 export default function Score({
   noButtons,
@@ -48,9 +49,18 @@ export default function Score({
     <Dialog open={open} onOpenChange={(o) => !o && setOpen(o) /* only closes*/}>
       <DialogTrigger className="flex flex-col items-center justify-center w-full px-8 self-start my-8 md:m-0">
         <div onClick={() => setOpen(true)} className="relative w-full text-center font-mono text-sm [&>*]:inline">
-          <div> Goal {Math.round(lastScore % goal)}</div>
+          Goal{" "}
+          <div className={cn(blue || gold ? "text-gray-500" : "font-bold")}>
+            {Math.round((lastScore % goal) * 100) / 100}
+          </div>
           <div className="text-blue-500">{Math.round(blue) > 0 ? "+" + Math.round(blue * 100) / 100 : ""}</div>
-          <div className="text-yellow-600">{gold ? "+" + Math.round(gold * 100) / 100 : ""}</div> <div>/{goal} XP </div>
+          <div className="text-yellow-600">{gold ? "+" + Math.round(gold * 100) / 100 : ""}</div>
+          {blue || gold ? (
+            <div className="font-bold">={Math.round(((lastScore % goal) + blue + gold) * 100) / 100}</div>
+          ) : (
+            ""
+          )}
+          <div>/{goal} XP </div>
           Remaining: <div className="text-green-500">{Math.max(0, Math.round(fullScore - currentScore))}</div>
           <div> XP</div>
         </div>
