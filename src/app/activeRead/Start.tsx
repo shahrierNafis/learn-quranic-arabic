@@ -1,13 +1,13 @@
 import MotionDiv from "@/components/MotionDiv";
-import { Button } from "@/components/ui/button";
-import React, { useCallback, useEffect, useState } from "react";
+import { Button, buttonVariants } from "@/components/ui/button";
+import React, { use, useCallback, useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import Verse from "@/components/Verse";
 import { WORD } from "@/types/types";
 import { toast } from "sonner";
 import { useOnlineStorage } from "@/stores/onlineStorage";
 import useVerseAudio from "@/components/useVerseAudio";
-import _ from "lodash";
+import _, { set } from "lodash";
 import { cn } from "@/utils/cn";
 import { motion } from "framer-motion";
 import Translations from "@/components/Translations";
@@ -18,23 +18,24 @@ import { Heart, Loader } from "lucide-react";
 import useSound from "use-sound";
 import { useLocalStorage } from "@/stores/localStorage";
 import Score from "./Score";
-import { EasingFactorSelector } from "./EasingFactorSelector";
+import { EasingFactorSelector, validChunkSizes } from "./EasingFactorSelector";
 import { Input } from "@/components/ui/input";
 import Fuse from "fuse.js";
 import { Label } from "@/components/ui/label";
+import { useShallow } from "zustand/react/shallow";
+import roundToTwo from "@/utils/roundToTwo";
+import { de } from "date-fns/locale";
 
 export default function Start({
   verse,
   verse_key,
   setNextVerse,
   setHold,
-  difficulty = 2,
 }: {
   verse: WORD[];
   verse_key: string | null | undefined;
   setNextVerse: () => void;
   setHold: React.Dispatch<React.SetStateAction<boolean>>;
-  difficulty: number;
 }) {
   const [redIndex, setRedIndex] = useState<number>();
   const [show, setShow] = useState(false);
@@ -47,9 +48,14 @@ export default function Start({
   const wrongSoundEffect = useSound("/audio/duolingo-wrong.mp3")[0];
   const [divideBy, setDivideBy] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-
+  const [ARProgress] = useOnlineStorage(useShallow((state) => [state.ARProgress]));
   const { openedVerse, setOpenedVerse } = useVerseAudio();
 
+  const verseCompleted: boolean = !!(verse_key && ARProgress[+verse_key?.split(":")[0]] === +verse_key?.split(":")[1]);
+
+  if (verse_key && ARProgress[+verse_key?.split(":")[0]] !== +verse_key?.split(":")[1] - 1) {
+    useLocalStorage.setState(() => ({ currentVerseScore: 0 })); // clear current verse score if wrong verse is loaded
+  }
   const reset = useCallback(() => {
     setUserWords([]);
     const chunkedArray = chunkArray(verse, +(verse.length / divideBy).toFixed(2));
@@ -76,23 +82,33 @@ export default function Start({
         }}
       >
         <DialogTrigger disabled={verse.length === 0} className="w-full">
-          <Button
+          <button
             disabled={verse.length === 0}
-            size={"lg"}
-            variant="outline"
             onClick={() => {
               setShow(false);
             }}
-            className="font-black text-base md:text-2xl w-full"
+            className={cn(
+              "font-black text-base md:text-2xl w-full flex flex-col p-4 rounded-full aspect-square align-middle items-center justify-center shadow-md  border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+            )}
           >
-            {difficulty === 1 ? `Practice:` : `Start:`}
-            {verse.length === 0 ? <Loader className="animate-spin" /> : ` ${verse.length ** difficulty}XP`}
-          </Button>
+            <div> {useLocalStorage.getState().currentVerseScore === 0 ? "Start" : "Continue"}:</div>
+            <div>
+              {" "}
+              {verse.length === 0 ? (
+                <Loader className="animate-spin" />
+              ) : useLocalStorage.getState().currentVerseScore === 0 ? (
+                ` ${roundToTwo(verse.length ** 2)}XP`
+              ) : (
+                <>{roundToTwo((useLocalStorage.getState().currentVerseScore / verse.length ** 2) * 100)}%</>
+              )}
+            </div>
+          </button>
         </DialogTrigger>
         <DialogContent className="w-full max-w-full h-screen overflow-y-auto pt-0 grid-rows-[auto_1fr] auto-cols-[100%] ">
           <Score
-            currentScore={userWords.length ** difficulty / (divideBy * (maxLives > 0 ? maxLives : 1))}
-            fullScore={verse.length ** difficulty / (divideBy * (maxLives > 0 ? maxLives : 1))}
+            currentScore={userWords.length ** 2 / (divideBy * (maxLives > 0 ? maxLives : 1))}
+            verseLength={verse.length}
+            divideBy={divideBy}
           />
           <div className="flex flex-col items-center justify-start gap-4">
             <div className="flex items-center justify-center gap-4 flex-wrap w-full">
@@ -129,24 +145,42 @@ export default function Start({
               >
                 Read/Listen Verse
               </Button>
-              <Button variant={"outline"} onClick={redo}>
-                Redo
+              <Button className={cn(verseCompleted ? "hidden" : "")} variant={"outline"} onClick={redo}>
+                {"Redo"}
+              </Button>
+              <Button
+                variant={"outline"}
+                onClick={() => {
+                  if (confirm("are you sure you want to reset your progress for this verse?")) {
+                    redo();
+                    useLocalStorage.setState(() => ({ currentVerseScore: 0 }));
+                  }
+                }}
+              >
+                {verseCompleted ? (
+                  "Redo"
+                ) : (
+                  <>
+                    Reset Score {roundToTwo(useLocalStorage.getState().currentVerseScore)}/{verse.length ** 2}
+                  </>
+                )}
               </Button>
               {/* Done Btn */}
               <Button
                 variant={"outline"}
-                disabled={verse.length !== userWords.length}
+                disabled={!verseCompleted}
                 onClick={() => {
                   setHold(false);
-                  setOpen(false);
+                  setOpen(true);
                   setNextVerse();
                   setShow(false);
                   setUserWords([]);
                   setLives(maxLives);
                   setDivideBy(1);
+                  useLocalStorage.setState(() => ({ currentVerseScore: 0 }));
                 }}
               >
-                Done
+                Next
               </Button>
             </div>
             {/* verse */}
@@ -154,7 +188,7 @@ export default function Start({
               <>no surah is selected</>
             ) : (
               <>
-                {(show || difficulty === 1) && verse && (
+                {show && verse && (
                   <>
                     <motion.div
                       transition={{ duration: 0.25 }}
@@ -324,9 +358,7 @@ export default function Start({
     );
 
     const won = userWords.length + 1 === verse.length;
-    const score =
-      ((userWords.length + 1) ** difficulty - userWords.length ** difficulty) /
-      (divideBy * (maxLives > 0 ? maxLives : 1));
+    const score = ((userWords.length + 1) ** 2 - userWords.length ** 2) / (divideBy * (maxLives > 0 ? maxLives : 1));
 
     if (madeMistake) {
       setLives((prev) => prev - 1);
@@ -346,25 +378,40 @@ export default function Start({
       setLives((prev) => (prev + 1 > maxLives ? maxLives : prev + 1));
       const ARScore = useOnlineStorage.getState().ARScore;
       const goal = useLocalStorage.getState().goal;
-      const relativeScore = ARScore - useLocalStorage.getState().lastScore + score;
       if (won) {
         setHold(true);
-        toast.success(`You earned ${Math.round(relativeScore * 100) / 100} points!`, {});
-        correctSoundEffect();
-        // add ARProgress if not in practice mode
-        difficulty !== 1 &&
-          verse_key &&
-          useOnlineStorage.getState().setARProgress(+verse_key?.split(":")[0], +verse_key?.split(":")[1]);
+        toast.success(`You earned ${roundToTwo(score)} points!`, {});
       }
       const leveledUpped = (ARScore % goal) + score >= goal;
       if (leveledUpped) {
-        correctSoundEffect();
         toast.success(`Level Up!`, { position: "top-center" });
-        toast.success(`${Math.round(relativeScore * 100) / 100} XP`);
       }
-      if (won || leveledUpped) useLocalStorage.setState(() => ({ lastScore: ARScore + score }));
       // add score
       useOnlineStorage.getState().addARScore(score);
+      const currentVerseScore = useLocalStorage.getState().currentVerseScore;
+      useLocalStorage.setState(() => ({ currentVerseScore: currentVerseScore + score }));
+      const verseNowCompletes = currentVerseScore + score >= verse.length ** 2;
+      if (verseNowCompletes) {
+        verse_key && useOnlineStorage.getState().setARProgress(+verse_key?.split(":")[0], +verse_key?.split(":")[1]);
+        toast.success(`verse completed!`, { position: "bottom-right" });
+      } else if (won && !verseCompleted) {
+        toast.message(`Increasing difficulty !!!`, { position: "top-left" });
+
+        if (divideBy === 1) {
+          useLocalStorage.setState((state) => ({ maxLives: state.maxLives > 1 ? state.maxLives - 1 : 1 }));
+        } else {
+          const lessenedEasingFactors =
+            validChunkSizes(verse.length)
+              .filter((divisor) => Math.floor(verse.length / divisor) > 1)
+              .filter((divisor) => divisor < divideBy)
+              .sort((a, b) => b - a)[0] ?? 1;
+          setDivideBy(lessenedEasingFactors);
+        }
+        redo();
+      }
+      if (won || leveledUpped || verseNowCompletes) {
+        correctSoundEffect();
+      }
       const [s, v, w] = word.index.split(":");
       new Audio(
         "https://audio.qurancdn.com/" + `wbw/${s.padStart(3, "0")}_${v.padStart(3, "0")}_${w.padStart(3, "0")}.mp3`,
@@ -376,8 +423,7 @@ export default function Start({
     if (
       userWords.length !== verse.length && // if verse is not complete
       userWords.length && // if userWords is not empty
-      openedVerse !== verse_key && // if audio is not playing
-      difficulty !== 1 // if not in practice mode
+      openedVerse !== verse_key // if audio is not playing
     )
       reset();
   }

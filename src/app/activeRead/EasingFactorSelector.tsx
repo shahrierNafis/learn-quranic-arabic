@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import roundToTwo from "@/utils/roundToTwo";
 
 export function EasingFactorSelector(params: {
   divideBy: number;
@@ -22,6 +23,7 @@ export function EasingFactorSelector(params: {
         params.setDivideBy(numValue);
         params.onValueChange && params.onValueChange(numValue);
       }}
+      value={params.divideBy.toString()}
     >
       <SelectTrigger className="w-full max-w-48">
         <SelectValue placeholder={`easing factor: ${params.divideBy}`} />
@@ -34,7 +36,7 @@ export function EasingFactorSelector(params: {
             .filter((divisor) => Math.floor(params.verseLength / divisor) > 1)
             .map((divisor) => (
               <SelectItem key={divisor} value={divisor.toString()}>
-                {Math.round(divisor * 100) / 100}
+                {roundToTwo(divisor)}
               </SelectItem>
             ))}
         </SelectGroup>
@@ -43,7 +45,7 @@ export function EasingFactorSelector(params: {
   );
 }
 
-function validChunkSizes(n: number): number[] {
+export function validChunkSizes(n: number): number[] {
   const sizes: number[] = [];
 
   for (let k = 1; k <= n; k++) {

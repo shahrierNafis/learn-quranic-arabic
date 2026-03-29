@@ -12,6 +12,7 @@ import getVerseWords from "@/utils/getVerseWords";
 import Start from "./Start";
 import { toast } from "sonner";
 import useSound from "use-sound";
+import roundToTwo from "@/utils/roundToTwo";
 export default function Page() {
   const [verse_key, setVerse_key] = useState<string | null>(null);
   const [verse, setVerse] = useState<WORD[]>([]); // the actual verse
@@ -81,7 +82,7 @@ export default function Page() {
   return (
     <>
       <div className="h-screen auto-cols-[100%] grid grid-rows-3 justify-items-center content-center items-center ">
-        <Score currentScore={0} fullScore={verse.length ** 2 / maxLives} />
+        <Score currentScore={0} verseLength={verse.length} divideBy={1} />
         <div className="p-2 w-fit h-fit flex flex-col items-center justify-center gap-4 overflow-hidden">
           <div className="grid grid-cols-3 items-center content-center gap-2">
             {/* reload Btn */}
@@ -97,17 +98,15 @@ export default function Page() {
               reload
             </Button>
             <div className="flex flex-col items-center justify-center gap-2">
-              <Start {...{ verse, verse_key, setNextVerse, setHold, difficulty: 1 }} />
-              <Start {...{ verse, verse_key, setNextVerse, setHold, difficulty: 2 }} />
+              <Start {...{ verse, verse_key, setNextVerse, setHold }} />
             </div>
             <Button
               variant={"outline"}
               onClick={() => {
                 const ARScore = useOnlineStorage.getState().ARScore;
-                const relativeScore = ARScore - useLocalStorage.getState().lastScore;
-                toast.success(`You earned ${Math.round(relativeScore * 100) / 100} points!`, {});
+                toast.success(`You earned ${roundToTwo(useLocalStorage.getState().currentVerseScore)} points!`, {});
                 correctSoundEffect();
-                useLocalStorage.setState(() => ({ lastScore: ARScore }));
+                useLocalStorage.setState(() => ({ currentVerseScore: 0 }));
                 verse_key &&
                   confirm("are you sure you want to skip this verse?") &&
                   addARProgress(+verse_key?.split(":")[0], 1);

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { use, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -16,27 +16,26 @@ import SelectChapters from "./SelectChapters";
 import AnimationLoop from "./AnimationLoop";
 import { useLocalStorage } from "@/stores/localStorage";
 import { cn } from "@/lib/utils";
+import roundToTwo from "@/utils/roundToTwo";
 
 export default function Score({
   noButtons,
   currentScore,
-  fullScore,
+  verseLength,
+  divideBy = 1,
 }: {
   noButtons?: boolean;
   currentScore: number;
-  fullScore: number;
+  verseLength: number;
+  divideBy: number;
 }) {
   const [score, setScore] = useOnlineStorage(useShallow((state) => [state.ARScore, state.setARScore]));
-  const [goal] = useLocalStorage(useShallow((state) => [state.goal, state.lastScore]));
-  if (useLocalStorage.getState().lastScore == 0 && typeof window !== "undefined") {
-    useLocalStorage.setState(() => ({
-      lastScore: score,
-    }));
-  }
+  const [goal] = useLocalStorage(useShallow((state) => [state.goal]));
+
+  const fullScore = verseLength ** 2 / (useLocalStorage.getState().maxLives * divideBy);
   const won = currentScore == fullScore;
   currentScore = !won ? currentScore : 0;
-  const lastScore = useLocalStorage.getState().lastScore;
-  const blue = Math.max(0, score - lastScore - currentScore);
+  const blue = Math.max(0, useLocalStorage.getState().currentVerseScore - currentScore);
   const percentageBlue = Math.min(100, (Math.round(blue) / goal) * 100);
   const darkGreen = (score - currentScore - blue) % goal;
   const LevelUpped = darkGreen + currentScore >= goal;
@@ -51,15 +50,11 @@ export default function Score({
         <div onClick={() => setOpen(true)} className="relative w-full text-center font-mono text-sm [&>*]:inline">
           Goal{" "}
           <div className={cn(blue || gold ? "text-gray-500" : "font-bold")}>
-            {Math.round((lastScore % goal) * 100) / 100}
+            {roundToTwo((score % goal) - useLocalStorage.getState().currentVerseScore)}
           </div>
-          <div className="text-blue-500">{Math.round(blue) > 0 ? "+" + Math.round(blue * 100) / 100 : ""}</div>
-          <div className="text-yellow-600">{gold ? "+" + Math.round(gold * 100) / 100 : ""}</div>
-          {blue || gold ? (
-            <div className="font-bold">={Math.round(((lastScore % goal) + blue + gold) * 100) / 100}</div>
-          ) : (
-            ""
-          )}
+          <div className="text-blue-500">{roundToTwo(blue) > 0 ? "+" + roundToTwo(blue) : ""}</div>
+          <div className="text-yellow-600">{gold ? "+" + roundToTwo(gold) : ""}</div>
+          {blue || gold ? <div className="font-bold">={roundToTwo(score % goal)}</div> : ""}
           <div>/{goal} XP </div>
           Remaining: <div className="text-green-500">{Math.max(0, Math.round(fullScore - currentScore))}</div>
           <div> XP</div>
@@ -154,7 +149,7 @@ export default function Score({
               if (input === null) return;
               setScore(Number(input));
               useLocalStorage.setState(() => ({
-                lastScore: 0,
+                currentVerseScore: 0,
               }));
             }}
           >
