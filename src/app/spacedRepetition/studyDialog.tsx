@@ -113,7 +113,7 @@ export default function StudyDialog() {
         <DialogTrigger className="w-fit">
           <Button className="bg-blue-500 hover:bg-blue-600 rounded-full text-white">Study Now</Button>
         </DialogTrigger>
-        <DialogContent className="flex flex-col max-w-full w-full h-[100vh]">
+        <DialogContent className="flex flex-col max-w-full w-full h-screen">
           {/* header */}
           <div className="flex flex-col h-full w-full items-center justify-center gap-8 text-2xl md:text-3xl">
             {word ? (

@@ -21,7 +21,7 @@ function ScrollDown() {
   }, []);
   return (
     <div
-      className="w-8 h-8 fixed bottom-4 left-1/2 md:hidden ml-[-1rem] text-black dark:text-white"
+      className="w-8 h-8 fixed bottom-4 left-1/2 md:hidden -ml-4 text-black dark:text-white"
       onClick={() => scrollBy({ top: innerHeight, behavior: "smooth" })}
     >
       <AnimatePresence mode="wait" initial={true}>

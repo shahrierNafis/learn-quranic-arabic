@@ -40,7 +40,7 @@ export default function SetProgress({
         Set Progress of selected rows:
         <div className="w-full flex flex-col gap-8 items-center">
           <Slider
-            className="w-[75%] sm:w-[45%] flex-shrink-0 border-primary"
+            className="w-[75%] sm:w-[45%] shrink-0 border-primary"
             onValueChange={setRange}
             value={range}
             max={100}

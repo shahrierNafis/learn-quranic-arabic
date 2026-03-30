@@ -55,7 +55,7 @@ export const columns: ColumnDef<TableData>[] = [
                 </div>
               </>
             ) : (
-              <div className="h-[2.25rem] opacity-50 text-sm">loading...</div>
+              <div className="h-9 opacity-50 text-sm">loading...</div>
             )}
             {options
               ? options.map((op) => (

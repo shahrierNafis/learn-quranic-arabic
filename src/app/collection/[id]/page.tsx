@@ -74,7 +74,7 @@ export default function Page(props: { params: Promise<{ id: string }> }) {
     <>
       {wordGroups && name ? (
         <>
-          <div className="max-w-screen-md mx-auto">
+          <div className="max-w-(--breakpoint-md) mx-auto">
             <div className="text-3xl flex items-center justify-center">
               {name}
             </div>

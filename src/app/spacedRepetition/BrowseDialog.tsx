@@ -15,7 +15,7 @@ export default function BrowseDialog() {
             Browse
           </Button>
         </DialogTrigger>
-        <DialogContent className="w-full max-w-full h-[100vh] overflow-y-auto overflow-x-auto">
+        <DialogContent className="w-full max-w-full h-screen overflow-y-auto overflow-x-auto">
           <DataTable columns={columns} data={Object.entries(wordList).map(([lemma, word]) => ({ card: word.card, index: word.index, isSuspended: word.isSuspended, lemma }))} />
         </DialogContent>
       </Dialog>
@@ -29,7 +29,7 @@ export default function BrowseDialog() {
   //           Browse
   //         </Button>
   //       </DialogTrigger>
-  //       <DialogContent className="w-full max-w-full h-[100vh] overflow-y-auto overflow-x-auto">
+  //       <DialogContent className="w-full max-w-full h-screen overflow-y-auto overflow-x-auto">
   //         {Object.entries(visibleWordList).map(([lemma, word]) => {
   //           const schedulingCards = preconfiguredFsrs.repeat(word.card, word.card.due);
 

@@ -25,7 +25,7 @@ export default function ChangeFont() {
     <>
       <Dialog>
         <DialogTrigger className="flex">
-          <Button variant={"outline"} className="flex-grow">
+          <Button variant={"outline"} className="grow">
             Change Font
           </Button>
         </DialogTrigger>

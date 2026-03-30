@@ -30,7 +30,7 @@ export default function SelectChapters() {
     <div className="flex flex-col w-full overflow-y-auto">
       <div className="flex items-center w-full gap-2 p-2">
         <Checkbox
-          className="flex-grow-0"
+          className="grow-0"
           checked={chapters.length === 114}
           onCheckedChange={() => {
             if (chapters.length === 114) {
@@ -40,9 +40,9 @@ export default function SelectChapters() {
             }
           }}
         />{" "}
-        <div className="relative flex items-center flex-grow ">
+        <div className="relative flex items-center grow ">
           <div
-            className="absolute z-0 h-full rounded-md bg-gradient-to-r from-zinc-50 to-zinc-300"
+            className="absolute z-0 h-full rounded-md bg-linear-to-r from-zinc-50 to-zinc-300"
             style={{
               width: `${totalPercentage}%`,
             }}
@@ -63,7 +63,7 @@ export default function SelectChapters() {
         <>
           <div className="flex items-center w-full gap-2 p-2">
             <Checkbox
-              className="flex-grow-0"
+              className="grow-0"
               checked={chapters.includes(chapter)}
               onCheckedChange={(checked) => {
                 if (checked) {
@@ -73,9 +73,9 @@ export default function SelectChapters() {
                 }
               }}
             />
-            <div className="relative flex items-center flex-grow ">
+            <div className="relative flex items-center grow ">
               <div
-                className="absolute z-0 h-full rounded-md bg-gradient-to-r from-zinc-50 to-zinc-300"
+                className="absolute z-0 h-full rounded-md bg-linear-to-r from-zinc-50 to-zinc-300"
                 style={{
                   width: `${getPretendProgressPercentage(chapter)}%`,
                 }}

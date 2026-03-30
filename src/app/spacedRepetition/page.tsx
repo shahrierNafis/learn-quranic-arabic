@@ -14,7 +14,7 @@ export default function Page() {
   const [maximumInterval, setMaximumInterval] = useOnlineStorage(useShallow((a) => [a.maximumInterval, a.setMaximumInterval]));
   const { newWords, learning, review, relearning, studiedToday } = getCount(wordList);
   return (
-    <div className="w-full flex justify-center gap-32 sm:gap-4 items-center my-auto h-[100vh]  sm:flex-row flex-col ">
+    <div className="w-full flex justify-center gap-32 sm:gap-4 items-center my-auto h-screen  sm:flex-row flex-col ">
       <div className="grid grid-cols-2 justify-items-start gap-2 sm:border-0 border">
         <div>New:</div> <div className="text-blue-500 font-bold">{newWords}</div>
         <div>Learning:</div> <div className="text-red-500 font-bold">{learning}</div>

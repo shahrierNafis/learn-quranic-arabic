@@ -69,7 +69,7 @@ export default function RoundProgress({
             Set Progress of selected rows:
             <div className="w-full flex flex-col m-4 gap-8 items-center">
               <Slider
-                className="w-[75%] sm:w-full flex-shrink-0 border-primary"
+                className="w-[75%] sm:w-full shrink-0 border-primary"
                 onValueChange={setRange}
                 value={range}
                 max={100}

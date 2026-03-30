@@ -18,7 +18,7 @@ export default function AdDialog() {
         <DialogTrigger>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <span className="absolute bg-gradient-to-r from-purple-500 to-yellow-500 bg-clip-text text-transparent font-bold animate-pulse bg-[length:200%_auto]">
+              <span className="absolute bg-linear-to-r from-purple-500 to-yellow-500 bg-clip-text text-transparent font-bold animate-pulse bg-size-[200%_auto]">
                 Ad
               </span>
             </SidebarMenuButton>

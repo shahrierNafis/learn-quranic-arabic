@@ -110,7 +110,7 @@ export default function AnimationLoop() {
         <div className="w-full h-full flex flex-col gap-4 items-center justify-center p-2 overflow-hidden">
           <div>DEMO</div>
           <div className="relative w-full text-center font-mono text-sm">XP {xp} / 1500</div>
-          <div className="w-full h-[1rem] rounded-full bg-zinc-200 relative">
+          <div className="w-full h-4 rounded-full bg-zinc-200 relative">
             <motion.div
               className={cn("h-full rounded-full bg-green-200 flex items-center justify-center")}
               initial={{ width: parentage + "%" }}

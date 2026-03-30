@@ -24,7 +24,7 @@ import Fuse from "fuse.js";
 import { Label } from "@/components/ui/label";
 import { useShallow } from "zustand/react/shallow";
 import roundToTwo from "@/utils/roundToTwo";
-import { de } from "date-fns/locale";
+import { CircularProgressButton } from "./CircularProgressButton";
 
 export default function Start({
   verse,
@@ -82,7 +82,8 @@ export default function Start({
         }}
       >
         <DialogTrigger disabled={verse.length === 0} className="w-full">
-          <button
+          <CircularProgressButton
+            progress={(useLocalStorage.getState().currentVerseScore / verse.length ** 2) * 100}
             disabled={verse.length === 0}
             onClick={() => {
               setShow(false);
@@ -102,7 +103,7 @@ export default function Start({
                 <>{roundToTwo((useLocalStorage.getState().currentVerseScore / verse.length ** 2) * 100)}%</>
               )}
             </div>
-          </button>
+          </CircularProgressButton>
         </DialogTrigger>
         <DialogContent className="w-full max-w-full h-screen overflow-y-auto pt-0 grid-rows-[auto_1fr] auto-cols-[100%] ">
           <Score

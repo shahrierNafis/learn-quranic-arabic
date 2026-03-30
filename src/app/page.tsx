@@ -66,7 +66,7 @@ export default function Home() {
                     </div>
                     <div></div> */}
                     <Link
-                      className="mx-auto animate-background-move block rounded-md bg-gradient-to-r from-green-300 via-white to-green-500 bg-[length:_400%_400%] p-px [animation-duration:_3s] w-full"
+                      className="mx-auto animate-background-move block rounded-md bg-linear-to-r from-green-300 via-white to-green-500 bg-size-[400%_400%] p-px [animation-duration:3s] w-full"
                       href={"/activeRead"}
                     >
                       <Button className=" w-full" variant={"outline"}>

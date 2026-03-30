@@ -37,10 +37,10 @@ export default function Collection({
 
   return (
     <>
-      <div className="flex items-center min-w-screen max-w-screen-lg mx-auto">
+      <div className="flex items-center min-w-screen max-w-(--breakpoint-lg) mx-auto">
         <div className="text-3xl hidden md:block">‣</div>
-        <div className="p-2 flex m-2 border border-input bg-background justify-around flex-grow">
-          <div className="max-w-screen-md">
+        <div className="p-2 flex m-2 border border-input bg-background justify-around grow">
+          <div className="max-w-(--breakpoint-md)">
             <h1 className="text-2xl">{collection.name}</h1>
             <p className="">{collection.description}</p>
           </div>

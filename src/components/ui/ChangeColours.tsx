@@ -22,7 +22,7 @@ export default function ChangeColours() {
     <>
       <Dialog>
         <DialogTrigger className="flex">
-          <Button variant={"outline"} className="flex-grow">
+          <Button variant={"outline"} className="grow">
             Change Colours
           </Button>
         </DialogTrigger>

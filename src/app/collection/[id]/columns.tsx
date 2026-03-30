@@ -110,7 +110,7 @@ export const columns: ColumnDef<TableData>[] = [
                     </div>
                   </>
                 ) : (
-                  <div className="h-[2.25rem] opacity-50 text-sm">
+                  <div className="h-9 opacity-50 text-sm">
                     loading...
                   </div>
                 )}

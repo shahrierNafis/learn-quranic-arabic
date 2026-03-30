@@ -49,7 +49,7 @@ export function DataTable<TValue>({ columns, data }: DataTableProps<TValue>) {
   });
   return (
     <>
-      <div className="rounded-md border flex-shrink-0">
+      <div className="rounded-md border shrink-0">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
