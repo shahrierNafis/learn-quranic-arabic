@@ -381,7 +381,10 @@ export default function Start({
       const goal = useLocalStorage.getState().goal;
       if (won) {
         setHold(true);
-        toast.success(`You earned ${roundToTwo(score)} points!`, {});
+        toast.success(
+          `You earned ${roundToTwo((userWords.length + 1) ** 2 / (divideBy * (maxLives > 0 ? maxLives : 1)))} points!`,
+          {},
+        );
       }
       const leveledUpped = (ARScore % goal) + score >= goal;
       if (leveledUpped) {
@@ -394,7 +397,7 @@ export default function Start({
       const verseNowCompletes = currentVerseScore + score >= verse.length ** 2;
       if (verseNowCompletes) {
         verse_key && useOnlineStorage.getState().setARProgress(+verse_key?.split(":")[0], +verse_key?.split(":")[1]);
-        toast.success(`verse completed!`, { position: "bottom-right" });
+        toast.success(`verse mastered!`, { position: "bottom-right" });
       } else if (won && !verseCompleted) {
         toast.message(`Increasing difficulty !!!`, { position: "top-left" });
 
