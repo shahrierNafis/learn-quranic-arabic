@@ -16,7 +16,7 @@ import Preference from "./Preference";
 import ReadQuranBtn from "./ReadQuranBtn";
 import Link from "@/components/ui/Link";
 import { usePathname } from "next/navigation";
-import AdDialog from "@/components/Ad/AdDialog";
+import AD from "@/app/AD";
 
 // Menu items.
 const items = [
@@ -58,7 +58,7 @@ export function AppSidebar() {
               ))}{" "}
               <Preference />
               <ReadQuranBtn />
-              <AdDialog />
+              <AD />
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
