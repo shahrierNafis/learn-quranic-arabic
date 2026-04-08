@@ -132,7 +132,7 @@ export const useOnlineStorage = createWithEqualityFn<PreferenceStore>()(
   persist(
     (set) => {
       return {
-        translation_ids: ["20"],
+        translation_ids: ["149"],
         setTranslation_ids: (translation_ids: string[]) => set({ translation_ids }),
         showTranslation: false,
         setShowTranslation: (showTranslation: boolean) => set({ showTranslation }),
