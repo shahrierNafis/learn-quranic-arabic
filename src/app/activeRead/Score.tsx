@@ -31,26 +31,35 @@ export default function Score({
 }) {
   const [score, setScore] = useOnlineStorage(useShallow((state) => [state.ARScore, state.setARScore]));
   const [goal] = useLocalStorage(useShallow((state) => [state.goal]));
-
+  const [currentVerseScore] = useLocalStorage(useShallow((state) => [state.currentVerseScore]));
   const fullScore = verseLength ** 2 / (useLocalStorage.getState().maxLives * divideBy);
   const won = currentScore == fullScore;
+  const previousScore = (score - currentVerseScore - currentScore) % goal;
+  const leveledUp = previousScore + currentScore + currentVerseScore >= goal;
   currentScore = !won ? currentScore : 0;
-  const blue = Math.max(0, useLocalStorage.getState().currentVerseScore - currentScore);
+  const blue = Math.max(0, leveledUp ? (currentVerseScore + previousScore) % goal : currentVerseScore - currentScore);
   const percentageBlue = Math.min(100, (Math.round(blue) / goal) * 100);
-  const darkGreen = (score - currentScore - blue) % goal;
+  const darkGreen = Math.max(0, leveledUp ? 0 : previousScore);
   const LevelUpped = darkGreen + currentScore >= goal;
   const percentageDarkGreen = LevelUpped ? 0 : Math.min(100, (darkGreen / goal) * 100);
   const gold = LevelUpped ? currentScore - (goal - darkGreen) : currentScore;
   const percentageGold = Math.min(100, (gold / goal) * 100);
   const percentageLightGreen = won ? 0 : Math.min(100, ((fullScore - currentScore) / goal) * 100);
   const [open, setOpen] = useState(false);
+
+  if (currentVerseScore > verseLength ** 2) {
+  }
+  if (blue + darkGreen > goal) {
+    //Score exceeds goal! This should not happen.
+    // blue = (blue + darkGreen) % goal;
+  }
   return (
     <Dialog open={open} onOpenChange={(o) => !o && setOpen(o) /* only closes*/}>
       <DialogTrigger className="flex flex-col items-center justify-center w-full px-8 self-start my-8 md:m-0">
         <div onClick={() => setOpen(true)} className="relative w-full text-center font-mono text-sm *:inline">
           Goal{" "}
           <div className={cn(blue || gold ? "text-gray-500" : "font-bold")}>
-            {roundToTwo((score % goal) - useLocalStorage.getState().currentVerseScore)}
+            {roundToTwo(Math.max(0, (score % goal) - currentVerseScore))}
           </div>
           <div className="text-blue-500">{roundToTwo(blue) > 0 ? "+" + roundToTwo(blue) : ""}</div>
           <div className="text-yellow-600">{gold ? "+" + roundToTwo(gold) : ""}</div>
@@ -59,10 +68,7 @@ export default function Score({
           Remaining: <div className="text-green-500">{Math.max(0, Math.round(fullScore - currentScore))}</div>
           <div> XP</div>
         </div>
-        <div
-          onClick={() => setOpen(true)}
-          className="w-full h-4 rounded-full bg-zinc-200 relative flex justify-start"
-        >
+        <div onClick={() => setOpen(true)} className="w-full h-4 rounded-full bg-zinc-200 relative flex justify-start">
           <motion.div
             className="h-full rounded-full rounded-r-none bg-green-500 flex items-center justify-center shrink-0"
             initial={{ width: percentageDarkGreen + "%" }}
