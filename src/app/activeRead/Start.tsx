@@ -287,6 +287,7 @@ export default function Start({
                                 >
                                   <Word
                                     asChild
+                                    colorless
                                     {...{
                                       wordSegments: word.wordSegments,
                                       noWordInfo: true,

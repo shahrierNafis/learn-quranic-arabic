@@ -15,6 +15,7 @@ function Word({
   size,
   pronounceOnClick,
   asChild = false,
+  colorless,
 }: {
   wordSegments: WordData;
   noWordInfo?: boolean;
@@ -22,6 +23,7 @@ function Word({
   size?: "default" | "sm" | "lg" | "icon" | null | undefined;
   pronounceOnClick?: boolean;
   asChild?: boolean;
+  colorless?: boolean;
 }) {
   const [colours, highlightedRoots] = useOnlineStorage(useShallow((a) => [a.colours, a.highlightedRoots]));
 
@@ -52,9 +54,11 @@ function Word({
             <div
               key={segment.position + ":" + index}
               style={{
-                color: (colours[segment.partOfSpeech] ?? colours.others)[
-                  (theme == "system" ? systemTheme : theme) == "dark" ? 1 : 0
-                ],
+                color: colorless
+                  ? "inherit"
+                  : (colours[segment.partOfSpeech] ?? colours.others)[
+                      (theme == "system" ? systemTheme : theme) == "dark" ? 1 : 0
+                    ],
               }}
               className="inline"
             >
