@@ -41,7 +41,5 @@ next-env.d.ts
 
 /quran-word-lists/*.json
 /quran-word-lists/*/*.json
-src/data.json
-src/rootData.json
-src/options.json
 !quran-word-lists/pronounData.json
+/src/**.json
