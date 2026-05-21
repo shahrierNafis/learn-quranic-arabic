@@ -127,6 +127,8 @@ type PreferenceStore = {
   setMaximumInterval: (maximumInterval: number) => void;
 
   highlightedRoots: string[];
+
+  ranks: number[];
 };
 export const useOnlineStorage = createWithEqualityFn<PreferenceStore>()(
   persist(
@@ -256,6 +258,7 @@ export const useOnlineStorage = createWithEqualityFn<PreferenceStore>()(
         maximumInterval: 365,
         setMaximumInterval: (maximumInterval: number) => set({ maximumInterval }),
         highlightedRoots: [],
+        ranks: [0],
       };
     },
     {

@@ -1,11 +1,6 @@
 import fs from "fs";
 import _ from "lodash";
-import {
-  Affixes,
-  CorpusApiWord,
-  PartOfSpeech,
-  WordData,
-} from "../src/types/types";
+import { Affixes, CorpusApiWord, PartOfSpeech, WordData } from "../src/types/types";
 import { PrefixPOS, prefixPOS } from "./preffixPOS";
 
 import { buckwalterToArabic } from "../src/utils/arabic-buckwalter-transliteration";
@@ -37,9 +32,7 @@ fs.readFileSync("./quran-word-lists/morphology.txt")
 
     const lineSegments = line.split("	");
     const position = lineSegments[0].substring(1, lineSegments[0].length - 3);
-    const segmentIndex = lineSegments[0]
-      .split(":")
-      [lineSegments[0].split(":").length - 1].slice(0, -1);
+    const segmentIndex = lineSegments[0].split(":")[lineSegments[0].split(":").length - 1].slice(0, -1);
     if (prevPosition && position !== prevPosition) {
       index++;
     }
@@ -49,8 +42,7 @@ fs.readFileSync("./quran-word-lists/morphology.txt")
 
     // set word translation
     // word.translation = translation[index];
-    let arPartOfSpeech: "fiʿil" | "ism" | "ḥarf" | "prefix" | "suffix" =
-      "fiʿil";
+    let arPartOfSpeech: "fiʿil" | "ism" | "ḥarf" | "prefix" | "suffix" = "fiʿil";
     const buckwalter = getBuckWalter(line);
     const arabic = buckwalterToArabic(buckwalter);
     const aspect = getAspect(line);
@@ -85,14 +77,8 @@ fs.readFileSync("./quran-word-lists/morphology.txt")
         } else if (segment.startsWith("PRON:")) {
           PGN = segment.substring(5);
           const [s, v, w] = position.split(":");
-          if (
-            ["obj2", "obj"].includes(pronounData[s][v][w][+segmentIndex - 1])
-          ) {
-            if (
-              Object.values(data[s][v]).some((wd) =>
-                wd.some((s) => s.arPartOfSpeech == "fiʿil")
-              )
-            ) {
+          if (["obj2", "obj"].includes(pronounData[s][v][w][+segmentIndex - 1])) {
+            if (Object.values(data[s][v]).some((wd) => wd.some((s) => s.arPartOfSpeech == "fiʿil"))) {
               partOfSpeech = "OBJ";
             } else {
               partOfSpeech = "OBJ2";
@@ -155,18 +141,14 @@ fs.readFileSync("./quran-word-lists/morphology.txt")
     _.setWith(data, position.split(":"), word, Object);
   });
 // write data
-fs.writeFile(
-  "./quran-word-lists/data.json",
-  JSON.stringify(data),
-  function (err) {
-    if (err) throw err;
-    console.log("complete");
-  }
-);
+fs.writeFile("./quran-word-lists/data.json", JSON.stringify(data), function (err) {
+  if (err) throw err;
+  console.log("./quran-word-lists/data.json");
+});
 // write data
 fs.writeFile("./src/data.json", JSON.stringify(data), function (err) {
   if (err) throw err;
-  console.log("complete");
+  console.log("./src/data.json");
 });
 // helper functions
 function isPrefix(line: string) {
@@ -187,17 +169,7 @@ function isSuffix(line: string) {
   return false;
 }
 function isIsm(line: string) {
-  for (const key of [
-    "N",
-    "PN",
-    "ADJ",
-    "IMPN",
-    "PRON",
-    "DEM",
-    "REL",
-    "T",
-    "LOC",
-  ]) {
+  for (const key of ["N", "PN", "ADJ", "IMPN", "PRON", "DEM", "REL", "T", "LOC"]) {
     if (line.split("	").includes(key)) {
       return true;
     }
@@ -299,9 +271,7 @@ function getForm(line: string) {
   }
 }
 
-function getDerivation(
-  line: string
-): "ACT PCPL" | "PASS PCPL" | "VN" | undefined {
+function getDerivation(line: string): "ACT PCPL" | "PASS PCPL" | "VN" | undefined {
   if (line.includes("ACT|PCPL")) {
     return "ACT PCPL";
   }

@@ -1,13 +1,4 @@
 import React from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useShallow } from "zustand/react/shallow";
 import { useLocalStorage } from "@/stores/localStorage";
@@ -18,7 +9,7 @@ import { Edit } from "lucide-react";
 import getPretendIterationNum from "./getPretendIterationNum";
 export default function SelectChapters() {
   const [chapters, addChapter, removeChapter, setChapters] = useLocalStorage(
-    useShallow((state) => [state.chapters, state.addChapter, state.removeChapter, state.setChapters])
+    useShallow((state) => [state.chapters, state.addChapter, state.removeChapter, state.setChapters]),
   );
   const [ARProgress, setARProgress] = useOnlineStorage(useShallow((state) => [state.ARProgress, state.setARProgress]));
   const totalPercentage = (
@@ -53,7 +44,7 @@ export default function SelectChapters() {
             {_.min(
               Array.from({ length: 114 }, (_, i) => i + 1).map((i) => {
                 return getPretendIterationNum(i, ARProgress);
-              })
+              }),
             )}
           </div>
           <div className="z-10 flex justify-center w-full p-2">{+totalPercentage}%</div>

@@ -28,8 +28,8 @@ export const useTimeListened = create<{
     {
       name: "TimeListened", // add a name for the store
       // skipHydration: true,
-    }
-  )
+    },
+  ),
 );
 
 export default function VerseAudioBtn({
@@ -41,36 +41,26 @@ export default function VerseAudioBtn({
   verse_key: string;
   onClick?: () => void;
   modal?: boolean;
-  variant?:
-  | "ghost"
-  | "outline"
-  | "link"
-  | "default"
-  | "destructive"
-  | "secondary"
-  | null
-  | undefined;
+  variant?: "ghost" | "outline" | "link" | "default" | "destructive" | "secondary" | null | undefined;
 }) {
-  const { verseAudio, openedVerse, setOpenedVerse } = useVerseAudio(verse_key);
-  const [addTimeListened] = useTimeListened(
-    useShallow((s) => [s.addTimeListened])
-  );
+  const { verseAudio, audioVerse, setAudioVerse } = useVerseAudio(verse_key);
+  const [addTimeListened] = useTimeListened(useShallow((s) => [s.addTimeListened]));
   const callCountRef = useRef(0); // To track how many times onListen is called
 
   return (
     <>
-      <Drawer open={openedVerse == verse_key} modal={modal}>
+      <Drawer open={audioVerse == verse_key} modal={modal}>
         <DrawerTrigger>
           <div className="flex">
             <Button
               onClick={() => {
-                setOpenedVerse(verse_key);
+                setAudioVerse(verse_key);
                 onClick?.();
               }}
               className=""
               size={"icon"}
               variant={variant}
-              disabled={!verseAudio || !!openedVerse}
+              disabled={!verseAudio || !!audioVerse}
             >
               <Volume2 />
             </Button>
@@ -99,7 +89,7 @@ export default function VerseAudioBtn({
                 className="w-fit m-auto rounded-full aspect-square"
                 variant={"outline"}
                 size={"icon"}
-                onClick={() => setOpenedVerse(undefined)}
+                onClick={() => setAudioVerse(undefined)}
               >
                 <X />
               </Button>,

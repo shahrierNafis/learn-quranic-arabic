@@ -26,9 +26,7 @@ for (const s in data) {
           rootData[word[segIndex].root][word[segIndex].lemma] =
             rootData[word[segIndex].root][word[segIndex].lemma] ?? [];
 
-          rootData[word[segIndex].root][word[segIndex].lemma].push(
-            word[segIndex].position
-          );
+          rootData[word[segIndex].root][word[segIndex].lemma].push(word[segIndex].position);
         }
       }
     }
@@ -54,23 +52,19 @@ const sortedData = Object.fromEntries(
                 return +wordCount[surahA][verseA] - +wordCount[surahB][verseB];
               }),
             ];
-          })
+          }),
       ),
     ];
-  })
+  }),
 );
 
 // write data
-fs.writeFile(
-  "./quran-word-lists/rootData.json",
-  JSON.stringify(sortedData),
-  function (err) {
-    if (err) throw err;
-    console.log("complete");
-  }
-);
+fs.writeFile("./quran-word-lists/rootData.json", JSON.stringify(sortedData), function (err) {
+  if (err) throw err;
+  console.log("./quran-word-lists/rootData.json");
+});
 // write data
 fs.writeFile("./src/rootData.json", JSON.stringify(sortedData), function (err) {
   if (err) throw err;
-  console.log("complete");
+  console.log("./src/rootData.json");
 });

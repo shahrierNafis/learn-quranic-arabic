@@ -59,19 +59,7 @@ export type OPTION = {
   index: 1 | 2 | 3 | 4;
   wordGroupId: number;
 };
-export type PrefixPOS =
-  | "DET"
-  | "P"
-  | "VOC"
-  | "INTG"
-  | "EQ"
-  | "CONJ"
-  | "REM"
-  | "CIRC"
-  | "SUP"
-  | "COM"
-  | "RSLT"
-  | "CAUS";
+export type PrefixPOS = "DET" | "P" | "VOC" | "INTG" | "EQ" | "CONJ" | "REM" | "CIRC" | "SUP" | "COM" | "RSLT" | "CAUS";
 
 export type Affixes =
   | "Al+"
@@ -116,11 +104,7 @@ export type LI = {
   description: string;
   name: string;
   spellings?: Set<string>;
-  getOptions: (
-    position: string,
-    segIndex: string,
-    extraSegments?: WordSegment[]
-  ) => Promise<WordData[]>;
+  getOptions: (position: string, segIndex: string, extraSegments?: WordSegment[]) => Promise<WordData[]>;
 };
 export type List = {
   [key: string]: LI;
@@ -192,3 +176,10 @@ export type PartOfSpeech =
   | "INL"
   | "DET"
   | "P";
+
+export type LemmaData = {
+  lemma: string;
+  positions: string[];
+  count: number;
+  rank: number;
+};

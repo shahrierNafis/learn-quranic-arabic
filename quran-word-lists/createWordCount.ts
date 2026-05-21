@@ -15,22 +15,13 @@ fs.readFileSync("./quran-word-lists/morphology.txt")
     }
 
     //set word count
-    _.setWith(
-      wordCount,
-      [position.split(":")[0], position.split(":")[1]],
-      position.split(":")[2],
-      Object
-    );
+    _.setWith(wordCount, [position.split(":")[0], position.split(":")[1]], position.split(":")[2], Object);
   });
-fs.writeFile(
-  "./quran-word-lists/wordCount.json",
-  JSON.stringify(wordCount),
-  function (err) {
-    if (err) throw err;
-    console.log("complete");
-  }
-);
+fs.writeFile("./quran-word-lists/wordCount.json", JSON.stringify(wordCount), function (err) {
+  if (err) throw err;
+  console.log("./quran-word-lists/wordCount.json");
+});
 fs.writeFile("./src/wordCount.json", JSON.stringify(wordCount), function (err) {
   if (err) throw err;
-  console.log("complete");
+  console.log("./src/wordCount.json");
 });

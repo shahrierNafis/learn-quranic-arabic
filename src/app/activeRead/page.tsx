@@ -1,10 +1,10 @@
 "use client";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { use, useCallback, useEffect, useMemo, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import Score from "./Score";
 import _ from "lodash";
 import { Button } from "@/components/ui/button";
-import { WORD } from "@/types/types";
+import { LemmaData, WORD } from "@/types/types";
 import { useOnlineStorage } from "@/stores/onlineStorage";
 import { useLocalStorage } from "@/stores/localStorage";
 import getChapterLength from "./getChapterLength";
@@ -13,6 +13,8 @@ import Start from "./Start";
 import { toast } from "sonner";
 import useSound from "use-sound";
 import roundToTwo from "@/utils/roundToTwo";
+import getLemmaDataArr from "./getLemmaDataArr";
+import { buckwalterToArabic } from "@/utils/arabic-buckwalter-transliteration";
 export default function Page() {
   const [verse_key, setVerse_key] = useState<string | null>(null);
   const [verse, setVerse] = useState<WORD[]>([]); // the actual verse
@@ -21,8 +23,14 @@ export default function Page() {
   const ARProgress = useOnlineStorage((state) => state.ARProgress);
   const addARProgress = useOnlineStorage(useShallow((state) => state.addARProgress));
   const chapters = useLocalStorage((state) => state.chapters);
-  const maxLives = useLocalStorage((state) => state.maxLives);
   const correctSoundEffect = useSound("/audio/duolingo-correct.mp3")[0];
+  const [vocabularyMode] = useLocalStorage(useShallow((state) => [state.vocabularyMode]));
+  const ranks = useOnlineStorage((state) => state.ranks);
+  const [lemmaDataArr, setLemmaDataArr] = useState<LemmaData[]>([]);
+
+  useEffect(() => {
+    getLemmaDataArr().then(setLemmaDataArr);
+  }, []);
 
   const reload = useCallback(
     async (signal: AbortSignal) => {
@@ -48,22 +56,38 @@ export default function Page() {
     [verse_key],
   );
 
+  const currentRank: [number, number] = useMemo(() => {
+    const c = Math.max(
+      lemmaDataArr.findIndex((element, index) => (ranks[index] ?? 0) < element.count && ranks[index] != 10),
+      0,
+    );
+    return [c, ranks[c] ?? 0];
+  }, [lemmaDataArr, ranks]);
+
   const setNextVerse = useCallback(() => {
-    setVerse_key(null);
-    const nextChapter = [...chapters].sort((a, b) => {
-      const iterationA = Math.floor(ARProgress[a] / getChapterLength(a));
-      const iterationB = Math.floor(ARProgress[b] / getChapterLength(b));
-      if (iterationA == iterationB) {
-        return +a - +b; // put chapters with lower index first
+    if (vocabularyMode) {
+      console.log("currentRank", currentRank);
+      if (currentRank.length && lemmaDataArr.length) {
+        const lemma = lemmaDataArr[currentRank[0]] as LemmaData;
+        setVerse_key(lemma.positions[ranks[currentRank[0]] ?? 0]);
       }
-      return iterationA - iterationB; // put chapters with lower iteration first
-    })[0];
-    nextChapter
-      ? setVerse_key(
-          `${nextChapter}:${Math.trunc((ARProgress[nextChapter] % getChapterLength(nextChapter)) + 1)}`, // set the next verse
-        )
-      : setVerse_key(null);
-  }, [ARProgress, chapters]);
+    } else {
+      setVerse_key(null);
+      const nextChapter = [...chapters].sort((a, b) => {
+        const iterationA = Math.floor(ARProgress[a] / getChapterLength(a));
+        const iterationB = Math.floor(ARProgress[b] / getChapterLength(b));
+        if (iterationA == iterationB) {
+          return +a - +b; // put chapters with lower index first
+        }
+        return iterationA - iterationB; // put chapters with lower iteration first
+      })[0];
+      nextChapter
+        ? setVerse_key(
+            `${nextChapter}:${Math.trunc((ARProgress[nextChapter] % getChapterLength(nextChapter)) + 1)}`, // set the next verse
+          )
+        : setVerse_key(null);
+    }
+  }, [ARProgress, chapters, currentRank, lemmaDataArr, ranks, vocabularyMode]);
 
   useEffect(() => {
     // Create an AbortController for this effect instance
@@ -79,10 +103,23 @@ export default function Page() {
     !hold && setNextVerse(); // set a next verse if chapters is not empty
     return () => {};
   }, [hold, setNextVerse]);
+
+  useEffect(() => {
+    if ([10, lemmaDataArr[currentRank[0]]?.count].includes(ranks[currentRank[0]])) {
+      toast.success(
+        `Rank up! You reached rank ${ranks[currentRank[0]]} & mastered the word "${buckwalterToArabic(lemmaDataArr[currentRank[0]]?.lemma)}"`,
+        {},
+      );
+    }
+
+    return () => {};
+  }, [currentRank, lemmaDataArr, ranks]);
+  if (!currentRank) return <div>Loading...</div>;
+
   return (
     <>
       <div className="h-screen auto-cols-[100%] grid grid-rows-3 justify-items-center content-center items-center ">
-        <Score currentScore={0} verseLength={verse.length} divideBy={1} />
+        <Score currentScore={0} currentRank={currentRank} verseLength={verse.length} divideBy={1} />
         <div className="p-2 w-fit h-fit flex flex-col items-center justify-center gap-4 overflow-hidden">
           <div className="grid grid-cols-3 items-center content-center gap-2">
             {/* reload Btn */}
@@ -98,21 +135,47 @@ export default function Page() {
               reload
             </Button>
             <div className="flex flex-col items-center justify-center gap-2">
-              <Start {...{ verse, verse_key, setNextVerse, setHold }} />
+              <Start {...{ verse, verse_key, setNextVerse, setHold, currentRank, lemmaDataArr }} />
             </div>
             <Button
               variant={"outline"}
               onClick={() => {
-                const ARScore = useOnlineStorage.getState().ARScore;
-                toast.success(`You earned ${roundToTwo(useLocalStorage.getState().currentVerseScore)} points!`, {});
+                // const ARScore = useOnlineStorage.getState().ARScore;
+                useLocalStorage.getState().currentVerse.score > 0 &&
+                  toast.success(`You earned ${roundToTwo(useLocalStorage.getState().currentVerse.score)} points!`, {});
                 correctSoundEffect();
-                useLocalStorage.setState(() => ({ currentVerseScore: 0 }));
-                verse_key &&
-                  confirm("are you sure you want to skip this verse?") &&
-                  addARProgress(+verse_key?.split(":")[0], 1);
+                useLocalStorage.setState(() => ({
+                  currentVerse: {
+                    score: 0,
+                    verse_key: useLocalStorage.getState().currentVerse.verse_key,
+                  },
+                }));
+
+                if (vocabularyMode) {
+                  useOnlineStorage.setState((state) => {
+                    const newRanks = [...state.ranks];
+                    newRanks[currentRank[0]] = (newRanks[currentRank[0]] ?? 0) + 1;
+
+                    return { ranks: newRanks };
+                  });
+                } else
+                  verse_key &&
+                    confirm("are you sure you want to skip this verse?") &&
+                    addARProgress(+verse_key?.split(":")[0], 1);
               }}
+              dir="ltr"
             >
-              Skip Verse {verse_key}
+              Skip{" "}
+              {vocabularyMode ? (
+                <div className=" flex gap-2 flex-row">
+                  <div> {buckwalterToArabic(lemmaDataArr[currentRank[0]]?.lemma)} </div>
+                  <div>
+                    {currentRank[1]}/{Math.min(10, lemmaDataArr[currentRank[0]]?.count)}
+                  </div>
+                </div>
+              ) : (
+                <>Verse {verse_key?.split(":")[0] + ":" + verse_key?.split(":")[1]}</>
+              )}
             </Button>
           </div>
         </div>

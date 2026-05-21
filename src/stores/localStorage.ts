@@ -1,15 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 export const useLocalStorage = create<{
-  versesPerRound: number;
-  setVersesPerRound: (versesPerRound: number) => void;
-  mode: string;
-  setMode: (mode: string) => void;
-  skill: string;
-  setSkill: (skill: string) => void;
-
-  openedVerse: string | undefined;
-  setOpenedVerse: (isOpen: string | undefined) => void;
+  audioVerse: string | undefined;
+  setAudioVerse: (isOpen: string | undefined) => void;
 
   chapters: number[];
   setChapters: (chapters: number[]) => void;
@@ -18,19 +11,16 @@ export const useLocalStorage = create<{
 
   goal: number;
   maxLives: number;
-  currentVerseScore: number;
+  currentVerse: {
+    score: number;
+    verse_key: string;
+  };
+  vocabularyMode: boolean;
 }>()(
   persist(
     (set) => ({
-      versesPerRound: 10,
-      setVersesPerRound: (versesPerRound: number) => set({ versesPerRound }),
-      mode: "",
-      setMode: (mode) => set({ mode }),
-      skill: "",
-      setSkill: (skill) => set({ skill }),
-
-      openedVerse: undefined,
-      setOpenedVerse: (openedVerse: string | undefined) => set({ openedVerse }),
+      audioVerse: undefined,
+      setAudioVerse: (audioVerse: string | undefined) => set({ audioVerse }),
 
       chapters: Array.from({ length: 114 }, (_, i) => i + 1), // initial state
       setChapters: (chapters: number[]) => set({ chapters }),
@@ -46,7 +36,11 @@ export const useLocalStorage = create<{
       },
       goal: 1000,
       maxLives: 3,
-      currentVerseScore: 0,
+      currentVerse: {
+        score: 0,
+        verse_key: "1:1",
+      },
+      vocabularyMode: true,
     }),
     {
       name: "useLocalStorage", // name of the item in the storage (must be unique)

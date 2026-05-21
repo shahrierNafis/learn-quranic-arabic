@@ -1,4 +1,4 @@
-import React, { use, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -17,24 +17,27 @@ import AnimationLoop from "./AnimationLoop";
 import { useLocalStorage } from "@/stores/localStorage";
 import { cn } from "@/lib/utils";
 import roundToTwo from "@/utils/roundToTwo";
+import EditRanks from "./Rank";
 
 export default function Score({
   noButtons,
   currentScore,
   verseLength,
   divideBy = 1,
+  currentRank,
 }: {
   noButtons?: boolean;
   currentScore: number;
   verseLength: number;
   divideBy: number;
+  currentRank: [number, number];
 }) {
   const [score, setScore] = useOnlineStorage(useShallow((state) => [state.ARScore, state.setARScore]));
   const [goal] = useLocalStorage(useShallow((state) => [state.goal]));
-  const [currentVerseScore] = useLocalStorage(useShallow((state) => [state.currentVerseScore]));
+  const [currentVerseScore] = useLocalStorage(useShallow((state) => [state.currentVerse.score]));
   const fullScore = verseLength ** 2 / (useLocalStorage.getState().maxLives * divideBy);
   const won = currentScore == fullScore;
-  const previousScore = (score - currentVerseScore - currentScore) % goal;
+  const previousScore = (score - currentVerseScore) % goal;
   const leveledUp = previousScore + currentScore + currentVerseScore >= goal;
   currentScore = !won ? currentScore : 0;
   const blue = Math.max(0, leveledUp ? (currentVerseScore + previousScore) % goal : currentVerseScore - currentScore);
@@ -46,6 +49,7 @@ export default function Score({
   const percentageGold = Math.min(100, (gold / goal) * 100);
   const percentageLightGreen = won ? 0 : Math.min(100, ((fullScore - currentScore) / goal) * 100);
   const [open, setOpen] = useState(false);
+  const [vocabularyMode] = useLocalStorage(useShallow((state) => [state.vocabularyMode]));
 
   if (currentVerseScore > verseLength ** 2) {
   }
@@ -106,6 +110,13 @@ export default function Score({
           ""
         ) : (
           <div className="flex gap-2 items-center justify-center mt-2">
+            <Button
+              onClick={() => useLocalStorage.setState((state) => ({ vocabularyMode: !state.vocabularyMode }))}
+              className=""
+              variant={vocabularyMode ? "secondary" : "outline"}
+            >
+              <div>Vocabulary Mode: {vocabularyMode ? "On" : "Off"}</div>
+            </Button>
             <AnimationLoop />
             <Button onClick={() => setOpen(true)} className="" variant={"outline"}>
               <div>
@@ -114,6 +125,9 @@ export default function Score({
                   return Math.floor(score / goal);
                 })()}
               </div>
+            </Button>
+            <Button disabled={!vocabularyMode} onClick={() => setOpen(true)} className="" variant={"outline"}>
+              <div>Rank {vocabularyMode && currentRank[0]}</div>
             </Button>
             <Button
               variant={"outline"}
@@ -143,7 +157,13 @@ export default function Score({
       <DialogContent className="max-w-[80vw] flex flex-col  max-h-[80vh]">
         <DialogHeader className="overflow-y-auto">
           <DialogTitle>Progress</DialogTitle>
-          <SelectChapters />
+          {vocabularyMode ? (
+            <>
+              <EditRanks currentRank={currentRank[0]} />
+            </>
+          ) : (
+            <SelectChapters />
+          )}
         </DialogHeader>
         <DialogFooter>
           <DialogClose>
@@ -154,8 +174,8 @@ export default function Score({
               const input = prompt("set progress", score + "");
               if (input === null) return;
               setScore(Number(input));
-              useLocalStorage.setState(() => ({
-                currentVerseScore: 0,
+              useLocalStorage.setState((state) => ({
+                currentVerse: { ...state.currentVerse, score: Number(input) },
               }));
             }}
           >

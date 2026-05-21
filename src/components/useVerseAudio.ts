@@ -6,7 +6,7 @@ import { useShallow } from "zustand/react/shallow";
 export default function useVerseAudio(verse_key?: string) {
   const [reciter_id] = useOnlineStorage(useShallow((s) => [s.reciter_id]));
   const [verseAudio, setVerseAudio] = useState<string>();
-  const [openedVerse, setOpenedVerse] = useLocalStorage(useShallow((s) => [s.openedVerse, s.setOpenedVerse]));
+  const [audioVerse, setAudioVerse] = useLocalStorage(useShallow((s) => [s.audioVerse, s.setAudioVerse]));
 
   useEffect(() => {
     if (!verse_key) return;
@@ -35,7 +35,7 @@ export default function useVerseAudio(verse_key?: string) {
 
   return {
     verseAudio,
-    openedVerse,
-    setOpenedVerse,
+    audioVerse,
+    setAudioVerse,
   };
 }

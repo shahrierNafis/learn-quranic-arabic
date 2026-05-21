@@ -17,17 +17,13 @@ for (const surah in corpusAPIdata) {
     for (const kalima in corpusAPIdata[surah][ayah]) {
       for (const segment in corpusAPIdata[surah][ayah][kalima].token.segments) {
         if (
-          ["subj", "obj", "obj2"].includes(
-            corpusAPIdata[surah][ayah][kalima].token.segments[segment]
-              .pronounType ?? ""
-          )
+          ["subj", "obj", "obj2"].includes(corpusAPIdata[surah][ayah][kalima].token.segments[segment].pronounType ?? "")
         ) {
           _.setWith(
             pronounData,
             [surah, ayah, kalima, segment],
-            corpusAPIdata[surah][ayah][kalima].token.segments[segment]
-              .pronounType,
-            Object
+            corpusAPIdata[surah][ayah][kalima].token.segments[segment].pronounType,
+            Object,
           );
         }
       }
@@ -35,11 +31,7 @@ for (const surah in corpusAPIdata) {
   }
 }
 // write data
-fs.writeFile(
-  "./quran-word-lists/pronounData.json",
-  JSON.stringify(pronounData),
-  function (err) {
-    if (err) throw err;
-    console.log("complete");
-  }
-);
+fs.writeFile("./quran-word-lists/pronounData.json", JSON.stringify(pronounData), function (err) {
+  if (err) throw err;
+  console.log("./quran-word-lists/pronounData.json");
+});

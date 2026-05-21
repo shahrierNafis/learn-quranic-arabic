@@ -10,7 +10,7 @@ export default function VerseInfo({ verse, verse_key }: { verse: any[]; verse_ke
         <Button size={"sm"} className="text-sm" disabled variant={"outline"}>
           {verse.length ? (
             <>
-              Verse {verse_key} with length {verse.length}
+              Verse {verse_key?.split(":")[0] + ":" + verse_key?.split(":")[1]} with length {verse.length}
             </>
           ) : (
             <>loading...</>
