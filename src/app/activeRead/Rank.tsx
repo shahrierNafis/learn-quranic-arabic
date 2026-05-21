@@ -9,10 +9,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DataTablePagination } from "@/components/ui/DataTablePagination";
 import { buckwalterToArabic } from "@/utils/arabic-buckwalter-transliteration";
 import { Button } from "@/components/ui/button";
+import { Edit, ExternalLink } from "lucide-react";
+import Link from "next/link";
+import { cn } from "@/utils/cn";
+import useFont from "@/utils/useFont";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const Rank = (props: { currentRank: number }) => {
   const ranks = useOnlineStorage((state) => state.ranks);
   const [lemmaData, setLemmaData] = useState<LemmaData[]>([]);
+  const [font] = useFont();
 
   useEffect(() => {
     getLemmaDataArr().then(setLemmaData);
@@ -43,7 +49,23 @@ const Rank = (props: { currentRank: number }) => {
         accessorFn: (row) => row.lemma,
         id: "lemma",
         header: "Lemma",
-        cell: (info) => <span className="text-3xl">{buckwalterToArabic(info.getValue() as string)}</span>,
+        cell: (info) => (
+          <div className="grow-0 flex justify-center">
+            <Link target="_blank" href={("/lemma/" + info.getValue()) as string}>
+              <Button
+                variant={"outline"}
+                size={"sm"}
+                className={cn(
+                  font?.className,
+                  "flex gap-2 justify-center items-center align-middle focus:ring hover:ring",
+                )}
+              >
+                <span className="text-3xl">{buckwalterToArabic(info.getValue() as string)}</span>
+                <ExternalLink />
+              </Button>
+            </Link>
+          </div>
+        ),
       },
       {
         accessorFn: (row) => row,
@@ -53,11 +75,38 @@ const Rank = (props: { currentRank: number }) => {
           const lemmaEntry = info.getValue() as LemmaData;
           const completed = ranks[lemmaEntry.rank - 1] ?? 0;
           const total = Math.min(10, lemmaEntry.count);
-          return `${completed}/${total}`;
+          return (
+            <div className="flex items-center justify-center gap-2 ">
+              <Edit
+                className="z-10 hover:cursor-pointer"
+                // size={64}
+                onClick={() => {
+                  const input = prompt("set progress", ranks[lemmaEntry.rank - 1] + "");
+                  if (input === null) return;
+                  useOnlineStorage.setState((state) => {
+                    const newRanks = [...state.ranks];
+                    newRanks[lemmaEntry.rank - 1] = Number(input);
+                    return { ranks: newRanks };
+                  });
+                }}
+              />
+              {completed}/{total}
+              <Checkbox
+                checked={[10, lemmaEntry.count].includes(ranks[lemmaEntry.rank - 1])}
+                onCheckedChange={(checked) => {
+                  useOnlineStorage.setState((state) => {
+                    const newRanks = [...state.ranks];
+                    newRanks[lemmaEntry.rank - 1] = checked ? Math.min(10, lemmaEntry.count) : 0;
+                    return { ranks: newRanks };
+                  });
+                }}
+              />
+            </div>
+          );
         },
       },
     ],
-    [ranks],
+    [font?.className, ranks],
   );
   const [pagination, setPagination] = useState(() => ({
     pageSize: 10,
@@ -75,23 +124,40 @@ const Rank = (props: { currentRank: number }) => {
 
   return (
     <div className="rounded-md border">
-      <div className="flex items-center justify-between px-4">
+      <div className="flex items-center justify-between p-4">
         <DataTablePagination table={table} />
-        <Button
-          variant={"outline"}
-          onClick={() => {
-            const targetRowIndex = props.currentRank;
-            const pageSize = table.getState().pagination.pageSize;
-            const pageIndex = Math.floor(targetRowIndex / pageSize);
+        <div className="flex gap-2">
+          <Button
+            variant={"outline"}
+            onClick={() => {
+              const targetRowIndex = props.currentRank;
+              const pageSize = table.getState().pagination.pageSize;
+              const pageIndex = Math.floor(targetRowIndex / pageSize);
 
-            setPagination({
-              pageIndex,
-              pageSize,
-            });
-          }}
-        >
-          Goto to current rank
-        </Button>
+              setPagination({
+                pageIndex,
+                pageSize,
+              });
+            }}
+          >
+            Goto to current rank
+          </Button>
+          <Button
+            variant={"outline"}
+            onClick={() => {
+              const newRank = +(prompt("set rank?", props.currentRank.toString()) ?? "0");
+              useOnlineStorage.setState((state) => {
+                const newRanks = [...state.ranks];
+                for (const lemmaEntry of lemmaData) {
+                  newRanks[lemmaEntry.rank - 1] = lemmaEntry.rank > newRank ? 0 : Math.min(lemmaEntry.count, 10);
+                }
+                return { ranks: newRanks };
+              });
+            }}
+          >
+            set rank
+          </Button>
+        </div>
       </div>
       <Table className="">
         <TableHeader>
