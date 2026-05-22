@@ -29,6 +29,34 @@ export default function SegmentInfo({ segment }: { segment: WordSegment }) {
             {buckwalterToArabic(segment.buckwalter)}
           </div>
           {(Object.keys(segment) as Array<keyof typeof segment>).map((property) => {
+            if (property == "lemma") {
+              return (
+                <div key={property} className="">
+                  {segment.lemma && (
+                    <>
+                      <div className="grid grid-cols-2 items-center   align-middle">
+                        <div> lemma:</div>
+                        <div className={cn("flex items-center gap-2")}>
+                          <Link target="_blank" href={"/lemma/" + segment.lemma}>
+                            <Button
+                              variant={"outline"}
+                              size={"sm"}
+                              className={cn(
+                                font?.className,
+                                "flex gap-2 justify-center items-center align-middle focus:ring hover:ring",
+                              )}
+                            >
+                              <div> {buckwalterToArabic(segment.lemma)}</div>
+                              <ExternalLink />
+                            </Button>
+                          </Link>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              );
+            }
             if (property == "root") {
               return (
                 <div key={property} className="">
@@ -75,6 +103,7 @@ export default function SegmentInfo({ segment }: { segment: WordSegment }) {
                 </div>
               );
             }
+
             if (property == "number") {
               return (
                 <div key={property} className="">
@@ -91,7 +120,7 @@ export default function SegmentInfo({ segment }: { segment: WordSegment }) {
                 </div>
               );
             }
-            if (property == "arabic" || property == "arPartOfSpeech" || property == "position" || property == "lemma") {
+            if (property == "arabic" || property == "arPartOfSpeech" || property == "position") {
               return <></>;
             }
             if (property == "mood") {
