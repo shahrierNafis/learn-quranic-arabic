@@ -11,6 +11,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
   SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import Preference from "./Preference";
 import ReadQuranBtn from "./ReadQuranBtn";
@@ -39,10 +40,11 @@ const items = [
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const { toggleSidebar, open } = useSidebar();
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarContent>
+      <SidebarContent onClick={() => !open && toggleSidebar()}>
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
