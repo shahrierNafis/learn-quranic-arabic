@@ -1,4 +1,4 @@
-import { PartOfSpeech } from "@/types/types";
+import { PartOfSpeech } from "@/types";
 
 const relations: { [key in PartOfSpeech]: any } = {
   N: "Noun",
@@ -53,9 +53,4 @@ const relations: { [key in PartOfSpeech]: any } = {
 
 export default relations;
 const invertKeyValues = (obj: any) =>
-  Object.fromEntries(
-    Object.entries(obj).map((entry) => [
-      (entry[1] as string).toUpperCase(),
-      entry[0],
-    ])
-  );
+  Object.fromEntries(Object.entries(obj).map((entry) => [(entry[1] as string).toUpperCase(), entry[0]]));

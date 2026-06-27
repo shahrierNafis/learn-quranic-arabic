@@ -2,7 +2,7 @@ import React, { memo, useEffect, useState } from "react";
 
 import getVerseWords from "@/utils/getVerseWords";
 
-import { WORD } from "@/types/types";
+import { WORD } from "@/types";
 
 import { cn } from "@/lib/utils";
 
@@ -21,7 +21,9 @@ export default memo(
   function CellComponent({ verse_key, translation_ids }: { verse_key: string; translation_ids: string[] }) {
     const [verse, setVerse] = useState<WORD[]>();
     const [translations, setTranslations] = useState<Awaited<ReturnType<typeof getVerseTranslations>>>();
-    const [showTranslation, showTransliteration] = useOnlineStorage(useShallow((a) => [a.showTranslation, a.showTransliteration]));
+    const [showTranslation, showTransliteration] = useOnlineStorage(
+      useShallow((a) => [a.showTranslation, a.showTransliteration]),
+    );
 
     // set verse
     useEffect(() => {
@@ -62,7 +64,7 @@ export default memo(
   },
   (prev, next) => {
     return prev.verse_key == next.verse_key && prev.translation_ids.every((e, i) => next.translation_ids[i] == e);
-  }
+  },
 );
 
 // This type is used to define the shape of our data.

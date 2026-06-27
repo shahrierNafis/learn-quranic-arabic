@@ -1,5 +1,5 @@
 "use server";
-import { WordData } from "@/types/types";
+import { WordData } from "@/types";
 import { cache } from "react";
 
 type SegmentData = {

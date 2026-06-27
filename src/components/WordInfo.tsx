@@ -7,7 +7,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { WORD, WordData } from "@/types/types";
+import { WORD, WordData } from "@/types";
 import SegmentInfo from "./SegmentInfo";
 import { Volume2 } from "lucide-react";
 import { Button, buttonVariants } from "./ui/button";

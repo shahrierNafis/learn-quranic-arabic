@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { CorpusApiWord } from "../src/types/types";
+import { CorpusApiWord } from "../src/types";
 import fs from "fs";
 const pronounData: {
   [key: string]: {

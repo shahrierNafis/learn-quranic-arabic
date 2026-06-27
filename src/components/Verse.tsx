@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { WORD } from "@/types/types";
+import { WORD } from "@/types";
 import React, { ReactNode, useEffect, useState } from "react";
 import { Skeleton } from "./ui/skeleton";
 import Word from "./Word";
@@ -16,6 +16,7 @@ export default function Verse({
   switchIndex,
   hideAudioPlayer,
   children,
+  hideSwitchBtn,
 }: {
   verse: WORD[] | undefined;
   highlightIndex?: number;
@@ -23,6 +24,7 @@ export default function Verse({
   switchIndex?: number;
   hideAudioPlayer?: boolean;
   children?: ReactNode;
+  hideSwitchBtn?: boolean;
 }) {
   const [switchOn, setSwitchOn] = useState(false);
   const [showTranslation, showTransliteration, showTranslationOnHiddenWords] = useOnlineStorage(
@@ -105,7 +107,7 @@ export default function Verse({
             </>
           )}
         </div>{" "}
-        {
+        {verse && !hideSwitchBtn && (
           <Button
             size={"icon"}
             variant={switchOn ? "default" : "ghost"}
@@ -114,7 +116,7 @@ export default function Verse({
           >
             <ArrowLeftRight />
           </Button>
-        }{" "}
+        )}{" "}
         {verse && !hideAudioPlayer && <VerseAudioBtn verse_key={`${surah}:${ayah}`} />}
       </div>
     </>

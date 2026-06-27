@@ -1,6 +1,6 @@
 import fs from "fs";
 import _ from "lodash";
-import { Affixes, CorpusApiWord, PartOfSpeech, WordData } from "../src/types/types";
+import { Affixes, CorpusApiWord, PartOfSpeech, WordData } from "../src/types";
 import { PrefixPOS, prefixPOS } from "./preffixPOS";
 
 import { buckwalterToArabic } from "../src/utils/arabic-buckwalter-transliteration";

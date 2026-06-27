@@ -1,12 +1,6 @@
 import fs from "fs";
 import path from "path";
-import {
-  List,
-  WordData,
-  WordCount,
-  Requirements,
-  WordSegment,
-} from "../../src/types/types";
+import { List, WordData, WordCount, Requirements, WordSegment } from "../../src/types";
 import getOptions from "../lib/getOptions";
 import { lemmaRequirements } from "../lib/requirements";
 import sortList from "../lib/sortList";
@@ -36,10 +30,7 @@ for (const s in data) {
     for (const w in data[s][v]) {
       const word = data[s][v][w];
       for (const segIndex in word) {
-        if (
-          !["ism", "fiʿil"].includes(word[segIndex].arPartOfSpeech) ||
-          !word[segIndex].lemma
-        ) {
+        if (!["ism", "fiʿil"].includes(word[segIndex].arPartOfSpeech) || !word[segIndex].lemma) {
           continue;
         }
         const lemmaGroup = list[word[segIndex].lemma] ?? {
@@ -62,45 +53,36 @@ for (const s in data) {
     }
   }
 }
-async function propGetOptions(
-  position: string,
-  segIndex: string,
-  extraSegments?: WordSegment[]
-) {
+async function propGetOptions(position: string, segIndex: string, extraSegments?: WordSegment[]) {
   return await getOptions(position, segIndex, lemmaRequirements, extraSegments);
 }
 const sortedList = sortList(list);
 
 for (const i in sortedList) {
-  options[cyrb64(sortedList[i].words.map((w) => w.position).join("")) + ""] =
-    await sortedList[i].getOptions(
-      sortedList[i].words[0]?.position,
-      sortedList[i].words[0]?.segIndex + ""
-    );
+  options[cyrb64(sortedList[i].words.map((w) => w.position).join("")) + ""] = await sortedList[i].getOptions(
+    sortedList[i].words[0]?.position,
+    sortedList[i].words[0]?.segIndex + "",
+  );
   console.log(i + "/" + sortedList.length);
 }
 
 // write lists
-fs.writeFile(
-  "./.seed-data/ism&fi'lList.json",
-  JSON.stringify(sortedList),
-  function (err) {
-    if (err) throw err;
-    console.log("./.seed-data/ism&fi'lList.json");
-  }
-);
+fs.writeFile("./.seed-data/ism&fi'lList.json", JSON.stringify(sortedList), function (err) {
+  if (err) throw err;
+  console.log("./.seed-data/ism&fi'lList.json");
+});
 // write listCount
 fs.writeFile(
   path.join(__dirname, "listCount.json"),
   JSON.stringify(
     sortedList.map((arr) => {
       return arr.positions.length;
-    })
+    }),
   ),
   function (err) {
     if (err) throw err;
     console.log(__dirname + "listCount.json");
-  }
+  },
 );
 // write options
 fs.writeFile("./src/options.json", JSON.stringify(options), function (err) {

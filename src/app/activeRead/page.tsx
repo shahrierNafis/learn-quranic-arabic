@@ -4,7 +4,7 @@ import { useShallow } from "zustand/react/shallow";
 import Score from "./Score";
 import _ from "lodash";
 import { Button } from "@/components/ui/button";
-import { LemmaData, WORD } from "@/types/types";
+import { LemmaData, WORD } from "@/types";
 import { useOnlineStorage } from "@/stores/onlineStorage";
 import { useLocalStorage } from "@/stores/localStorage";
 import getChapterLength from "./getChapterLength";
@@ -24,7 +24,7 @@ export default function Page() {
   const addARProgress = useOnlineStorage(useShallow((state) => state.addARProgress));
   const chapters = useLocalStorage((state) => state.chapters);
   const correctSoundEffect = useSound("/audio/duolingo-correct.mp3")[0];
-  const [vocabularyMode] = useLocalStorage(useShallow((state) => [state.vocabularyMode]));
+  const [order] = useLocalStorage(useShallow((state) => [state.order]));
   const ranks = useOnlineStorage((state) => state.ranks);
   const [lemmaDataArr, setLemmaDataArr] = useState<LemmaData[]>([]);
 
@@ -65,7 +65,7 @@ export default function Page() {
   }, [lemmaDataArr, ranks]);
 
   const setNextVerse = useCallback(() => {
-    if (vocabularyMode) {
+    if (order === "frequency") {
       console.log("currentRank", currentRank);
       if (currentRank.length && lemmaDataArr.length) {
         const lemma = lemmaDataArr[currentRank[0]] as LemmaData;
@@ -87,7 +87,7 @@ export default function Page() {
           )
         : setVerse_key(null);
     }
-  }, [ARProgress, chapters, currentRank, lemmaDataArr, ranks, vocabularyMode]);
+  }, [ARProgress, chapters, currentRank, lemmaDataArr, ranks, order]);
 
   useEffect(() => {
     // Create an AbortController for this effect instance
@@ -151,7 +151,7 @@ export default function Page() {
                   },
                 }));
 
-                if (vocabularyMode) {
+                if (order === "frequency") {
                   useOnlineStorage.setState((state) => {
                     const newRanks = [...state.ranks];
                     newRanks[currentRank[0]] = (newRanks[currentRank[0]] ?? 0) + 1;
@@ -166,7 +166,7 @@ export default function Page() {
               dir="ltr"
             >
               Skip{" "}
-              {vocabularyMode ? (
+              {order === "frequency" ? (
                 <div className=" flex gap-2 flex-row">
                   <div> {buckwalterToArabic(lemmaDataArr[currentRank[0]]?.lemma)} </div>
                   <div>

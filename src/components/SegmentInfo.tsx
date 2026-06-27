@@ -1,5 +1,5 @@
 import React from "react";
-import { WordSegment } from "@/types/types";
+import { WordSegment } from "@/types";
 import { useOnlineStorage } from "@/stores/onlineStorage";
 import { useShallow } from "zustand/react/shallow";
 import { useTheme } from "next-themes";

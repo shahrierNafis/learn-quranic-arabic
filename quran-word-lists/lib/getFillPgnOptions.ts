@@ -1,8 +1,5 @@
-import { WordData } from "../../src/types/types";
-import {
-  buckwalterToArabic as b2a,
-  arabicToBuckwalter as a2b,
-} from "@/utils/arabic-buckwalter-transliteration";
+import { WordData } from "../../src/types";
+import { buckwalterToArabic as b2a, arabicToBuckwalter as a2b } from "@/utils/arabic-buckwalter-transliteration";
 
 type Data = {
   [key: string]: {
@@ -13,11 +10,7 @@ type Data = {
 };
 const data: Data = require("./../data.json");
 export type FillPgn = "1S" | "1P" | "2nd person" | "3FS" | "3rd person";
-export default async function getFillPgnOptions(
-  prefix: FillPgn,
-  position: string,
-  segIndex: number
-) {
+export default async function getFillPgnOptions(prefix: FillPgn, position: string, segIndex: number) {
   const [s, v, w] = position.split(":");
   const segments: WordData = data[+s][+v][+w];
   const options: WordData[] = [];
@@ -45,8 +38,7 @@ export default async function getFillPgnOptions(
   }
   prefixes.forEach((p) => {
     const newSegments: WordData = JSON.parse(JSON.stringify(segments));
-    newSegments[segIndex].buckwalter =
-      p + a2b(newSegments[segIndex].buckwalter.slice(1));
+    newSegments[segIndex].buckwalter = p + a2b(newSegments[segIndex].buckwalter.slice(1));
 
     if (newSegments.length != segments.length) {
       throw new Error();

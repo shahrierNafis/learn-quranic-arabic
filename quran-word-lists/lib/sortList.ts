@@ -1,4 +1,4 @@
-import { List, WordCount } from "../../src/types/types";
+import { List, WordCount } from "../../src/types";
 const wordCount: WordCount = require("../wordCount.json");
 
 export default function sortList(list: List) {

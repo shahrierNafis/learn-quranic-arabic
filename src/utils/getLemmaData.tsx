@@ -1,5 +1,5 @@
 "use server";
-import { LemmaData } from "@/types/types";
+import { LemmaData } from "@/types";
 import { cache } from "react";
 
 const lemmaData: LemmaData[] = require("@/lemmaData.json");

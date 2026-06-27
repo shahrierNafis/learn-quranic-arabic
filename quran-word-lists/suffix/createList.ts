@@ -1,10 +1,5 @@
 import fs from "fs";
-import {
-  List,
-  WordData,
-  Requirements,
-  WordSegment,
-} from "../../src/types/types";
+import { List, WordData, Requirements, WordSegment } from "../../src/types";
 import path from "path";
 import { descriptions } from "./descriptions";
 import getOptions from "../lib/getOptions";
@@ -35,11 +30,7 @@ for (const s in data) {
   for (const v in data[s]) {
     for (const w in data[s][v]) {
       const word = data[s][v][w];
-      if (
-        word.some(
-          (segment) => segment.aspect == "IMPV" || segment.aspect == "IMPF"
-        )
-      ) {
+      if (word.some((segment) => segment.aspect == "IMPV" || segment.aspect == "IMPF")) {
         continue;
       }
       for (const segIndex in word) {
@@ -60,11 +51,7 @@ for (const s in data) {
           suffixGroup.spellings?.add(word[segIndex].buckwalter);
           suffixGroup.name = SuffixGroupName;
           suffixGroup.description =
-            getDescription(
-              word,
-              +segIndex,
-              Array.from(suffixGroup?.spellings ?? [])
-            ) ?? word[segIndex].affix;
+            getDescription(word, +segIndex, Array.from(suffixGroup?.spellings ?? [])) ?? word[segIndex].affix;
           if (["OBJ", "SUBJ", "OBJ2"].includes(word[segIndex].partOfSpeech)) {
             suffixGroup.getOptions = propGetOptions;
           } else {
@@ -76,11 +63,7 @@ for (const s in data) {
     }
   }
 }
-async function propGetOptions(
-  position: string,
-  segIndex: string,
-  extraSegments?: WordSegment[]
-) {
+async function propGetOptions(position: string, segIndex: string, extraSegments?: WordSegment[]) {
   const requirements: Requirements = [
     {
       shouldMatch: ["partOfSpeech", "arPartOfSpeech"],
@@ -90,11 +73,7 @@ async function propGetOptions(
   return await getOptions(position, segIndex, requirements, extraSegments);
 }
 
-async function propGetHarfOptions(
-  position: string,
-  segIndex: string,
-  extraSegments?: WordSegment[]
-) {
+async function propGetHarfOptions(position: string, segIndex: string, extraSegments?: WordSegment[]) {
   return await getOptions(position, segIndex, HarfRequirement, extraSegments);
 }
 const sortedList = sortList(list);
@@ -105,16 +84,14 @@ console.log(
       .map((sli) => {
         return { name: sli.name, spellings: Array.from(sli.spellings ?? []) };
       })
-      .filter((sli) => sli.name.startsWith("SUBJ"))
-  )
+      .filter((sli) => sli.name.startsWith("SUBJ")),
+  ),
 );
 
 for (const i in sortedList) {
   const [s, v, w] = sortedList[i].words[0]?.position.split(":");
   const word = data[+s][+v][+w];
-  const extraSegments: WordSegment[] = Array.from(
-    sortedList[i].spellings ?? []
-  ).map((buc) => {
+  const extraSegments: WordSegment[] = Array.from(sortedList[i].spellings ?? []).map((buc) => {
     return {
       arabic: buckwalterToArabic(buc),
       buckwalter: buc,
@@ -124,12 +101,11 @@ for (const i in sortedList) {
     };
   });
 
-  options[cyrb64(sortedList[i].words.map((w) => w.position).join("")) + ""] =
-    await sortedList[i].getOptions(
-      sortedList[i].words[0]?.position,
-      sortedList[i].words[0]?.segIndex + "",
-      extraSegments
-    );
+  options[cyrb64(sortedList[i].words.map((w) => w.position).join("")) + ""] = await sortedList[i].getOptions(
+    sortedList[i].words[0]?.position,
+    sortedList[i].words[0]?.segIndex + "",
+    extraSegments,
+  );
 
   console.log(i + "/" + sortedList.length);
 }
@@ -142,7 +118,7 @@ fs.writeFile(
   function (err) {
     if (err) throw err;
     console.log("./.seed-data/suffixList.json");
-  }
+  },
 );
 // write listCount
 fs.writeFile(
@@ -150,12 +126,12 @@ fs.writeFile(
   JSON.stringify(
     sortedList.map((arr) => {
       return arr.positions.length;
-    })
+    }),
   ),
   function (err) {
     if (err) throw err;
     console.log(__dirname + "listCount.json");
-  }
+  },
 ); // write options
 fs.writeFile("./src/options.json", JSON.stringify(options), function (err) {
   if (err) throw err;
@@ -163,8 +139,7 @@ fs.writeFile("./src/options.json", JSON.stringify(options), function (err) {
 });
 
 function getDescription(word: WordData, segIndex: number, spellings: string[]) {
-  let description =
-    (word[segIndex].affix && descriptions[word[segIndex].affix]) ?? "";
+  let description = (word[segIndex].affix && descriptions[word[segIndex].affix]) ?? "";
   if (!word[segIndex].affix) {
     switch (word[segIndex].person) {
       case 1:
@@ -200,8 +175,7 @@ function getDescription(word: WordData, segIndex: number, spellings: string[]) {
     }
 
     if (
-      (word[segIndex].partOfSpeech == "OBJ" ||
-        word[segIndex].partOfSpeech == "OBJ2") &&
+      (word[segIndex].partOfSpeech == "OBJ" || word[segIndex].partOfSpeech == "OBJ2") &&
       !(word[segIndex].person == 1 && word[segIndex].number == "S")
     ) {
       description += " object/possessive";
@@ -242,15 +216,8 @@ function getSuffixGroupName(word: WordData, segIndex: number): string {
   }
 
   let value =
-    word[segIndex].affix ??
-    word[segIndex].person +
-      "" +
-      (word[segIndex].gender ?? "") +
-      word[segIndex].number;
-  if (
-    word[segIndex].partOfSpeech === "OBJ" ||
-    word[segIndex].partOfSpeech === "OBJ2"
-  ) {
+    word[segIndex].affix ?? word[segIndex].person + "" + (word[segIndex].gender ?? "") + word[segIndex].number;
+  if (word[segIndex].partOfSpeech === "OBJ" || word[segIndex].partOfSpeech === "OBJ2") {
     if (!(word[segIndex].person == 1 && word[segIndex].number == "S")) {
       return "OBJ_POS-" + value;
     } else {

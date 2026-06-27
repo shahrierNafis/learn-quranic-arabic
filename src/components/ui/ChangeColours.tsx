@@ -10,12 +10,12 @@ import {
 import { useOnlineStorage } from "@/stores/onlineStorage";
 import { useShallow } from "zustand/react/shallow";
 import relations from "@/utils/relations";
-import { PartOfSpeech } from "@/types/types";
+import { PartOfSpeech } from "@/types";
 import { ColourPicker } from "./ColourPicker";
 import { Button } from "./button";
 export default function ChangeColours() {
   const [colours, setColours, resetColours] = useOnlineStorage(
-    useShallow((a) => [a.colours, a.setColours, a.resetColours])
+    useShallow((a) => [a.colours, a.setColours, a.resetColours]),
   );
 
   return (

@@ -15,7 +15,7 @@ export const useLocalStorage = create<{
     score: number;
     verse_key: string;
   };
-  vocabularyMode: boolean;
+  order: "quran" | "frequency";
 }>()(
   persist(
     (set) => ({
@@ -40,7 +40,7 @@ export const useLocalStorage = create<{
         score: 0,
         verse_key: "1:1",
       },
-      vocabularyMode: true,
+      order: "quran",
     }),
     {
       name: "useLocalStorage", // name of the item in the storage (must be unique)

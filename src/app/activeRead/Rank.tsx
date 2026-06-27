@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { ColumnDef, flexRender, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 import { useOnlineStorage } from "@/stores/onlineStorage";
 import getLemmaDataArr from "./getLemmaDataArr";
-import { LemmaData } from "@/types/types";
+import { LemmaData } from "@/types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DataTablePagination } from "@/components/ui/DataTablePagination";
 import { buckwalterToArabic } from "@/utils/arabic-buckwalter-transliteration";

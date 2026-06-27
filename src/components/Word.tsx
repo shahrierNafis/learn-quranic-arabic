@@ -1,4 +1,4 @@
-import { WORD, WordData } from "@/types/types";
+import { WORD, WordData } from "@/types";
 import React from "react";
 import { useOnlineStorage } from "@/stores/onlineStorage";
 import { useShallow } from "zustand/react/shallow";

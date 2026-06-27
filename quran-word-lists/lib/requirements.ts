@@ -1,4 +1,4 @@
-import { Requirements } from "../../src/types/types";
+import { Requirements } from "../../src/types";
 
 export const lemmaRequirements: Requirements = [
   {

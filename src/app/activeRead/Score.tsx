@@ -49,7 +49,7 @@ export default function Score({
   const percentageGold = Math.min(100, (gold / goal) * 100);
   const percentageLightGreen = won ? 0 : Math.min(100, ((fullScore - currentScore) / goal) * 100);
   const [open, setOpen] = useState(false);
-  const [vocabularyMode] = useLocalStorage(useShallow((state) => [state.vocabularyMode]));
+  const [order] = useLocalStorage(useShallow((state) => [state.order]));
 
   if (currentVerseScore > verseLength ** 2) {
   }
@@ -111,11 +111,13 @@ export default function Score({
         ) : (
           <div className="flex gap-2 items-center justify-center mt-2">
             <Button
-              onClick={() => useLocalStorage.setState((state) => ({ vocabularyMode: !state.vocabularyMode }))}
+              onClick={() =>
+                useLocalStorage.setState((state) => ({ order: state.order === "quran" ? "frequency" : "quran" }))
+              }
               className=""
-              variant={vocabularyMode ? "secondary" : "outline"}
+              variant={order === "frequency" ? "secondary" : "outline"}
             >
-              <div>Vocabulary Mode: {vocabularyMode ? "On" : "Off"}</div>
+              <div>Order: {order === "quran" ? "Quran" : "Frequency"}</div>
             </Button>
             <AnimationLoop />
             <Button onClick={() => setOpen(true)} className="" variant={"outline"}>
@@ -126,8 +128,8 @@ export default function Score({
                 })()}
               </div>
             </Button>
-            <Button disabled={!vocabularyMode} onClick={() => setOpen(true)} className="" variant={"outline"}>
-              <div>Rank {vocabularyMode && currentRank[0]}</div>
+            <Button disabled={order == "quran"} onClick={() => setOpen(true)} className="" variant={"outline"}>
+              <div>Rank {order === "frequency" && currentRank[0]}</div>
             </Button>
             <Button
               variant={"outline"}
@@ -157,7 +159,7 @@ export default function Score({
       <DialogContent className="max-w-[80vw] flex flex-col  max-h-[80vh]">
         <DialogHeader className="overflow-y-auto">
           <DialogTitle>Progress</DialogTitle>
-          {vocabularyMode ? (
+          {order == "frequency" ? (
             <>
               <EditRanks currentRank={currentRank[0]} />
             </>

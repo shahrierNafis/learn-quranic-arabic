@@ -1,4 +1,4 @@
-import { LemmaData, WordCount, WordData } from "../src/types/types";
+import { LemmaData, WordCount, WordData } from "../src/types";
 import fs from "fs";
 
 type Data = {

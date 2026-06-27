@@ -1,21 +1,11 @@
 import fs from "fs";
-import {
-  List,
-  WordData,
-  WordCount,
-  Requirements,
-  WordSegment,
-  PartOfSpeech,
-} from "../../src/types/types";
+import { List, WordData, WordCount, Requirements, WordSegment, PartOfSpeech } from "../../src/types";
 import path from "path";
 import { descriptions } from "./descriptions";
 import getOptions from "../lib/getOptions";
 import { HarfRequirement } from "../lib/requirements";
 import sortList from "../lib/sortList";
-import {
-  arabicToBuckwalter,
-  buckwalterToArabic as bt,
-} from "@/utils/arabic-buckwalter-transliteration";
+import { arabicToBuckwalter, buckwalterToArabic as bt } from "@/utils/arabic-buckwalter-transliteration";
 import _ from "lodash";
 import { cyrb64 } from "../lib/cyrb64";
 let options: {
@@ -57,23 +47,15 @@ for (const s in data) {
             segIndex: segIndex,
           });
           group.getOptions = propGetHarfOptions;
-          group.name =
-            bt(word[segIndex].lemma) + " " + word[segIndex].partOfSpeech;
-          group.description =
-            bt(word[segIndex].lemma) +
-            ": " +
-            descriptions[word[segIndex].partOfSpeech ?? ""];
+          group.name = bt(word[segIndex].lemma) + " " + word[segIndex].partOfSpeech;
+          group.description = bt(word[segIndex].lemma) + ": " + descriptions[word[segIndex].partOfSpeech ?? ""];
           list[groupName] = group;
         }
       }
     }
   }
 }
-async function propGetHarfOptions(
-  position: string,
-  segIndex: string,
-  extraSegments?: WordSegment[]
-) {
+async function propGetHarfOptions(position: string, segIndex: string, extraSegments?: WordSegment[]) {
   return await getOptions(position, segIndex, HarfRequirement, extraSegments);
 }
 const spellingsArr: { [key in PartOfSpeech]?: string[] } = {
@@ -176,37 +158,13 @@ const spellingsArr: { [key in PartOfSpeech]?: string[] } = {
     "لَعَلِّ",
     "وَيْكَأَنَّ",
   ],
-  CONJ: [
-    "أَمْ",
-    "أَوْ",
-    "ثُمَّ",
-    "أَمِ",
-    "أَوِ",
-    "أَم",
-    "أَ",
-    "أَمَّا",
-    "أَمَّاذَا",
-    "أَو",
-    "بَلْ",
-  ],
+  CONJ: ["أَمْ", "أَوْ", "ثُمَّ", "أَمِ", "أَوِ", "أَم", "أَ", "أَمَّا", "أَمَّاذَا", "أَو", "بَلْ"],
   RES: ["إِلَّآ", "إِلَّا"],
   PRO: ["لَا", "لَّا"],
   PREV: ["مَا", "مَآ", "مَّا"],
   INC: ["أَلَآ", "حَتَّىءٓ", "بَلْ", "بَلِ", "أَلَا", "حَتَّىء"],
   AMD: ["لَءكِن", "لَءكِنِ", "لَءكِنْ", "لَّءكِنِ", "لَءكِنۢ"],
-  SUB: [
-    "مَآ",
-    "أَن",
-    "أَنْ",
-    "مَا",
-    "لَوْ",
-    "ئَ",
-    "أَ",
-    "كَيْلَا",
-    "مَّا",
-    "أَنِ",
-    "كَىْ",
-  ],
+  SUB: ["مَآ", "أَن", "أَنْ", "مَا", "لَوْ", "ئَ", "أَ", "كَيْلَا", "مَّا", "أَنِ", "كَىْ"],
   COND: [
     "لَوْ",
     "إِن",
@@ -294,8 +252,7 @@ const sortedList = sortList(list);
 for (const i in sortedList) {
   const [s, v, w] = sortedList[i].words[0].position.split(":");
   const wordData = data[+s][+v][+w];
-  const { arabic, partOfSpeech, arPartOfSpeech, position } =
-    wordData[+sortedList[i].words[0]?.segIndex];
+  const { arabic, partOfSpeech, arPartOfSpeech, position } = wordData[+sortedList[i].words[0]?.segIndex];
 
   const extraSegments: WordSegment[] = // all the spellings of the its partOfSpeech
     Object.values(spellingsArr)
@@ -309,12 +266,11 @@ for (const i in sortedList) {
         position,
       })) ?? [];
 
-  options[cyrb64(sortedList[i].words.map((w) => w.position).join("")) + ""] =
-    await sortedList[i].getOptions(
-      sortedList[i].words[0]?.position,
-      sortedList[i].words[0]?.segIndex + "",
-      extraSegments
-    );
+  options[cyrb64(sortedList[i].words.map((w) => w.position).join("")) + ""] = await sortedList[i].getOptions(
+    sortedList[i].words[0]?.position,
+    sortedList[i].words[0]?.segIndex + "",
+    extraSegments,
+  );
 
   console.log(i + "/" + sortedList.length);
 }
@@ -326,7 +282,7 @@ fs.writeFile(
   function (err) {
     if (err) throw err;
     console.log("./.seed-data/harfList.json");
-  }
+  },
 );
 // write listCount
 fs.writeFile(
@@ -334,12 +290,12 @@ fs.writeFile(
   JSON.stringify(
     sortedList.map((arr) => {
       return arr.positions.length;
-    })
+    }),
   ),
   function (err) {
     if (err) throw err;
     console.log(__dirname + "listCount.json");
-  }
+  },
 );
 // write options
 fs.writeFile("./src/options.json", JSON.stringify(options), function (err) {

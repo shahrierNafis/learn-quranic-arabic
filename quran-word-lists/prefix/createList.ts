@@ -1,10 +1,5 @@
 import fs from "fs";
-import {
-  List,
-  WordData,
-  WordSegment,
-  PartOfSpeech,
-} from "../../src/types/types";
+import { List, WordData, WordSegment, PartOfSpeech } from "../../src/types";
 import path from "path";
 import { descriptions } from "./descriptions";
 import getFillPgnOptions, { FillPgn } from "../lib/getFillPgnOptions";
@@ -64,8 +59,7 @@ for (const s in data) {
           });
           prefixGroup.getOptions = propGetHarfOptions;
           prefixGroup.name = word[segIndex].affix;
-          prefixGroup.description =
-            descriptions[word[segIndex].affix] ?? word[segIndex].affix;
+          prefixGroup.description = descriptions[word[segIndex].affix] ?? word[segIndex].affix;
 
           list[word[segIndex].affix] = prefixGroup;
         }
@@ -77,29 +71,21 @@ for (const s in data) {
             if (word[segIndex].person == 1) {
               if (word[segIndex].number == "S") {
                 prefix = "1S";
-                description =
-                  "1st person singular pronoun prefix ا(alif) attached to an imperfect verb";
+                description = "1st person singular pronoun prefix ا(alif) attached to an imperfect verb";
               } else if (word[segIndex].number == "P") {
                 prefix = "1P";
-                description =
-                  "1st person plural pronoun prefix نَ(na) attached to an imperfect verb";
+                description = "1st person plural pronoun prefix نَ(na) attached to an imperfect verb";
               }
             } else if (word[segIndex].person === 2) {
               prefix = "2nd person";
-              description =
-                "2nd person pronoun prefix تَ(ta) attached to an imperfect verb";
+              description = "2nd person pronoun prefix تَ(ta) attached to an imperfect verb";
             } else if (word[segIndex].person == 3) {
-              if (
-                word[segIndex].gender == "F" &&
-                word[segIndex].number == "S"
-              ) {
+              if (word[segIndex].gender == "F" && word[segIndex].number == "S") {
                 prefix = "3FS";
-                description =
-                  "3rd person singular feminine pronoun prefix تَ(ta) attached to an imperfect verb";
+                description = "3rd person singular feminine pronoun prefix تَ(ta) attached to an imperfect verb";
               } else {
                 prefix = "3rd person";
-                description =
-                  "3rd person pronoun prefix یَ(ya) attached to an imperfect verb";
+                description = "3rd person pronoun prefix یَ(ya) attached to an imperfect verb";
               }
             }
             const prefixGroup = list[prefix] ?? {
@@ -117,7 +103,7 @@ for (const s in data) {
             prefixGroup.getOptions = async function (
               position: string,
               segIndex: string,
-              extraSegments?: WordSegment[]
+              extraSegments?: WordSegment[],
             ) {
               return await getFillPgnOptions(prefix, position, +segIndex);
             };
@@ -129,11 +115,7 @@ for (const s in data) {
     }
   }
 }
-async function propGetHarfOptions(
-  position: string,
-  segIndex: string,
-  extraSegments?: WordSegment[]
-) {
+async function propGetHarfOptions(position: string, segIndex: string, extraSegments?: WordSegment[]) {
   return await getOptions(position, segIndex, HarfRequirement, extraSegments);
 }
 
@@ -142,8 +124,7 @@ const sortedList = sortList(list);
 for (const i in sortedList) {
   const [s, v, w] = sortedList[i].words[0].position.split(":");
   const wordData = data[s][v][w];
-  const { arabic, partOfSpeech, arPartOfSpeech, position } =
-    wordData[+sortedList[i].words[0]?.segIndex];
+  const { arabic, partOfSpeech, arPartOfSpeech, position } = wordData[+sortedList[i].words[0]?.segIndex];
 
   const extraSegments: WordSegment[] = wordData
 
@@ -164,15 +145,14 @@ for (const i in sortedList) {
             partOfSpeech,
             position,
           };
-        }) ?? []
+        }) ?? [],
     );
 
-  options[cyrb64(sortedList[i].words.map((w) => w.position).join("")) + ""] =
-    await sortedList[i].getOptions(
-      sortedList[i].words[0]?.position,
-      sortedList[i].words[0]?.segIndex + "",
-      extraSegments
-    );
+  options[cyrb64(sortedList[i].words.map((w) => w.position).join("")) + ""] = await sortedList[i].getOptions(
+    sortedList[i].words[0]?.position,
+    sortedList[i].words[0]?.segIndex + "",
+    extraSegments,
+  );
 
   console.log(i + "/" + sortedList.length);
 }
@@ -186,7 +166,7 @@ fs.writeFile(
   function (err) {
     if (err) throw err;
     console.log("./.seed-data/prefixList.json");
-  }
+  },
 );
 // write listCount
 fs.writeFile(
@@ -194,12 +174,12 @@ fs.writeFile(
   JSON.stringify(
     sortedList.map((arr) => {
       return arr.positions.length;
-    })
+    }),
   ),
   function (err) {
     if (err) throw err;
     console.log(__dirname + "listCount.json");
-  }
+  },
 );
 // write options
 fs.writeFile("./src/options.json", JSON.stringify(options), function (err) {

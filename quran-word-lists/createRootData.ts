@@ -1,4 +1,4 @@
-import { WordCount, WordData } from "../src/types/types";
+import { WordCount, WordData } from "../src/types";
 import fs from "fs";
 
 type Data = {

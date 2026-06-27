@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import MotionDiv from "@/components/MotionDiv";
 import { Button } from "@/components/ui/button";
-import { LemmaData, WORD } from "@/types/types";
+import { LemmaData, WORD } from "@/types";
 import { useShallow } from "zustand/react/shallow";
 import { Skeleton } from "@/components/ui/skeleton";
 import Translations from "@/components/Translations";
@@ -57,7 +57,7 @@ export default function Start({
   const [searchTerm, setSearchTerm] = useState("");
   const [ARProgress] = useOnlineStorage(useShallow((state) => [state.ARProgress]));
   const { audioVerse, setAudioVerse } = useVerseAudio();
-  const [vocabularyMode] = useLocalStorage(useShallow((state) => [state.vocabularyMode]));
+  const [order] = useLocalStorage(useShallow((state) => [state.order]));
   const ranks = useOnlineStorage((state) => state.ranks);
 
   const verseCompleted: boolean = useLocalStorage.getState().currentVerse.score >= verse.length ** 2;
@@ -66,9 +66,10 @@ export default function Start({
     useLocalStorage.setState(() => ({
       currentVerse: {
         score: 0,
-        verse_key: vocabularyMode
-          ? (lemmaDataArr[currentRank[0]]?.positions[currentRank[1]] as `${string}:${string}`)
-          : verse_key,
+        verse_key:
+          order === "frequency"
+            ? (lemmaDataArr[currentRank[0]]?.positions[currentRank[1]] as `${string}:${string}`)
+            : verse_key,
       },
     })); // clear current verse score if wrong verse is loaded
   }
@@ -225,7 +226,7 @@ export default function Start({
                       <Verse
                         {...{
                           verse,
-                          highlightIndex: vocabularyMode ? Number(verse_key?.split(":")[2]) - 1 : undefined,
+                          highlightIndex: order == "frequency" ? Number(verse_key?.split(":")[2]) - 1 : undefined,
                         }}
                       ></Verse>
                     </motion.div>
@@ -349,7 +350,7 @@ export default function Start({
                               const randomWidth = Math.floor(Math.random() * (12 - 6 + 1)) + 6;
                               return (
                                 <MotionDiv key={i}>
-                                  <Skeleton style={{ width: `${randomWidth}rem` }} className={`h-[48px] rounded-md`} />
+                                  <Skeleton style={{ width: `${randomWidth}rem` }} className={`h-12 rounded-md`} />
                                 </MotionDiv>
                               );
                             })}
@@ -436,7 +437,7 @@ export default function Start({
       }));
       const verseNowCompletes = currentVerseScore + score >= verse.length ** 2;
       if (verseNowCompletes) {
-        if (vocabularyMode) {
+        if (order === "frequency") {
           useOnlineStorage.setState((state) => {
             const newRanks = [...state.ranks];
             newRanks[currentRank[0]] = currentRank[1] + 1;

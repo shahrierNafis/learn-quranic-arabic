@@ -1,4 +1,4 @@
-import { Requirements, WordData, WordSegment } from "../../src/types/types";
+import { Requirements, WordData, WordSegment } from "../../src/types";
 
 type Data = Record<string, Record<string, Record<string, WordData>>>;
 type FlattenedData = Record<string, WordData>;
@@ -8,7 +8,7 @@ export default async function getOptions(
   position: string,
   segIndex: string,
   requirements: Requirements,
-  extraSegments: WordSegment[] = []
+  extraSegments: WordSegment[] = [],
 ): Promise<WordData[]> {
   const data: Data = require("./../data.json");
   const [surah, verse, word] = position.split(":").map(Number);
@@ -20,23 +20,13 @@ export default async function getOptions(
   }
   const shuffledData = fisherYatesShuffle(Object.values(flattenedDataCache));
 
-  const segments = await findMatchingSegments(
-    wordData,
-    segIndex,
-    requirements,
-    extraSegments,
-    shuffledData
-  );
+  const segments = await findMatchingSegments(wordData, segIndex, requirements, extraSegments, shuffledData);
 
   if (segments.length !== 3) {
-    throw new Error(
-      `Failed to find required segments: ${JSON.stringify(wordData)}`
-    );
+    throw new Error(`Failed to find required segments: ${JSON.stringify(wordData)}`);
   }
 
-  return segments.map((segment) =>
-    createNewWordData(wordData, segment, segIndex)
-  );
+  return segments.map((segment) => createNewWordData(wordData, segment, segIndex));
 }
 
 function fisherYatesShuffle<T>(array: T[]): T[] {
@@ -53,7 +43,7 @@ async function findMatchingSegments(
   segIndex: string,
   requirements: Requirements,
   extraSegments: WordSegment[],
-  shuffledData: WordData[]
+  shuffledData: WordData[],
 ): Promise<WordSegment[]> {
   const segments: WordSegment[] = [];
 
@@ -66,16 +56,7 @@ async function findMatchingSegments(
       for (const randomSegment of randomWordData) {
         if (segments.length === 3) break;
 
-        if (
-          isSegmentValid(
-            randomSegment,
-            wordData[+segIndex],
-            segments,
-            extraSegments,
-            shouldNotMatch,
-            shouldMatch
-          )
-        ) {
+        if (isSegmentValid(randomSegment, wordData[+segIndex], segments, extraSegments, shouldNotMatch, shouldMatch)) {
           segments.push(randomSegment);
         }
       }
@@ -91,34 +72,24 @@ function isSegmentValid(
   existingSegments: WordSegment[],
   extraSegments: WordSegment[],
   shouldNotMatch: string[],
-  shouldMatch: string[]
+  shouldMatch: string[],
 ): boolean {
   const allSegments = [baseSegment, ...existingSegments, ...extraSegments];
 
   return allSegments.every((existing) =>
     Object.keys(existing).every((key) => {
       if (shouldNotMatch.includes(key)) {
-        return (
-          segment[key as keyof WordSegment] !==
-          existing[key as keyof WordSegment]
-        );
+        return segment[key as keyof WordSegment] !== existing[key as keyof WordSegment];
       }
       if (shouldMatch.includes(key)) {
-        return (
-          segment[key as keyof WordSegment] ===
-          existing[key as keyof WordSegment]
-        );
+        return segment[key as keyof WordSegment] === existing[key as keyof WordSegment];
       }
       return true;
-    })
+    }),
   );
 }
 
-function createNewWordData(
-  originalData: WordData,
-  segment: WordSegment,
-  segIndex: string
-): WordData {
+function createNewWordData(originalData: WordData, segment: WordSegment, segIndex: string): WordData {
   const newData = structuredClone(originalData);
   newData[+segIndex] = segment;
 

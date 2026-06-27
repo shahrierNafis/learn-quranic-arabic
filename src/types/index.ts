@@ -51,7 +51,7 @@ export type WordSegment = {
 
   derivation?: "ACT PCPL" | "PASS PCPL" | "VN";
   state?: "DEF" | "INDEF";
-  grammaticalCase?: string;
+  grammaticalCase?: "GEN" | "ACC" | "NOM";
 };
 export type OPTION = {
   wordSegments: WordData;
@@ -183,3 +183,17 @@ export type LemmaData = {
   count: number;
   rank: number;
 };
+
+export type IdleSentence = {
+  chapter: string;
+  verse: string;
+  wordCount: number;
+  nomCount: number;
+  accCount: number;
+  verbCount: number;
+};
+import { Card } from "ts-fsrs";
+
+export type FlashCard = {
+  sentence: IdleSentence;
+} & Card;
