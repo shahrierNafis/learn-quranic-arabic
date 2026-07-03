@@ -37,7 +37,7 @@ export default function Score({
   const [currentVerseScore] = useLocalStorage(useShallow((state) => [state.currentVerse.score]));
   const fullScore = verseLength ** 2 / (useLocalStorage.getState().maxLives * divideBy);
   const won = currentScore == fullScore;
-  const previousScore = (score - currentVerseScore) % goal;
+  const previousScore = Math.round(score - currentVerseScore) % goal;
   const leveledUp = previousScore + currentScore + currentVerseScore >= goal;
   currentScore = !won ? currentScore : 0;
   const blue = Math.max(0, leveledUp ? (currentVerseScore + previousScore) % goal : currentVerseScore - currentScore);
@@ -176,9 +176,9 @@ export default function Score({
               const input = prompt("set progress", score + "");
               if (input === null) return;
               setScore(Number(input));
-              useLocalStorage.setState((state) => ({
-                currentVerse: { ...state.currentVerse, score: Number(input) },
-              }));
+              // useLocalStorage.setState((state) => ({
+              //   currentVerse: { ...state.currentVerse, score: Number(input) },
+              // }));
             }}
           >
             Edit XP: {Math.round(score)}
