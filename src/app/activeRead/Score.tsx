@@ -18,6 +18,7 @@ import { useLocalStorage } from "@/stores/localStorage";
 import { cn } from "@/lib/utils";
 import roundToTwo from "@/utils/roundToTwo";
 import EditRanks from "./Rank";
+import { ButtonGroup } from "@/components/ui/button-group";
 
 export default function Score({
   noButtons,
@@ -110,15 +111,6 @@ export default function Score({
           ""
         ) : (
           <div className="flex gap-2 items-center justify-center mt-2">
-            <Button
-              onClick={() =>
-                useLocalStorage.setState((state) => ({ order: state.order === "quran" ? "frequency" : "quran" }))
-              }
-              className=""
-              variant={order === "frequency" ? "secondary" : "outline"}
-            >
-              <div>Order: {order === "quran" ? "Quran" : "Frequency"}</div>
-            </Button>
             <AnimationLoop />
             <Button onClick={() => setOpen(true)} className="" variant={"outline"}>
               <div>
@@ -128,6 +120,22 @@ export default function Score({
                 })()}
               </div>
             </Button>
+            <ButtonGroup aria-label="Button group">
+              <Button
+                onClick={() => useLocalStorage.setState(() => ({ order: "frequency" }))}
+                className=""
+                variant={order === "frequency" ? "secondary" : "outline"}
+              >
+                <div>Frequency List</div>
+              </Button>
+              <Button
+                onClick={() => useLocalStorage.setState(() => ({ order: "quran" }))}
+                className=""
+                variant={order === "quran" ? "secondary" : "outline"}
+              >
+                <div>Quran</div>
+              </Button>
+            </ButtonGroup>
             <Button disabled={order == "quran"} onClick={() => setOpen(true)} className="" variant={"outline"}>
               <div>Rank {order === "frequency" && currentRank[0]}</div>
             </Button>
@@ -139,16 +147,6 @@ export default function Score({
                 useLocalStorage.setState(() => ({
                   goal: Number(input),
                 }));
-                // if (confirm("Change XP accordingly?")) {
-                //   useOnlineStorage.setState((state) => {
-                //     useLocalStorage.setState(() => ({
-                //       lastScore: (state.ARScore / goal) * Number(input),
-                //     }));
-                //     return {
-                //       ARScore: (state.ARScore / goal) * Number(input),
-                //     };
-                //   });
-                // }
               }}
             >
               set Goal
