@@ -55,10 +55,8 @@ export default function Start({
   const wrongSoundEffect = useSound("/audio/duolingo-wrong.mp3")[0];
   const [divideBy, setDivideBy] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const [ARProgress] = useOnlineStorage(useShallow((state) => [state.ARProgress]));
   const { audioVerse, setAudioVerse } = useVerseAudio();
   const [order] = useLocalStorage(useShallow((state) => [state.order]));
-  const ranks = useOnlineStorage((state) => state.ranks);
 
   const verseCompleted: boolean = useLocalStorage.getState().currentVerse.score >= verse.length ** 2;
 
@@ -85,7 +83,17 @@ export default function Start({
 
   function redo() {
     userWords.length !== 0 && reset();
-    verse_key && useOnlineStorage.getState().setARProgress(+verse_key?.split(":")[0], +verse_key?.split(":")[1] - 1);
+    order === "quran" &&
+      verse_key &&
+      useOnlineStorage.getState().setARProgress(+verse_key?.split(":")[0], +verse_key?.split(":")[1] - 1);
+    order === "frequency" &&
+      currentRank.length &&
+      lemmaDataArr.length &&
+      useOnlineStorage.setState((state) => {
+        const newRanks = [...state.ranks];
+        newRanks[currentRank[0]] = currentRank[1] - 1;
+        return { ranks: newRanks };
+      });
   }
 
   return (
