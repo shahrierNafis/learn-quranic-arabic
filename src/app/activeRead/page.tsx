@@ -15,13 +15,14 @@ import useSound from "use-sound";
 import roundToTwo from "@/utils/roundToTwo";
 import getLemmaDataArr from "./getLemmaDataArr";
 import { buckwalterToArabic } from "@/utils/arabic-buckwalter-transliteration";
+import Nav from "./Nav";
 export default function Page() {
   const [verse_key, setVerse_key] = useState<string | null>(null);
   const [verse, setVerse] = useState<WORD[]>([]); // the actual verse
   const [hold, setHold] = useState(false);
 
-  const ARProgress = useOnlineStorage((state) => state.ARProgress);
-  const addARProgress = useOnlineStorage(useShallow((state) => state.addARProgress));
+  const QuranProgress = useOnlineStorage((state) => state.QuranProgress);
+  const addQuranProgress = useOnlineStorage(useShallow((state) => state.addQuranProgress));
   const chapters = useLocalStorage((state) => state.chapters);
   const correctSoundEffect = useSound("/audio/duolingo-correct.mp3")[0];
   const [order] = useLocalStorage(useShallow((state) => [state.order]));
@@ -74,8 +75,8 @@ export default function Page() {
     } else {
       setVerse_key(null);
       const nextChapter = [...chapters].sort((a, b) => {
-        const iterationA = Math.floor(ARProgress[a] / getChapterLength(a));
-        const iterationB = Math.floor(ARProgress[b] / getChapterLength(b));
+        const iterationA = Math.floor(QuranProgress[a] / getChapterLength(a));
+        const iterationB = Math.floor(QuranProgress[b] / getChapterLength(b));
         if (iterationA == iterationB) {
           return +a - +b; // put chapters with lower index first
         }
@@ -83,11 +84,11 @@ export default function Page() {
       })[0];
       nextChapter
         ? setVerse_key(
-            `${nextChapter}:${Math.trunc((ARProgress[nextChapter] % getChapterLength(nextChapter)) + 1)}`, // set the next verse
+            `${nextChapter}:${Math.trunc((QuranProgress[nextChapter] % getChapterLength(nextChapter)) + 1)}`, // set the next verse
           )
         : setVerse_key(null);
     }
-  }, [ARProgress, chapters, currentRank, lemmaDataArr, ranks, order]);
+  }, [QuranProgress, chapters, currentRank, lemmaDataArr, ranks, order]);
 
   useEffect(() => {
     // Create an AbortController for this effect instance
@@ -119,7 +120,7 @@ export default function Page() {
   return (
     <>
       <div className="h-screen auto-cols-[100%] grid grid-rows-3 justify-items-center content-center items-center ">
-        <Score currentScore={0} currentRank={currentRank} verseLength={verse.length} divideBy={1} />
+        <Nav />
         <div className="p-2 w-fit h-fit flex flex-col items-center justify-center gap-4 overflow-hidden">
           <div className="grid grid-cols-3 items-center content-center gap-2">
             {/* reload Btn */}
@@ -140,7 +141,7 @@ export default function Page() {
             <Button
               variant={"outline"}
               onClick={() => {
-                // const ARScore = useOnlineStorage.getState().ARScore;
+                if (confirm("are you sure you want to skip this verse?") === false) return;
                 useLocalStorage.getState().currentVerse.score > 0 &&
                   toast.success(`You earned ${roundToTwo(useLocalStorage.getState().currentVerse.score)} points!`, {});
                 correctSoundEffect();
@@ -150,7 +151,6 @@ export default function Page() {
                     verse_key: useLocalStorage.getState().currentVerse.verse_key,
                   },
                 }));
-
                 if (order === "frequency") {
                   useOnlineStorage.setState((state) => {
                     const newRanks = [...state.ranks];
@@ -158,10 +158,7 @@ export default function Page() {
 
                     return { ranks: newRanks };
                   });
-                } else
-                  verse_key &&
-                    confirm("are you sure you want to skip this verse?") &&
-                    addARProgress(+verse_key?.split(":")[0], 1);
+                } else verse_key && addQuranProgress(+verse_key?.split(":")[0], 1);
               }}
               dir="ltr"
             >

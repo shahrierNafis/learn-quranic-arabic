@@ -22,12 +22,21 @@ import Translations from "@/components/Translations";
 import useVerseAudio from "@/components/useVerseAudio";
 import { useLocalStorage } from "@/stores/localStorage";
 import { useOnlineStorage } from "@/stores/onlineStorage";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 import Score from "./Score";
 import VerseInfo from "./VerseInfo";
 import { CircularProgressButton } from "./CircularProgressButton";
 import { EasingFactorSelector, validChunkSizes } from "./EasingFactorSelector";
+import DailyGoals from "./DailyGoals";
 
 export default function Start({
   verse,
@@ -57,7 +66,7 @@ export default function Start({
   const [searchTerm, setSearchTerm] = useState("");
   const { audioVerse, setAudioVerse } = useVerseAudio();
   const [order] = useLocalStorage(useShallow((state) => [state.order]));
-
+  const [openDailyGoals, setOpenDailyGoals] = useState(false);
   const verseCompleted: boolean = useLocalStorage.getState().currentVerse.score >= verse.length ** 2;
 
   if (verse_key && useLocalStorage.getState().currentVerse.verse_key !== verse_key) {
@@ -81,11 +90,18 @@ export default function Start({
     reset();
   }, [reset, verse]);
 
+  useEffect(() => {
+    if (userWords.length && useLocalStorage.getState().currentVerse.score >= verse.length ** 2) {
+      setOpenDailyGoals(true);
+    }
+  }, [userWords.length, verse]);
+
   function redo() {
+    useLocalStorage.setState((state) => ({ currentVerse: { ...state.currentVerse, score: 0 } }));
     userWords.length !== 0 && reset();
     order === "quran" &&
       verse_key &&
-      useOnlineStorage.getState().setARProgress(+verse_key?.split(":")[0], +verse_key?.split(":")[1] - 1);
+      useOnlineStorage.getState().setQuranProgress(+verse_key?.split(":")[0], +verse_key?.split(":")[1] - 1);
     order === "frequency" &&
       currentRank.length &&
       lemmaDataArr.length &&
@@ -130,16 +146,22 @@ export default function Start({
             </div>
           </CircularProgressButton>
         </DialogTrigger>
-        <DialogContent className="w-full max-w-full h-screen overflow-y-auto pt-0 grid-rows-[auto_1fr] auto-cols-[100%] ">
+        <DialogContent className="w-full sm:max-w-full h-screen overflow-y-auto pt-0 grid-rows-[auto_1fr] auto-cols-[100%] ">
           <Score
-            currentRank={currentRank}
             currentScore={userWords.length ** 2 / (divideBy * (maxLives > 0 ? maxLives : 1))}
             verseLength={verse.length}
             divideBy={divideBy}
           />
           <div className="flex flex-col items-center justify-start gap-4">
             <div className="flex items-center justify-center gap-4 flex-wrap w-full">
-              <EasingFactorSelector {...{ divideBy, setDivideBy, verseLength: verse.length, onValueChange: redo }} />
+              <EasingFactorSelector
+                {...{
+                  divideBy,
+                  setDivideBy,
+                  verseLength: verse.length,
+                  onValueChange: () => reset(),
+                }}
+              />
               <div className="relative w-fit shrink-0">
                 <Input
                   id="max-lives"
@@ -151,7 +173,7 @@ export default function Start({
                     const value = +e.target.value > 0 ? +e.target.value : 1;
                     useLocalStorage.setState((state) => ({ ...state, maxLives: value }));
                     setLives(value);
-                    redo();
+                    reset();
                   }}
                   placeholder="Max Lives"
                 />
@@ -172,22 +194,19 @@ export default function Start({
               >
                 Read/Listen Verse
               </Button>
-              <Button className={cn(verseCompleted ? "hidden" : "")} variant={"outline"} onClick={redo}>
-                {"Redo"}
-              </Button>
+
               <Button
                 variant={"outline"}
                 onClick={() => {
-                  if (confirm("are you sure you want to reset your progress for this verse?")) {
-                    redo();
-                    useLocalStorage.setState((state) => ({
-                      currentVerse: { ...state.currentVerse, score: 0 },
-                    }));
+                  if (verseCompleted) {
+                    setOpenDailyGoals(true);
+                    return;
                   }
+                  if (confirm("are you sure you want to reset your progress for this verse?")) redo();
                 }}
               >
                 {verseCompleted ? (
-                  "Redo"
+                  "Continue"
                 ) : (
                   <>
                     Reset Score {roundToTwo(useLocalStorage.getState().currentVerse.score)}/{verse.length ** 2}
@@ -195,25 +214,6 @@ export default function Start({
                 )}
               </Button>
               {/* Done Btn */}
-              <Button
-                variant={"outline"}
-                disabled={!verseCompleted}
-                className={cn(verseCompleted && "ring ring-green-400 animate-pulse")}
-                onClick={() => {
-                  setHold(false);
-                  setOpen(true);
-                  setNextVerse();
-                  setShow(false);
-                  setUserWords([]);
-                  setLives(maxLives);
-                  setDivideBy(1);
-                  useLocalStorage.setState((state) => ({
-                    currentVerse: { ...state.currentVerse, score: 0 },
-                  }));
-                }}
-              >
-                Next
-              </Button>
             </div>
             {/* verse */}
             {verse_key === null ? (
@@ -369,7 +369,56 @@ export default function Start({
             )}
           </div>
         </DialogContent>
-      </Dialog>{" "}
+      </Dialog>
+      <Dialog open={openDailyGoals} onOpenChange={setOpenDailyGoals}>
+        <DialogContent className="max-w-fit min-w-sm  flex flex-col  max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle>Daily Goals</DialogTitle>
+            <DailyGoals
+              toAdd={{
+                dailyXP: verse.length ** 2,
+                dailyFrequencyListVerseCount: order === "frequency" ? 1 : undefined,
+                dailyQuranVerseCount: order === "quran" ? 1 : undefined,
+                dailyQuranProgressPercentage: order === "quran" ? (verse.length / 77934) * 100 : undefined,
+              }}
+            />
+          </DialogHeader>
+          <DialogFooter className="flex items-center sm:justify-center align-middle gap-2">
+            <DialogClose>
+              <Button variant={"outline"}>Return</Button>
+            </DialogClose>
+            <Button
+              className={cn()}
+              variant={"outline"}
+              onClick={() => {
+                redo();
+                setOpenDailyGoals(false);
+              }}
+            >
+              {"Redo"}
+            </Button>
+            <Button
+              variant={"outline"}
+              disabled={!verseCompleted}
+              onClick={() => {
+                setHold(false);
+                setOpen(true);
+                setNextVerse();
+                setShow(false);
+                setUserWords([]);
+                setLives(maxLives);
+                setDivideBy(1);
+                setOpenDailyGoals(false);
+                useLocalStorage.setState((state) => ({
+                  currentVerse: { ...state.currentVerse, score: 0 },
+                }));
+              }}
+            >
+              Next
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       {open && (
         <div className="flex items-center justify-center gap-2 fixed bottom-4 right-4 z-999">
           {Array.from({ length: maxLives - lives })
@@ -396,6 +445,8 @@ export default function Start({
   function onWordClick(word: WORD, i: number) {
     setAudioVerse(undefined); // close audio
     setShow(false); // hide verse
+
+    // handle mistake
     const madeMistake = !(
       verse[userWords.length].text_imlaei == word.text_imlaei ||
       verse[userWords.length].wordSegments.map((ws) => ws.buckwalter).join() ==
@@ -419,10 +470,11 @@ export default function Start({
       }, 500);
       wrongSoundEffect();
     } else {
+      // handle normal case
+
       setUserWords((prev) => [...prev, word]);
       setLives((prev) => (prev + 1 > maxLives ? maxLives : prev + 1));
-      const ARScore = useOnlineStorage.getState().ARScore;
-      const goal = useLocalStorage.getState().goal;
+
       if (won) {
         setHold(true);
         toast.success(
@@ -430,12 +482,9 @@ export default function Start({
           {},
         );
       }
-      const leveledUpped = (ARScore % goal) + score >= goal;
-      if (leveledUpped) {
-        toast.success(`Level Up!`, { position: "top-center" });
-      }
+
       // add score
-      useOnlineStorage.getState().addARScore(score);
+      useOnlineStorage.setState((state) => ({ dailyXP: state.dailyXP + score }));
       const currentVerseScore = useLocalStorage.getState().currentVerse.score;
       useLocalStorage.setState((state) => ({
         currentVerse: {
@@ -451,9 +500,20 @@ export default function Start({
             newRanks[currentRank[0]] = currentRank[1] + 1;
             return { ranks: newRanks };
           });
+          useOnlineStorage.setState((state) => ({
+            dailyFrequencyListVerseCount: state.dailyFrequencyListVerseCount + 1,
+          }));
         } else {
-          verse_key && useOnlineStorage.getState().setARProgress(+verse_key?.split(":")[0], +verse_key?.split(":")[1]);
+          verse_key &&
+            useOnlineStorage.getState().setQuranProgress(+verse_key?.split(":")[0], +verse_key?.split(":")[1]);
           toast.success(`verse mastered!`, { position: "bottom-right" });
+          useOnlineStorage.setState((state) => ({
+            dailyQuranVerseCount: state.dailyQuranVerseCount + 1,
+            dailyQuranProgressPercentage: Math.min(
+              100,
+              state.dailyQuranProgressPercentage + (verse.length / 77934) * 100,
+            ),
+          }));
         }
       } else if (won && !verseCompleted) {
         toast.message(`Increasing difficulty !!!`, { position: "top-left" });
@@ -469,9 +529,9 @@ export default function Start({
               .sort((a, b) => b - a)[0] ?? 1;
           setDivideBy(lessenedEasingFactors);
         }
-        redo();
+        reset();
       }
-      if (won || leveledUpped || verseNowCompletes) {
+      if (won || verseNowCompletes) {
         correctSoundEffect();
       }
       const [s, v, w] = word.index.split(":");

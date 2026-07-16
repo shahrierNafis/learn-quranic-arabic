@@ -15,11 +15,23 @@ import { cn } from "@/utils/cn";
 import useFont from "@/utils/useFont";
 import { Checkbox } from "@/components/ui/checkbox";
 
-const Rank = (props: { currentRank: number }) => {
+const Rank = (props: {}) => {
   const ranks = useOnlineStorage((state) => state.ranks);
   const [lemmaData, setLemmaData] = useState<LemmaData[]>([]);
   const [font] = useFont();
+  const [lemmaDataArr, setLemmaDataArr] = useState<LemmaData[]>([]);
 
+  const currentRank: [number, number] = useMemo(() => {
+    const c = Math.max(
+      lemmaDataArr.findIndex(
+        (element, index) =>
+          (useOnlineStorage.getState().ranks[index] ?? 0) < element.count &&
+          useOnlineStorage.getState().ranks[index] != 10,
+      ),
+      0,
+    );
+    return [c, useOnlineStorage.getState().ranks[c] ?? 0];
+  }, [lemmaDataArr]);
   useEffect(() => {
     getLemmaDataArr().then(setLemmaData);
   }, []);
@@ -123,14 +135,14 @@ const Rank = (props: { currentRank: number }) => {
   });
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md border overflow-y-auto">
       <div className="flex items-center justify-between p-4">
         <DataTablePagination table={table} />
         <div className="flex gap-2">
           <Button
             variant={"outline"}
             onClick={() => {
-              const targetRowIndex = props.currentRank;
+              const targetRowIndex = currentRank[0];
               const pageSize = table.getState().pagination.pageSize;
               const pageIndex = Math.floor(targetRowIndex / pageSize);
 
@@ -145,7 +157,7 @@ const Rank = (props: { currentRank: number }) => {
           <Button
             variant={"outline"}
             onClick={() => {
-              const newRank = +(prompt("set rank?", props.currentRank.toString()) ?? "0");
+              const newRank = +(prompt("set rank?", currentRank[0].toString()) ?? "0");
               useOnlineStorage.setState((state) => {
                 const newRanks = [...state.ranks];
                 for (const lemmaEntry of lemmaData) {
@@ -159,7 +171,7 @@ const Rank = (props: { currentRank: number }) => {
           </Button>
         </div>
       </div>
-      <Table className="">
+      <Table id="dd" className="overflow-y-hidden">
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="*:text-center">

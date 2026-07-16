@@ -22,7 +22,7 @@ import AD from "@/app/AD";
 // Menu items.
 const items = [
   {
-    title: "Home",
+    title: " Home",
     url: "/",
     icon: Home,
   },
@@ -32,7 +32,7 @@ const items = [
   //   icon: Clock,
   // },
   {
-    title: "Active Read",
+    title: " Active Read",
     url: "/activeRead",
     icon: BrainCircuit,
   },
@@ -50,14 +50,12 @@ export function AppSidebar() {
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <Link href={pathname == item.url ? "#" : item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
+                  <SidebarMenuButton render={(props) => <Link {...(props as any)} href={item.url} />}>
+                    <item.icon />
+                    <div> {item.title}</div>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              ))}{" "}
+              ))}
               <Preference />
               <ReadQuranBtn />
               <AD />

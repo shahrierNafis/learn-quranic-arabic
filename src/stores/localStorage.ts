@@ -9,7 +9,6 @@ export const useLocalStorage = create<{
   addChapter: (chapter: number) => void;
   removeChapter: (chapter: number) => void;
 
-  goal: number;
   maxLives: number;
   currentVerse: {
     score: number;
@@ -34,7 +33,6 @@ export const useLocalStorage = create<{
           chapters: state.chapters.filter((i) => i !== chapter),
         }));
       },
-      goal: 1000,
       maxLives: 3,
       currentVerse: {
         score: 0,

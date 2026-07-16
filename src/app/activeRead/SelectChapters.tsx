@@ -11,7 +11,9 @@ export default function SelectChapters() {
   const [chapters, addChapter, removeChapter, setChapters] = useLocalStorage(
     useShallow((state) => [state.chapters, state.addChapter, state.removeChapter, state.setChapters]),
   );
-  const [ARProgress, setARProgress] = useOnlineStorage(useShallow((state) => [state.ARProgress, state.setARProgress]));
+  const [QuranProgress, setQuranProgress] = useOnlineStorage(
+    useShallow((state) => [state.QuranProgress, state.setQuranProgress]),
+  );
   const totalPercentage = (
     Array.from({ length: 114 }, (_, i) => i + 1).reduce((previousValue: number, currentValue: number) => {
       return previousValue + getPretendProgressPercentage(currentValue) * getChapterLength(currentValue);
@@ -33,17 +35,17 @@ export default function SelectChapters() {
         />{" "}
         <div className="relative flex items-center grow ">
           <div
-            className="absolute z-0 h-full rounded-md bg-linear-to-r from-zinc-50 to-zinc-300"
+            className="absolute z-0 h-full rounded-md bg-linear-to-r from-secondary/10 to-secondary/50 border"
             style={{
               width: `${totalPercentage}%`,
             }}
           ></div>
-          <div className="z-10 flex justify-center w-full p-2">All 114 surahs :</div>{" "}
+          <div className="z-10 flex justify-center w-full p-2">All 114 SURAHS :</div>{" "}
           <div className="z-10 flex flex-col items-center justify-center w-full p-2 ">
             iteration{" "}
             {_.min(
               Array.from({ length: 114 }, (_, i) => i + 1).map((i) => {
-                return getPretendIterationNum(i, ARProgress);
+                return getPretendIterationNum(i, QuranProgress);
               }),
             )}
           </div>
@@ -66,25 +68,25 @@ export default function SelectChapters() {
             />
             <div className="relative flex items-center grow ">
               <div
-                className="absolute z-0 h-full rounded-md bg-linear-to-r from-zinc-50 to-zinc-300"
+                className="absolute z-0 h-full rounded-md bg-linear-to-r from-secondary/10 to-secondary/50 border"
                 style={{
                   width: `${getPretendProgressPercentage(chapter)}%`,
                 }}
               ></div>
-              <div className="z-10 flex justify-center w-full p-2">surah {chapter}:</div>
+              <div className="z-10 flex justify-center w-full p-2">SURAH {chapter}:</div>
               <div className="z-10 flex flex-col items-center w-full p-2">
-                <div> iteration {getPretendIterationNum(chapter, ARProgress)}</div>
+                <div> iteration {getPretendIterationNum(chapter, QuranProgress)}</div>
                 <div className="flex">
-                  {ARProgress[chapter]} /{getChapterLength(chapter)}
+                  {QuranProgress[chapter]} /{getChapterLength(chapter)}
                 </div>
               </div>{" "}
               <Edit
                 className="z-10 hover:cursor-pointer"
                 size={64}
                 onClick={() => {
-                  const input = prompt("set progress", ARProgress[chapter] + "");
+                  const input = prompt("set progress", QuranProgress[chapter] + "");
                   if (input === null) return;
-                  setARProgress(chapter, Number(input));
+                  setQuranProgress(chapter, Number(input));
                 }}
               />
               <div className="z-10 flex justify-center w-full p-2">{getPretendProgressPercentage(chapter)}%</div>
@@ -95,9 +97,9 @@ export default function SelectChapters() {
     </div>
   );
   function getPretendProgressPercentage(chapter: number) {
-    if (ARProgress[chapter] == 0) return 0;
+    if (QuranProgress[chapter] == 0) return 0;
     return +(
-      (((ARProgress[chapter] - 0.0000001) % getChapterLength(chapter)) * 100) /
+      (((QuranProgress[chapter] - 0.0000001) % getChapterLength(chapter)) * 100) /
       getChapterLength(chapter)
     ).toFixed(2);
   }

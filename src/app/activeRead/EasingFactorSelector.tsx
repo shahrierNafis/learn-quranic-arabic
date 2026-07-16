@@ -19,7 +19,7 @@ export function EasingFactorSelector(params: {
   return (
     <Select
       onValueChange={(value) => {
-        const numValue = Number(value);
+        const numValue = Number(value ?? 1);
         params.setDivideBy(numValue);
         params.onValueChange && params.onValueChange(numValue);
       }}

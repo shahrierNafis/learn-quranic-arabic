@@ -66,7 +66,7 @@ export default function WordInfo({
             {children}
           </div>
         </DialogTrigger>
-        <DialogContent>
+        <DialogContent className="sm:max-w-xl  max-h-[85vh] ">
           <DialogHeader>
             <DialogTitle>Word Info</DialogTitle>
             <DialogDescription>

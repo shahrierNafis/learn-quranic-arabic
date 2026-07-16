@@ -22,7 +22,13 @@ export default function ChangeReciter() {
   useEffect(() => {
     fetch("https://api.qurancdn.com/api/qdc/audio/reciters")
       .then((r) => r.json())
-      .then((r) => setReciters((r.reciters as Reciter[]).filter((obj1, i, arr) => arr.findIndex((obj2) => obj2.reciter_id === obj1.reciter_id) === i)));
+      .then((r) =>
+        setReciters(
+          (r.reciters as Reciter[]).filter(
+            (obj1, i, arr) => arr.findIndex((obj2) => obj2.reciter_id === obj1.reciter_id) === i,
+          ),
+        ),
+      );
 
     return () => {};
   }, []);
@@ -52,7 +58,9 @@ export default function ChangeReciter() {
                         setOpen(false);
                       }}
                     >
-                      <Check className={cn("mr-2 h-4 w-4", reciter_id === reciter.id + "" ? "opacity-100" : "opacity-0")} />
+                      <Check
+                        className={cn("mr-2 h-4 w-4", reciter_id === reciter.id + "" ? "opacity-100" : "opacity-0")}
+                      />
                       {reciter.name}
                     </CommandItem>
                   ))}
