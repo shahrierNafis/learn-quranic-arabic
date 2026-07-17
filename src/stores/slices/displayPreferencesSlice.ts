@@ -4,7 +4,7 @@ import { DisplayPreferencesSlice, PreferenceStore } from "../types";
 
 export const createDisplayPreferencesSlice: StateCreator<
   PreferenceStore,
-  [],
+  [["zustand/immer", never], ["zustand/persist", unknown]], // Matches the root middleware setup
   [],
   DisplayPreferencesSlice
 > = (set) => ({
@@ -15,8 +15,7 @@ export const createDisplayPreferencesSlice: StateCreator<
   setShowTranslation: (showTranslation: boolean) => set({ showTranslation }),
 
   showTranslationOnHiddenWords: false,
-  setShowTranslationOnHiddenWords: (showTranslationOnHiddenWords: boolean) =>
-    set({ showTranslationOnHiddenWords }),
+  setShowTranslationOnHiddenWords: (showTranslationOnHiddenWords: boolean) => set({ showTranslationOnHiddenWords }),
 
   showTransliteration: false,
   setShowTransliteration: (showTransliteration: boolean) => set({ showTransliteration }),

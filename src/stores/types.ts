@@ -56,20 +56,18 @@ export type MiscSlice = {
   ranks: number[];
 };
 
+export type GoalRecord = {
+  value: number;
+  name: string;
+  goal: number;
+  streak: number;
+};
+
 export type DailyGoalsSlice = {
   date: string;
-  dailyXP: number;
-  dailyXPGoal: number;
-  dailyXpStreak: number;
-  dailyQuranVerseCount: number;
-  dailyQuranVerseCountGoal: number;
-  dailyQuranVerseCountStreak: number;
-  dailyFrequencyListVerseCount: number;
-  dailyFrequencyListVerseCountGoal: number;
-  dailyFrequencyListVerseCountStreak: number;
-  dailyQuranProgressPercentage: number;
-  dailyQuranProgressPercentageGoal: number;
-  dailyQuranProgressPercentageStreak: number;
+  goalRecords: {
+    [key: string]: GoalRecord;
+  };
 };
 
 // ---- Combined store type ----

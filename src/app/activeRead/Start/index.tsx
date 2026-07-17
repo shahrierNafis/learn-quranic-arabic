@@ -285,7 +285,9 @@ export default function Start({
       }
 
       // add score
-      useOnlineStorage.setState((state) => ({ dailyXP: state.dailyXP + score }));
+      useOnlineStorage.setState((state) => {
+        state.goalRecords.xp.value = state.goalRecords.xp.value + score;
+      });
       const currentVerseScore = useLocalStorage.getState().currentVerse.score;
       useLocalStorage.setState((state) => ({
         currentVerse: {
@@ -295,26 +297,18 @@ export default function Start({
       }));
       const verseNowCompletes = currentVerseScore + score >= verse.length ** 2;
       if (verseNowCompletes) {
+        useOnlineStorage.setState((state) => {
+          state.goalRecords.verse.value = state.goalRecords.verse.value + 1;
+          state.goalRecords.word.value = state.goalRecords.word.value + verse.length;
+        });
         if (order === "frequency") {
           useOnlineStorage.setState((state) => {
-            const newRanks = [...state.ranks];
-            newRanks[currentRank[0]] = currentRank[1] + 1;
-            return { ranks: newRanks };
+            state.ranks[currentRank[0]] = currentRank[1] + 1;
           });
-          useOnlineStorage.setState((state) => ({
-            dailyFrequencyListVerseCount: state.dailyFrequencyListVerseCount + 1,
-          }));
         } else {
           verse_key &&
             useOnlineStorage.getState().setQuranProgress(+verse_key?.split(":")[0], +verse_key?.split(":")[1]);
           toast.success(`verse mastered!`, { position: "bottom-right" });
-          useOnlineStorage.setState((state) => ({
-            dailyQuranVerseCount: state.dailyQuranVerseCount + 1,
-            dailyQuranProgressPercentage: Math.min(
-              100,
-              state.dailyQuranProgressPercentage + (verse.length / 77934) * 100,
-            ),
-          }));
         }
       } else if (won && !verseCompleted) {
         toast.message(`Increasing difficulty !!!`, { position: "top-left" });

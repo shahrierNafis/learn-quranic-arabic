@@ -1,10 +1,11 @@
 // src/stores/counter-store.ts
 import { persist } from "zustand/middleware";
+import { immer } from "zustand/middleware/immer";
 import { createWithEqualityFn } from "zustand/traditional";
 import superjson from "superjson";
 import { pullFromTheServer, useUserDataOutOfSyncStore } from "@/components/UserDataOutOfSync";
 
-import { PreferenceStore } from "./types";
+import { GoalRecord, PreferenceStore } from "./types";
 import { storage, supabase } from "./storage";
 
 import { createDisplayPreferencesSlice } from "./slices/displayPreferencesSlice";
@@ -19,7 +20,7 @@ const dayjs = require("dayjs");
 
 export const useOnlineStorage = createWithEqualityFn<PreferenceStore>()(
   persist(
-    (...a) => ({
+    immer((...a) => ({
       ...createDisplayPreferencesSlice(...a),
       ...createColoursSlice(...a),
       ...createReviewSlice(...a),
@@ -27,7 +28,7 @@ export const useOnlineStorage = createWithEqualityFn<PreferenceStore>()(
       ...createWordListSlice(...a),
       ...createMiscSlice(...a),
       ...createDailyGoalsSlice(...a),
-    }),
+    })),
     {
       version: 8,
       name: "preference-storage",
@@ -53,45 +54,12 @@ useOnlineStorage.persist.onHydrate(async () => {
 
   // increase streak
   const diff = dayjs().diff(dayjs(useOnlineStorage.getState().date), "day");
-  if (diff >= 1) {
-    useOnlineStorage.setState(() => ({
-      date: dayjs().format("YYYY-MM-DD"),
-      dailyXP: 0,
-      dailyQuranVerseCount: 0,
-      dailyFrequencyListVerseCount: 0,
-      dailyQuranProgressPercentage: 0,
-    }));
-  }
-  if (diff === 1) {
-    if (useOnlineStorage.getState().dailyXP >= useOnlineStorage.getState().dailyXPGoal) {
-      // Handle the case where XP goal is met
-      useOnlineStorage.setState((state) => ({
-        dailyXpStreak: state.dailyXpStreak + 1,
-      }));
-    }
-    if (useOnlineStorage.getState().dailyQuranVerseCount >= useOnlineStorage.getState().dailyQuranVerseCountGoal) {
-      // Handle the case where Quran verse goal is met
-      useOnlineStorage.setState((state) => ({
-        dailyQuranVerseCountStreak: state.dailyQuranVerseCountStreak + 1,
-      }));
-    }
-    if (
-      useOnlineStorage.getState().dailyQuranProgressPercentage >=
-      useOnlineStorage.getState().dailyQuranProgressPercentageGoal
-    ) {
-      // Handle the case where Quran progress percentage goal is met
-      useOnlineStorage.setState((state) => ({
-        dailyQuranProgressPercentageStreak: state.dailyQuranProgressPercentageStreak + 1,
-      }));
-    }
-    if (
-      useOnlineStorage.getState().dailyFrequencyListVerseCount >=
-      useOnlineStorage.getState().dailyFrequencyListVerseCountGoal
-    ) {
-      // Handle the case where frequency list verse goal is met
-      useOnlineStorage.setState((state) => ({
-        dailyFrequencyListVerseCountStreak: state.dailyFrequencyListVerseCountStreak + 1,
-      }));
-    }
-  }
+  if (diff > 0)
+    useOnlineStorage.setState((state) => {
+      state.date = dayjs().format("YYYY-MM-DD");
+      for (const [key, value] of Object.entries(state.goalRecords)) {
+        state.goalRecords[key].value = 0;
+        state.goalRecords[key].streak = value.value > value.goal && diff === 1 ? value.streak + 1 : 0;
+      }
+    });
 });

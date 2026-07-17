@@ -3,18 +3,16 @@ import { StateCreator } from "zustand";
 import { DailyGoalsSlice, PreferenceStore } from "../types";
 import {} from "../types";
 
-export const createDailyGoalsSlice: StateCreator<PreferenceStore, [], [], DailyGoalsSlice> = (set) => ({
+export const createDailyGoalsSlice: StateCreator<
+  PreferenceStore,
+  [["zustand/immer", never], ["zustand/persist", unknown]], // Matches the root middleware setup
+  [],
+  DailyGoalsSlice
+> = (set) => ({
   date: new Date().toISOString().split("T")[0],
-  dailyXP: 0,
-  dailyXPGoal: 1000,
-  dailyXpStreak: 0,
-  dailyQuranVerseCount: 0,
-  dailyQuranVerseCountGoal: 10,
-  dailyQuranVerseCountStreak: 0,
-  dailyFrequencyListVerseCount: 0,
-  dailyFrequencyListVerseCountGoal: 10,
-  dailyFrequencyListVerseCountStreak: 0,
-  dailyQuranProgressPercentage: 0,
-  dailyQuranProgressPercentageGoal: 0.25,
-  dailyQuranProgressPercentageStreak: 0,
+  goalRecords: {
+    xp: { value: 0, name: "XP", goal: 1000, streak: 0 },
+    verse: { value: 0, name: "Quran Verse Count", goal: 10, streak: 0 },
+    word: { value: 0, name: "Frequency List Verse Count", goal: 100, streak: 0 },
+  },
 });
