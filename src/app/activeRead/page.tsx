@@ -106,7 +106,7 @@ export default function Page() {
   }, [hold, setNextVerse]);
 
   useEffect(() => {
-    if ([10, lemmaDataArr[currentRank[0]]?.count].includes(ranks[currentRank[0]])) {
+    if ([10, lemmaDataArr[currentRank[0]]?.count ?? 10].includes(ranks[currentRank[0]])) {
       toast.success(
         `Rank up! You reached rank ${ranks[currentRank[0]]} & mastered the word "${buckwalterToArabic(lemmaDataArr[currentRank[0]]?.lemma)}"`,
         {},

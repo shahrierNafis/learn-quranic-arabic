@@ -6,7 +6,7 @@ import {} from "../types";
 export const createDailyGoalsSlice: StateCreator<PreferenceStore, [], [], DailyGoalsSlice> = (set) => ({
   date: new Date().toISOString().split("T")[0],
   dailyXP: 0,
-  dailyXPGoal: 100,
+  dailyXPGoal: 1000,
   dailyXpStreak: 0,
   dailyQuranVerseCount: 0,
   dailyQuranVerseCountGoal: 10,
@@ -15,6 +15,6 @@ export const createDailyGoalsSlice: StateCreator<PreferenceStore, [], [], DailyG
   dailyFrequencyListVerseCountGoal: 10,
   dailyFrequencyListVerseCountStreak: 0,
   dailyQuranProgressPercentage: 0,
-  dailyQuranProgressPercentageGoal: 0.5,
+  dailyQuranProgressPercentageGoal: 0.25,
   dailyQuranProgressPercentageStreak: 0,
 });

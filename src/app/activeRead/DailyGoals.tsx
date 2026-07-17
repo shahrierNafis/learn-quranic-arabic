@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Progress } from "@/components/ui/progress";
 import { useOnlineStorage } from "@/stores/onlineStorage";
 import { Edit } from "lucide-react";
-import { PreferenceStore } from "@/stores/types";
+import { DailyGoalsSlice, PreferenceStore } from "@/stores/types";
 import { useShallow } from "zustand/react/shallow";
 import NumberFlow from "@number-flow/react";
 import { cn, roundByNthPlace } from "@/lib/utils";
@@ -10,25 +10,29 @@ import { cn, roundByNthPlace } from "@/lib/utils";
 function DailyGoals(props: { toAdd?: Partial<PreferenceStore> }) {
   useOnlineStorage(
     useShallow((a) => [
+      a.dailyXP,
       a.dailyXPGoal,
       a.dailyXpStreak,
+      a.dailyQuranVerseCount,
       a.dailyQuranVerseCountGoal,
       a.dailyQuranVerseCountStreak,
+      a.dailyFrequencyListVerseCount,
       a.dailyFrequencyListVerseCountGoal,
       a.dailyFrequencyListVerseCountStreak,
+      a.dailyQuranProgressPercentage,
       a.dailyQuranProgressPercentageGoal,
       a.dailyQuranProgressPercentageStreak,
     ]),
   );
 
-  const a = {
+  const a: Partial<Record<keyof DailyGoalsSlice, string>> = {
     dailyXP: "XP",
     dailyQuranVerseCount: "Quran Verses",
     dailyFrequencyListVerseCount: "Frequency List Verses",
     dailyQuranProgressPercentage: "Quran Progress",
   };
 
-  const [state, setState] = useState<Record<keyof typeof a, number>>({
+  const [state, setState] = useState<Partial<Record<keyof typeof a, number>>>({
     dailyXP: useOnlineStorage.getState().dailyXP - (props.toAdd?.dailyXP ?? useOnlineStorage.getState().dailyXP),
     dailyQuranVerseCount:
       useOnlineStorage.getState().dailyQuranVerseCount -
@@ -41,6 +45,8 @@ function DailyGoals(props: { toAdd?: Partial<PreferenceStore> }) {
       (props.toAdd?.dailyQuranProgressPercentage ?? useOnlineStorage.getState().dailyQuranProgressPercentage),
   });
 
+  const [animationEnded, setAnimationEnded] = useState(false);
+
   React.useEffect(() => {
     const timer = setTimeout(() => {
       setState({
@@ -49,6 +55,7 @@ function DailyGoals(props: { toAdd?: Partial<PreferenceStore> }) {
         dailyFrequencyListVerseCount: useOnlineStorage.getState().dailyFrequencyListVerseCount,
         dailyQuranProgressPercentage: useOnlineStorage.getState().dailyQuranProgressPercentage,
       });
+      setAnimationEnded(true);
     }, 1000);
     return () => clearTimeout(timer);
   }, []);
@@ -58,12 +65,13 @@ function DailyGoals(props: { toAdd?: Partial<PreferenceStore> }) {
       {(Object.keys(a) as Array<keyof typeof a>).map((key) => (
         <DailyGoal
           key={key}
-          x={state[key]}
-          name={a[key]}
+          x={state[key] as number}
+          name={a[key] as string}
           goal={useOnlineStorage.getState()[(key + "Goal") as keyof PreferenceStore] as number}
           edit={key + "Goal"}
           streak={useOnlineStorage.getState()[(key + "Streak") as keyof PreferenceStore] as number}
           toAdd={props.toAdd?.[key as keyof PreferenceStore] as number | undefined}
+          animationEnded={animationEnded}
         />
       ))}
     </div>
@@ -72,7 +80,15 @@ function DailyGoals(props: { toAdd?: Partial<PreferenceStore> }) {
 
 export default DailyGoals;
 
-function DailyGoal(props: { x: number; name: string; goal: number; edit: string; streak?: number; toAdd?: number }) {
+function DailyGoal(props: {
+  x: number;
+  name: string;
+  goal: number;
+  edit: string;
+  animationEnded: boolean;
+  streak?: number;
+  toAdd?: number;
+}) {
   return (
     <>
       <Progress value={(props.x / props.goal) * 100} className={cn("w-full max-w-sm", props.goal == 0 && "opacity-25")}>
@@ -82,6 +98,7 @@ function DailyGoal(props: { x: number; name: string; goal: number; edit: string;
           goal={props.goal}
           edit={props.edit}
           toAdd={props.toAdd}
+          animationEnded={props.animationEnded}
         ></ProgressValue>
       </Progress>
     </>
@@ -98,7 +115,7 @@ function ProgressLabel(props: { children: React.ReactNode; streak?: number }) {
     </label>
   );
 }
-function ProgressValue(props: { value: number; goal: number; edit: string; toAdd?: number }) {
+function ProgressValue(props: { value: number; goal: number; edit: string; animationEnded: boolean; toAdd?: number }) {
   const [num, setNum] = useState(0);
   useEffect(() => {
     setTimeout(() => {
@@ -113,7 +130,7 @@ function ProgressValue(props: { value: number; goal: number; edit: string; toAdd
     >
       {props.toAdd ? (
         <span className="text-muted-foreground">
-          {roundByNthPlace(props.value - (props.toAdd + num), 4)}+
+          {roundByNthPlace(props.value - (props.animationEnded ? props.toAdd : 0), 4)}+
           <NumberFlow value={num} />
         </span>
       ) : (
@@ -125,7 +142,7 @@ function ProgressValue(props: { value: number; goal: number; edit: string; toAdd
         size={16}
         onClick={() => {
           useOnlineStorage.setState((state) => {
-            const promptValue = parseInt(
+            const promptValue = parseFloat(
               prompt("Goal", state[props.edit as keyof PreferenceStore] as string) ??
                 (state[props.edit as keyof PreferenceStore] as string),
             );
