@@ -52,7 +52,8 @@ useOnlineStorage.persist.onHydrate(async () => {
   }
 
   // increase streak
-  if (dayjs().format("YYYY-MM-DD").diff(dayjs(useOnlineStorage.getState().date), "day") === 1) {
+  const diff = dayjs().diff(dayjs(useOnlineStorage.getState().date), "day");
+  if (diff >= 1) {
     useOnlineStorage.setState(() => ({
       date: dayjs().format("YYYY-MM-DD"),
       dailyXP: 0,
@@ -60,6 +61,8 @@ useOnlineStorage.persist.onHydrate(async () => {
       dailyFrequencyListVerseCount: 0,
       dailyQuranProgressPercentage: 0,
     }));
+  }
+  if (diff === 1) {
     if (useOnlineStorage.getState().dailyXP >= useOnlineStorage.getState().dailyXPGoal) {
       // Handle the case where XP goal is met
       useOnlineStorage.setState((state) => ({

@@ -7,6 +7,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/app/app-sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import UserDataOutOfSync from "@/components/UserDataOutOfSync";
+import HydrateOnlineStorage from "./HydrateOnlineStorage";
 
 const comfortaa = Comfortaa({ subsets: ["latin"] });
 
@@ -33,6 +34,7 @@ export default function RootLayout({
       <body className={comfortaa.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <CheckAuth />
+          <HydrateOnlineStorage />
           <SidebarProvider defaultOpen={false}>
             <AppSidebar />
             <div className="absolute md:m-4 md:hidden">

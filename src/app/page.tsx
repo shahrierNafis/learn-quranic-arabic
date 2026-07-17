@@ -25,14 +25,7 @@ export default function Home() {
       setUser(data.user);
     });
     supabase.auth.onAuthStateChange((event, session) => {
-      if (event == "SIGNED_IN") {
-        setUser(session?.user);
-        useOnlineStorage.persist.rehydrate();
-      }
-      setTimeout(async () => {
-        // await on other Supabase function here
-        // this runs right after the callback has finished
-      }, 0);
+      if (event == "INITIAL_SESSION") setUser(session?.user);
     });
   }, [supabase]);
   return (
