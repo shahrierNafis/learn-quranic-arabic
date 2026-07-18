@@ -1,7 +1,6 @@
 "use client";
-import React, { use, useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
-import Score from "./Score";
 import _ from "lodash";
 import { Button } from "@/components/ui/button";
 import { LemmaData, WORD } from "@/types";
@@ -105,16 +104,6 @@ export default function Page() {
     return () => {};
   }, [hold, setNextVerse]);
 
-  useEffect(() => {
-    if ([10, lemmaDataArr[currentRank[0]]?.count ?? 10].includes(ranks[currentRank[0]])) {
-      toast.success(
-        `Rank up! You reached rank ${ranks[currentRank[0]]} & mastered the word "${buckwalterToArabic(lemmaDataArr[currentRank[0]]?.lemma)}"`,
-        {},
-      );
-    }
-
-    return () => {};
-  }, [currentRank, lemmaDataArr, ranks]);
   if (!currentRank) return <div>Loading...</div>;
 
   return (

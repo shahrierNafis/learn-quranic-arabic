@@ -29,6 +29,7 @@ import VerseControls from "./VerseControls";
 import DailyGoalsDialog from "./DailyGoalsDialog";
 import { CircularProgressButton } from "./CircularProgressButton";
 import { validChunkSizes } from "../EasingFactorSelector";
+import { buckwalterToArabic } from "@/utils/arabic-buckwalter-transliteration";
 
 export default function Start({
   verse,
@@ -304,6 +305,12 @@ export default function Start({
         if (order === "frequency") {
           useOnlineStorage.setState((state) => {
             state.ranks[currentRank[0]] = currentRank[1] + 1;
+            if ([10, lemmaDataArr[currentRank[0]]?.count ?? 10].includes(currentRank[1] + 1)) {
+              toast.success(
+                `Rank up! You reached rank ${currentRank[0] + 1} & mastered the word "${buckwalterToArabic(lemmaDataArr[currentRank[0]].lemma)}"`,
+                {},
+              );
+            }
           });
         } else {
           verse_key &&
