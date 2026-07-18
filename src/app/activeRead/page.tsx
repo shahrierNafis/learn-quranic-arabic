@@ -122,7 +122,7 @@ export default function Page() {
       <div className="h-screen auto-cols-[100%] grid grid-rows-3 justify-items-center content-center items-center ">
         <Nav />
         <div className="p-2 w-fit h-fit flex flex-col items-center justify-center gap-4 overflow-hidden">
-          <div className="grid grid-cols-3 items-center content-center gap-2">
+          <div className="grid grid-cols-3 items-center content-center gap-2 min-w-[45vw]">
             {/* reload Btn */}
             <Button
               variant={"outline"}

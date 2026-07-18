@@ -28,7 +28,7 @@ function Nav() {
   const [openDailyGoals, setOpenDailyGoals] = React.useState(false);
 
   return (
-    <div className="flex gap-2 items-start justify-center mt-2 w-full h-full">
+    <div className="flex gap-2 items-start justify-center mt-2 w-full h-full flex-wrap">
       <div className="flex gap-2 items-start justify-start mt-2">
         <AnimationLoop />
 

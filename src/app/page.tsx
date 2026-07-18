@@ -52,7 +52,7 @@ export default function Home() {
                 />
               ) : (
                 <>
-                  <div className="flex flex-col gap-4 items-center">
+                  <div className="flex flex-col gap-4 items-center min-w-xs">
                     {/* <div className="grid grid-cols-2 relative">
                     <div className="text-sm relative bottom-0 mt-auto mx-auto text-red-500 animate-pulse">
                       *start here

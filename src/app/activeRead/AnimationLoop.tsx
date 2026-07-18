@@ -22,7 +22,7 @@ export default function AnimationLoop() {
           .fill(1)
           .map((a, i) => {
             return { width: oneFifth, id: i + offset };
-          })
+          }),
       ).map((a, i) => {
         switch (i) {
           case 0:
@@ -106,7 +106,7 @@ export default function AnimationLoop() {
           DEMO
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-full max-w-full h-full overflow-y-auto flex flex-col items-center justify-center gap-2">
+      <DialogContent className="w-full sm:max-w-full h-full overflow-y-auto flex flex-col items-center justify-center gap-2">
         <div className="w-full h-full flex flex-col gap-4 items-center justify-center p-2 overflow-hidden">
           <div>DEMO</div>
           <div className="relative w-full text-center font-mono text-sm">XP {xp} / 1500</div>
@@ -143,7 +143,7 @@ export default function AnimationLoop() {
                       <MotionDiv
                         style={{ width: `${a.width}px`, visibility: array2Ids.includes(a.id) ? "visible" : "hidden" }}
                         className={cn(
-                          `h-[5vh] md:h-[10vh] rounded-md border bg-green-200 text-center content-center text-muted-foreground`
+                          `h-[5vh] md:h-[10vh] rounded-md border bg-green-200 text-center content-center text-muted-foreground`,
                         )}
                       >
                         {a.id + 1}
@@ -174,7 +174,7 @@ export default function AnimationLoop() {
                       className={cn(
                         `h-[5vh] md:h-[10vh] rounded-md border text-center content-center text-muted-foreground`,
                         a.id == array2.length && xp < 1500 && click && array2.length != 5 ? "bg-green-200" : "",
-                        array2.length == 5 && a.id == 6 && shouldLose && click ? "bg-red-200" : ""
+                        array2.length == 5 && a.id == 6 && shouldLose && click ? "bg-red-200" : "",
                       )}
                     >
                       {a.id + 1}

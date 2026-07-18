@@ -5,16 +5,8 @@ import Link from "@/components/ui/Link";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Book, ChevronDown, ChevronRight } from "lucide-react";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import {
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarMenuSubItem,
-} from "@/components/ui/sidebar";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { SidebarMenuButton, SidebarMenuItem, SidebarMenuSubItem, useSidebar } from "@/components/ui/sidebar";
 
 export default function CollapsibleQuranMenu() {
   const pathname = usePathname();
@@ -24,14 +16,23 @@ export default function CollapsibleQuranMenu() {
   const pathType = pathname.split("/")[2];
   const isSurahPath = !pathType || pathType === "surah";
   const isJuzPath = pathType === "juz";
+  const { toggleSidebar, open } = useSidebar();
 
+  const [openCollapsible, setOpenCollapsible] = React.useState(open);
   return (
     <>
       <div className="sidebar-menu w-full">
-        <Collapsible className="group/collapsible w-full">
+        <Collapsible
+          open={openCollapsible && open}
+          onOpenChange={setOpenCollapsible}
+          className="group/collapsible w-full"
+        >
           <SidebarMenuItem className="w-full">
             <CollapsibleTrigger className="w-full">
-              <SidebarMenuButton className="w-full flex items-center justify-between shadow-sm">
+              <SidebarMenuButton
+                onClick={() => !open && toggleSidebar()}
+                className="w-full flex items-center justify-between shadow-sm"
+              >
                 <Book />
                 <div className="flex items-center">
                   {pathname.startsWith("/quran/surah") ? (
@@ -53,17 +54,10 @@ export default function CollapsibleQuranMenu() {
           <CollapsibleContent className="mt-2 space-y-2">
             {/* Surah Submenu */}
             <div className="sidebar-menu-sub">
-              <Collapsible
-                defaultOpen={isSurahPath}
-                className="group/surah-collapsible"
-              >
+              <Collapsible defaultOpen={isSurahPath} className="group/surah-collapsible">
                 {" "}
-                <CollapsibleTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full flex items-center justify-between"
-                  >
+                <CollapsibleTrigger>
+                  <Button variant="ghost" size="sm" className="w-full flex items-center justify-between">
                     <span>Surah</span>
                     <ChevronRight
                       className="h-3 w-3  duration-200 lucide lucide-chevron-right transition-transform ml-auto group-data-[state=open]/surah-collapsible:rotate-90"
@@ -100,16 +94,9 @@ export default function CollapsibleQuranMenu() {
 
             {/* Juz Submenu */}
             <div className="sidebar-menu-sub">
-              <Collapsible
-                defaultOpen={isJuzPath}
-                className="group/juz-collapsible"
-              >
-                <CollapsibleTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full flex items-center justify-between"
-                  >
+              <Collapsible defaultOpen={isJuzPath} className="group/juz-collapsible">
+                <CollapsibleTrigger>
+                  <Button variant="ghost" size="sm" className="w-full flex items-center justify-between">
                     <span>Juz</span>
                     <ChevronRight
                       className="h-3 w-3  duration-200 lucide lucide-chevron-right transition-transform ml-auto group-data-[state=open]/juz-collapsible:rotate-90"

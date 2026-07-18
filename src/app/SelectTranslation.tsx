@@ -3,7 +3,9 @@ import { MultiSelect } from "@/components/MultiSelect";
 import { useOnlineStorage } from "@/stores/onlineStorage";
 import { useShallow } from "zustand/react/shallow";
 export default function SelectTranslation() {
-  const [translation_ids, setTranslation_ids] = useOnlineStorage(useShallow((a) => [a.translation_ids, a.setTranslation_ids]));
+  const [translation_ids, setTranslation_ids] = useOnlineStorage(
+    useShallow((a) => [a.translation_ids, a.setTranslation_ids]),
+  );
 
   const [translations, setTranslations] = useState<
     {
@@ -29,10 +31,11 @@ export default function SelectTranslation() {
             return { label: t.name, value: t.id + "" };
           }) ?? []
         }
-        onValueChange={setTranslation_ids}
-        defaultValue={translation_ids}
+        onChange={setTranslation_ids}
+        selectedValues={translation_ids}
         placeholder="Select translations"
-        variant="default"
+        label="Translations"
+        // variant="default"
       />
     </>
   );

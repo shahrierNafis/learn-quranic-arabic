@@ -6,10 +6,14 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useOnlineStorage } from "@/stores/onlineStorage";
 import { useShallow } from "zustand/react/shallow";
+import { Label } from "./ui/label";
 
 export default function ChangeReciter() {
   const [open, setOpen] = React.useState(false);
   const [reciter_id, setReciter_id] = useOnlineStorage(useShallow((s) => [s.reciter_id, s.setReciter_id]));
+  // Generates a unique ID for accessible labeling
+  const generatedId = React.useId();
+
   type Reciter = {
     id: number;
     reciter_id: number;
@@ -35,9 +39,10 @@ export default function ChangeReciter() {
 
   return (
     <>
-      <div className="">
+      <div className="grid w-full items-center gap-1.5">
+        <Label htmlFor={generatedId}>{"Reciter"}</Label>
         <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>
+          <PopoverTrigger>
             <Button variant="outline" role="combobox" aria-expanded={open} className=" w-full justify-between">
               {reciter_id ? reciters.find((reciter) => reciter.id + "" === reciter_id)?.name : "Select reciter..."}
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />

@@ -40,11 +40,10 @@ const items = [
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const { toggleSidebar, open } = useSidebar();
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarContent onClick={() => !open && toggleSidebar()}>
+      <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
