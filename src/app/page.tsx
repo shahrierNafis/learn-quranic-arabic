@@ -25,7 +25,7 @@ export default function Home() {
       setUser(data.user);
     });
     supabase.auth.onAuthStateChange((event, session) => {
-      if (event == "INITIAL_SESSION") setUser(session?.user);
+      if (event == "SIGNED_IN") setUser(session?.user);
     });
   }, [supabase]);
   return (
