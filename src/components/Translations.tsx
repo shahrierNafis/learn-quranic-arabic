@@ -27,7 +27,7 @@ function FootnoteRef({ footnoteId }: { footnoteId: string }) {
 
   return (
     <Dialog open={open} onOpenChange={handleOpen}>
-      <DialogTrigger asChild>
+      <DialogTrigger>
         <sup className="cursor-pointer text-blue-500 hover:text-blue-700 font-semibold ml-0.5 select-none">§</sup>
       </DialogTrigger>
       <DialogContent className="max-w-md">
@@ -123,7 +123,7 @@ function Translations({
   return (
     <>
       {translation_ids.length ? (
-        <div className="text-sm md:text-xl">
+        <div className="text-sm md:text-xl text-center text-balance">
           {index && translations2?.length ? (
             translation_ids
               .map((id) => translations2.filter((t) => t.id == +id)[0])
@@ -139,7 +139,7 @@ function Translations({
                 </div>
               ))
           ) : (
-            <Skeleton className="w-[64vw] h-[45px] rounded-full" />
+            <Skeleton className="w-[64vw] h-11.25 rounded-full" />
           )}
         </div>
       ) : null}

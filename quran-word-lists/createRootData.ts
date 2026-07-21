@@ -34,7 +34,7 @@ for (const s in data) {
 }
 const wordCount: WordCount = require("./wordCount.json");
 
-const sortedData = Object.fromEntries(
+const sortedData: RootData = Object.fromEntries(
   Object.entries(rootData).map(([root, wordGroups]) => {
     return [
       root,
@@ -68,3 +68,63 @@ fs.writeFile("./src/rootData.json", JSON.stringify(sortedData), function (err) {
   if (err) throw err;
   console.log("./src/rootData.json");
 });
+// write data
+fs.writeFile(
+  "./quran-word-lists/rootGroupsByFirstLetter.json",
+  JSON.stringify(groupRootsByFirstLetter(sortedData)),
+  function (err) {
+    if (err) throw err;
+    console.log("./quran-word-lists/rootGroupsByFirstLetter.json");
+  },
+);
+// write data
+fs.writeFile("./src/rootGroupsByFirstLetter.json", JSON.stringify(groupRootsByFirstLetter(sortedData)), function (err) {
+  if (err) throw err;
+  console.log("./src/rootGroupsByFirstLetter.json");
+});
+function groupRootsByFirstLetter(data: RootData): RootGroupByFirstLetter {
+  const groups: RootGroupByFirstLetter = {};
+
+  for (const [root, lemmaMap] of Object.entries(data)) {
+    const letter = root.charAt(0); // case-sensitive, no lowercasing
+
+    // build lemma entries, sorted by their own index count (descending)
+    const lemmas: LemmaEntry[] = Object.entries(lemmaMap)
+      .map(([lemma, indices]) => ({ lemma, indices }))
+      .sort((a, b) => b.indices.length - a.indices.length);
+
+    const totalIndexCount = lemmas.reduce((sum, l) => sum + l.indices.length, 0);
+
+    const entry: RootEntry = { root, lemmas, totalIndexCount };
+
+    if (Array.isArray(groups[letter]) === false) groups[letter] = [];
+    groups[letter].push(entry);
+  }
+
+  // sort roots within each letter group by total index count, descending
+  for (const roots of Object.values(groups)) {
+    roots.sort((a, b) => b.totalIndexCount - a.totalIndexCount);
+  }
+
+  return groups;
+}
+type RootData = {
+  [root: string]: {
+    [lemma: string]: string[];
+  };
+};
+
+type LemmaEntry = {
+  lemma: string;
+  indices: string[];
+};
+
+type RootEntry = {
+  root: string;
+  lemmas: LemmaEntry[];
+  totalIndexCount: number;
+};
+
+export type RootGroupByFirstLetter = {
+  [letter: string]: RootEntry[];
+};

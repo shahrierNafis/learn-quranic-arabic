@@ -40,7 +40,7 @@ export default memo(
     }, [translation_ids, verse_key]);
 
     return (
-      <div className="flex flex-col gap-2 justify-center items-center min-w-[768px]">
+      <div className="flex flex-col gap-2 justify-center items-center min-w-3xl">
         <div key={verse_key} dir="rtl" className="flex gap-2 flex-wrap  text-center text-2xl">
           {/* ARABIC */}
           {verse ? (
@@ -53,7 +53,7 @@ export default memo(
             />
           ) : (
             <>
-              <Skeleton className="w-[75vw] h-[45px] rounded-full" />
+              <Skeleton className="w-[75vw] h-11.25 rounded-full" />
             </>
           )}
         </div>

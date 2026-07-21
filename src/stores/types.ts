@@ -4,8 +4,6 @@ import { fontNames } from "@/utils/fontNames";
 
 export type reviewOrderType = "next_review ASC" | "next_review DESC" | "level ASC" | "level DESC" | "random";
 
-export type WordListEntry = { card: Card; index: string; isSuspended: boolean };
-
 // ---- Individual slice state/actions ----
 
 export type DisplayPreferencesSlice = {
@@ -27,27 +25,11 @@ export type ColoursSlice = {
   resetColours: () => void;
 };
 
-export type ReviewSlice = {
-  reviewOrder: reviewOrderType;
-  setReviewOrder: (reviewOrder: reviewOrderType) => void;
-  reciter_id: string;
-  setReciter_id: (reciter_id: string) => void;
-};
-
 export type ARSlice = {
   QuranProgress: { [key: number]: number };
   setQuranProgress: (chapter: number, progress: number) => void;
   addQuranProgress: (chapter: number, progress: number) => void;
   resetQuranProgress: () => void;
-};
-
-export type WordListSlice = {
-  wordList: { [key: string]: WordListEntry };
-  addToWordList: (key: string, word: { card: Card; index: string; isSuspended?: boolean }) => void;
-  updateCard: (key: string, card: Card) => void;
-  toggleSuspend: (key: string) => void;
-  removeFromWordList: (key: string) => void;
-  resetWordList: () => void;
 };
 
 export type MiscSlice = {
@@ -69,13 +51,14 @@ export type DailyGoalsSlice = {
     [key: string]: GoalRecord;
   };
 };
-
+export type FSRSSlice = {
+  rootGroupsByFirstLetter: { [key: string]: Card };
+};
 // ---- Combined store type ----
 
 export type PreferenceStore = DisplayPreferencesSlice &
   ColoursSlice &
-  ReviewSlice &
   ARSlice &
-  WordListSlice &
   MiscSlice &
-  DailyGoalsSlice;
+  DailyGoalsSlice &
+  FSRSSlice;

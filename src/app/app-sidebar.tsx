@@ -1,5 +1,5 @@
 "use client";
-import { Home, BrainCircuit, Clock } from "lucide-react";
+import { Home, BrainCircuit, Grid3x3 } from "lucide-react";
 
 import {
   Sidebar,
@@ -22,7 +22,7 @@ import AD from "@/app/AD";
 // Menu items.
 const items = [
   {
-    title: " Home",
+    title: "Home",
     url: "/",
     icon: Home,
   },
@@ -32,9 +32,14 @@ const items = [
   //   icon: Clock,
   // },
   {
-    title: " Active Read",
+    title: "Active Read",
     url: "/activeRead",
     icon: BrainCircuit,
+  },
+  {
+    title: "Root Lists",
+    url: "/rootLists",
+    icon: Grid3x3,
   },
 ];
 

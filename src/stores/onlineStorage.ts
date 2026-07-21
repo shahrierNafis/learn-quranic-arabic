@@ -10,11 +10,10 @@ import { storage, supabase } from "./storage";
 
 import { createDisplayPreferencesSlice } from "./slices/displayPreferencesSlice";
 import { createColoursSlice } from "./slices/coloursSlice";
-import { createReviewSlice } from "./slices/reviewSlice";
 import { createARSlice } from "./slices/arSlice";
-import { createWordListSlice } from "./slices/wordListSlice";
 import { createMiscSlice } from "./slices/miscSlice";
 import { createDailyGoalsSlice } from "./slices/dailyGoalsSlice";
+import { createFSRSSlice } from "./slices/fsrsSlice";
 
 const dayjs = require("dayjs");
 
@@ -23,14 +22,13 @@ export const useOnlineStorage = createWithEqualityFn<PreferenceStore>()(
     immer((...a) => ({
       ...createDisplayPreferencesSlice(...a),
       ...createColoursSlice(...a),
-      ...createReviewSlice(...a),
       ...createARSlice(...a),
-      ...createWordListSlice(...a),
       ...createMiscSlice(...a),
       ...createDailyGoalsSlice(...a),
+      ...createFSRSSlice(...a),
     })),
     {
-      version: 8,
+      version: 9,
       name: "preference-storage",
       storage: storage,
       // skipHydration: true,
