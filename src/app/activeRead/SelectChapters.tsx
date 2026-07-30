@@ -3,7 +3,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useShallow } from "zustand/react/shallow";
 import { useLocalStorage } from "@/stores/localStorage";
 import _ from "lodash";
-import { useOnlineStorage } from "@/stores/onlineStorage";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import getChapterLength from "./getChapterLength";
 import { Edit } from "lucide-react";
 import getPretendIterationNum from "./getPretendIterationNum";
@@ -11,9 +12,14 @@ export default function SelectChapters() {
   const [chapters, addChapter, removeChapter, setChapters] = useLocalStorage(
     useShallow((state) => [state.chapters, state.addChapter, state.removeChapter, state.setChapters]),
   );
-  const [QuranProgress, setQuranProgress] = useOnlineStorage(
-    useShallow((state) => [state.QuranProgress, state.setQuranProgress]),
+
+  const initialQuranProgress = Object.fromEntries(
+    Array.from({ length: 114 }, (_, i) => i + 1).map((chapter) => [chapter, 0]),
   );
+  const quranProgressData = useQuery(api.quranProgress.get);
+  const updateQuranProgress = useMutation(api.quranProgress.update);
+  const QuranProgress = quranProgressData?.progress ?? initialQuranProgress;
+  const setQuranProgress = (chapter: number, progress: number) => updateQuranProgress({ chapter, progress });
   const totalPercentage = (
     Array.from({ length: 114 }, (_, i) => i + 1).reduce((previousValue: number, currentValue: number) => {
       return previousValue + getPretendProgressPercentage(currentValue) * getChapterLength(currentValue);

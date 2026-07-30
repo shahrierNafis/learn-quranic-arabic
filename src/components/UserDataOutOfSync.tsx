@@ -10,10 +10,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "./ui/button";
-import { useOnlineStorage } from "@/stores/onlineStorage";
-import { createClient } from "@/utils/supabase/clients";
-import { Database } from "@/database.types";
-import superjson from "superjson";
 
 export const useUserDataOutOfSyncStore = create<{
   open: boolean;
@@ -22,8 +18,6 @@ export const useUserDataOutOfSyncStore = create<{
   open: false,
   setOpen: (open: boolean) => set({ open }),
 }));
-
-const supabase = createClient<Database>();
 
 export default function UserDataOutOfSync() {
   const { open } = useUserDataOutOfSyncStore();
@@ -53,16 +47,8 @@ export default function UserDataOutOfSync() {
 }
 
 export async function pullFromTheServer() {
-  const { data, error } = await supabase.from("user_preference").select("*").single();
-  if (data?.preference && !error) {
-    useOnlineStorage.setState((superjson.parse(data.preference as string) as any).state);
-  }
   useUserDataOutOfSyncStore.getState().setOpen(false);
 }
 async function pushToTheServer() {
-  const state = useOnlineStorage.getState();
-  const { error } = await supabase.from("user_preference").upsert({ preference: superjson.stringify({ state }) });
-  if (!error) {
-    useUserDataOutOfSyncStore.getState().setOpen(false);
-  }
+  useUserDataOutOfSyncStore.getState().setOpen(false);
 }

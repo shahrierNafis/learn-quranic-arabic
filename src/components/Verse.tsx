@@ -3,8 +3,8 @@ import { WORD } from "@/types";
 import React, { ReactNode, useEffect, useState } from "react";
 import { Skeleton } from "./ui/skeleton";
 import Word from "./Word";
-import { useOnlineStorage } from "@/stores/onlineStorage";
-import { useShallow } from "zustand/react/shallow";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { ArrowLeftRight, Volume2 } from "lucide-react";
 import { Button } from "./ui/button";
 import VerseAudioBtn from "./verseAudioBtn";
@@ -27,9 +27,10 @@ export default function Verse({
   hideSwitchBtn?: boolean;
 }) {
   const [switchOn, setSwitchOn] = useState(false);
-  const [showTranslation, showTransliteration, showTranslationOnHiddenWords] = useOnlineStorage(
-    useShallow((a) => [a.showTranslation, a.showTransliteration, a.showTranslationOnHiddenWords]),
-  );
+  const displayPreferences = useQuery(api.displayPreferences.get);
+  const showTranslation = displayPreferences?.showTranslation ?? true;
+  const showTransliteration = displayPreferences?.showTransliteration ?? true;
+  const showTranslationOnHiddenWords = displayPreferences?.showTranslationOnHiddenWords ?? false;
   useEffect(() => {
     setSwitchOn(false);
   }, [verse]);

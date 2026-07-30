@@ -1,6 +1,6 @@
-import { useOnlineStorage } from "@/stores/onlineStorage";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import React, { useEffect, useState } from "react";
-import { useShallow } from "zustand/react/shallow";
 import {
   Dialog,
   DialogContent,
@@ -17,9 +17,10 @@ import { Button } from "./button";
 import useFont from "@/utils/useFont";
 
 export default function ChangeFont() {
-  const [fontName, setFont] = useOnlineStorage(
-    useShallow((a) => [a.font, a.setFont])
-  );
+  const displayPreferences = useQuery(api.displayPreferences.get);
+  const updateDisplayPreferences = useMutation(api.displayPreferences.update);
+  const fontName = displayPreferences?.font ?? "Noto_Sans_Arabic";
+  const setFont = (font: string) => updateDisplayPreferences({ font });
   const [font, , googleFont] = useFont();
   return (
     <>
@@ -38,19 +39,10 @@ export default function ChangeFont() {
                   return (
                     <>
                       <div className="flex items-center gap-2">
-                        <Checkbox
-                          checked={f == fontName}
-                          onClick={() => setFont(f)}
-                        />{" "}
+                        <Checkbox checked={f == fontName} onClick={() => setFont(f)} />{" "}
                         <div className="text-xl">{f}</div>
                       </div>
-                      <div
-                        className={
-                          googleFont[f]?.className +
-                          " " +
-                          "text-2xl md:text-4xl py-8 ml-4"
-                        }
-                      >
+                      <div className={googleFont[f]?.className + " " + "text-2xl md:text-4xl py-8 ml-4"}>
                         لَا إِلَٰهَ إِلَّا ٱللَّٰهُ مُحَمَّدٌ رَسُولُ ٱللَّٰهِ
                       </div>
                     </>

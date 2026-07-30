@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,14 +8,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Auth } from "@supabase/auth-ui-react";
-import { createClient } from "@/utils/supabase/clients";
-import { ThemeSupa } from "@supabase/auth-ui-shared";
-import { Button, buttonVariants } from "./ui/button";
-import { cn } from "@/lib/utils";
+import { Button } from "./ui/button";
 
 export default function ChangePassword() {
-  const supabase = createClient();
   return (
     <Dialog>
       <DialogTrigger className={"w-full"}>
@@ -25,9 +20,10 @@ export default function ChangePassword() {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle></DialogTitle>
+          <DialogTitle>Change password</DialogTitle>
           <DialogDescription>
-            <Auth supabaseClient={supabase} view="update_password" appearance={{ theme: ThemeSupa }} theme="dark" />
+            Password updates are handled through the Convex Auth flow. Use the sign-in screen to create or reset your
+            account credentials.
           </DialogDescription>
         </DialogHeader>
       </DialogContent>

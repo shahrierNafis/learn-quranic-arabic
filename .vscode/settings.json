@@ -14,5 +14,32 @@
     "surahs"
   ],
   "typescript.tsdk": "node_modules/typescript/lib",
-  "js/ts.tsdk.path": "node_modules/typescript/lib"
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
+  "workbench.colorCustomizations": {
+    "activityBar.activeBackground": "#78f0d6",
+    "activityBar.background": "#78f0d6",
+    "activityBar.foreground": "#15202b",
+    "activityBar.inactiveForeground": "#15202b99",
+    "activityBarBadge.background": "#d370ef",
+    "activityBarBadge.foreground": "#15202b",
+    "activityBarTop.activeBackground": "#78f0d6",
+    "activityBarTop.background": "#78f0d6",
+    "activityBarTop.foreground": "#15202b",
+    "activityBarTop.inactiveForeground": "#15202b99",
+    "commandCenter.border": "#15202b99",
+    "commandCenter.foreground": "#15202b",
+    "sash.hoverBorder": "#78f0d6",
+    "statusBar.background": "#4aebc8",
+    "statusBar.debuggingBackground": "#4aebc8",
+    "statusBar.debuggingForeground": "#15202b",
+    "statusBar.foreground": "#15202b",
+    "statusBarItem.hoverBackground": "#1ce6ba",
+    "statusBarItem.remoteBackground": "#cb53ec",
+    "statusBarItem.remoteForeground": "#15202b",
+    "titleBar.activeBackground": "#4aebc8",
+    "titleBar.activeForeground": "#15202b",
+    "titleBar.inactiveBackground": "#4aebc899",
+    "titleBar.inactiveForeground": "#15202b99"
+  },
+  "peacock.color": "#4aebc8"
 }

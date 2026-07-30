@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Progress } from "@/components/ui/progress";
-import { useOnlineStorage } from "@/stores/onlineStorage";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { Edit } from "lucide-react";
 import { DailyGoalsSlice, GoalRecord, PreferenceStore } from "@/stores/types";
-import { useShallow } from "zustand/react/shallow";
 import NumberFlow from "@number-flow/react";
 import { cn, roundByNthPlace } from "@/lib/utils";
 import _ from "lodash";
@@ -12,40 +12,37 @@ const enums: Record<string, string> = {
   verse: "Verses",
   word: "word",
 };
+
+const initialGoalRecords = {
+  xp: { value: 0, name: "XP", goal: 1000, streak: 0 },
+  verse: { value: 0, name: "Quran Verse Count", goal: 10, streak: 0 },
+  word: { value: 0, name: "Frequency List Verse Count", goal: 100, streak: 0 },
+};
+
 function DailyGoals(props: { toAdd?: Partial<Record<keyof typeof enums, number>> }) {
-  useOnlineStorage(useShallow((a) => [a.goalRecords]));
+  const dailyGoalsData = useQuery(api.dailyGoals.get);
+  const currentGoalRecords = dailyGoalsData?.goalRecords ?? initialGoalRecords;
 
   const [goalRecords, setGoalRecords] = useState<Partial<Record<keyof typeof enums, GoalRecord>>>(
-    _.mapValues(useOnlineStorage.getState().goalRecords, (value, key) => {
+    _.mapValues(currentGoalRecords, (value, key) => {
       const newValue = { ...value };
       newValue.value =
         value.value - (props.toAdd ? (props.toAdd[key as keyof typeof enums] ?? value.value) : value.value);
 
       return newValue;
     }),
-    //   {
-    //   dailyXP: useOnlineStorage.getState().dailyXP - (props.toAdd?.dailyXP ?? useOnlineStorage.getState().dailyXP),
-    //   dailyQuranVerseCount:
-    //     useOnlineStorage.getState().dailyQuranVerseCount -
-    //     (props.toAdd?.dailyQuranVerseCount ?? useOnlineStorage.getState().dailyQuranVerseCount),
-    //   dailyFrequencyListVerseCount:
-    //     useOnlineStorage.getState().dailyFrequencyListVerseCount -
-    //     (props.toAdd?.dailyFrequencyListVerseCount ?? useOnlineStorage.getState().dailyFrequencyListVerseCount),
-    //   dailyQuranProgressPercentage:
-    //     useOnlineStorage.getState().dailyQuranProgressPercentage -
-    //     (props.toAdd?.dailyQuranProgressPercentage ?? useOnlineStorage.getState().dailyQuranProgressPercentage),
-    // }
   );
 
   const [animationEnded, setAnimationEnded] = useState(false);
 
   React.useEffect(() => {
+    if (!dailyGoalsData) return;
     const timer = setTimeout(() => {
-      setGoalRecords(useOnlineStorage.getState().goalRecords);
+      setGoalRecords(dailyGoalsData.goalRecords);
       setAnimationEnded(true);
     }, 1000);
     return () => clearTimeout(timer);
-  }, []);
+  }, [dailyGoalsData]);
 
   return (
     <div className="flex flex-col gap-4 items-center justify-center w-full h-full">
@@ -59,6 +56,7 @@ function DailyGoals(props: { toAdd?: Partial<Record<keyof typeof enums, number>>
           streak={goalRecords[key]?.streak ?? 0}
           toAdd={props.toAdd?.[key as keyof PreferenceStore] as number | undefined}
           animationEnded={animationEnded}
+          currentGoalRecords={currentGoalRecords}
         />
       ))}
     </div>
@@ -75,6 +73,7 @@ function DailyGoal(props: {
   animationEnded: boolean;
   streak?: number;
   toAdd?: number;
+  currentGoalRecords: Record<string, GoalRecord>;
 }) {
   return (
     <>
@@ -86,6 +85,7 @@ function DailyGoal(props: {
           edit={props.edit}
           toAdd={props.toAdd}
           animationEnded={props.animationEnded}
+          currentGoalRecords={props.currentGoalRecords}
         ></ProgressValue>
       </Progress>
     </>
@@ -102,8 +102,17 @@ function ProgressLabel(props: { children: React.ReactNode; streak?: number }) {
     </label>
   );
 }
-function ProgressValue(props: { value: number; goal: number; edit: string; animationEnded: boolean; toAdd?: number }) {
+function ProgressValue(props: {
+  value: number;
+  goal: number;
+  edit: string;
+  animationEnded: boolean;
+  toAdd?: number;
+  currentGoalRecords: Record<string, GoalRecord>;
+}) {
   const [num, setNum] = useState(0);
+  const updateDailyGoals = useMutation(api.dailyGoals.update);
+
   useEffect(() => {
     setTimeout(() => {
       setNum(props.toAdd ?? 0);
@@ -128,13 +137,14 @@ function ProgressValue(props: { value: number; goal: number; edit: string; anima
       <Edit
         size={16}
         onClick={() => {
-          useOnlineStorage.setState((state) => {
-            const promptValue = parseFloat(
-              prompt("Goal", state.goalRecords[props.edit].goal + "") ?? state.goalRecords[props.edit].goal + "",
-            );
-            if (isNaN(promptValue)) return;
-            state.goalRecords[props.edit].goal = promptValue;
-          });
+          const promptValue = parseFloat(
+            prompt("Goal", props.currentGoalRecords[props.edit].goal + "") ??
+              props.currentGoalRecords[props.edit].goal + "",
+          );
+          if (isNaN(promptValue)) return;
+          const newGoalRecords = { ...props.currentGoalRecords };
+          newGoalRecords[props.edit].goal = promptValue;
+          updateDailyGoals({ goalRecords: newGoalRecords });
         }}
       ></Edit>
     </div>

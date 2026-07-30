@@ -1,14 +1,11 @@
 import React from "react";
-import {
-  Noto_Sans_Arabic,
-  Noto_Kufi_Arabic,
-  Noto_Naskh_Arabic,
-  Amiri_Quran,
-} from "next/font/google";
-import { useOnlineStorage } from "@/stores/onlineStorage";
-import { useShallow } from "zustand/react/shallow";
+import { Noto_Sans_Arabic, Noto_Kufi_Arabic, Noto_Naskh_Arabic, Amiri_Quran } from "next/font/google";
 import { create } from "zustand/react";
 import { NextFont } from "next/dist/compiled/@next/font";
+import { useShallow } from "zustand/shallow";
+import { useMutation, useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { fontNames } from "./fontNames";
 const sans = Noto_Sans_Arabic({
   weight: "400",
   subsets: ["arabic"],
@@ -41,14 +38,10 @@ const useStore = create<{
   setFont: (font: NextFont) => set({ font }),
 }));
 
-export default function useFont(): [
-  NextFont | null,
-  string,
-  typeof googleFonts,
-] {
-  const fontName = useOnlineStorage(useShallow((a) => a.font));
+export default function useFont(): [NextFont | null, string, typeof googleFonts] {
+  const { font: fontName } = useQuery(api.displayPreferences.get) ?? { font: "Noto_Sans_Arabic" };
   const { font, setFont } = useStore(useShallow((a) => a));
-  setFont(googleFonts[fontName]);
+  setFont(googleFonts[fontName as (typeof fontNames)[number]]);
 
   return [font, fontName, googleFonts];
 }

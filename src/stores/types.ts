@@ -36,6 +36,10 @@ export type MiscSlice = {
   lastModified: Date;
   highlightedRoots: string[];
   ranks: number[];
+  reciter_id: string;
+  setReciter_id: (reciterId: string) => void;
+  reviewOrder: reviewOrderType;
+  setReviewOrder: (reviewOrder: reviewOrderType) => void;
 };
 
 export type GoalRecord = {

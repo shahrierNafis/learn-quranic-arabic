@@ -1,9 +1,9 @@
 import { Skeleton } from "./ui/skeleton";
 import getVerseTranslations from "@/utils/getVerseTranslations";
-import { useOnlineStorage } from "@/stores/onlineStorage";
-import { useShallow } from "zustand/react/shallow";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 // Fetch footnote text by ID
 async function getFootnote(footnoteId: string): Promise<string> {
@@ -100,7 +100,8 @@ function Translations({
   translations?: Awaited<ReturnType<typeof getVerseTranslations>>;
   index?: string | null;
 }) {
-  const [translation_ids] = useOnlineStorage(useShallow((a) => [a.translation_ids]));
+  const displayPreferences = useQuery(api.displayPreferences.get);
+  const translation_ids = useMemo(() => displayPreferences?.translation_ids ?? ["131"], [displayPreferences]);
   const [translations2, setTranslations] = useState<Awaited<ReturnType<typeof getVerseTranslations>>>();
 
   useEffect(() => {

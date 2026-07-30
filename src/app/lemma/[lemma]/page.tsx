@@ -7,14 +7,15 @@ import { buckwalterToArabic } from "@/utils/arabic-buckwalter-transliteration";
 import useFont from "@/utils/useFont";
 import { cn } from "@/lib/utils";
 import CellComponent from "@/components/CellComponent";
-import { useOnlineStorage } from "@/stores/onlineStorage";
-import { useShallow } from "zustand/react/shallow";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 export default function Page(props: { params: Promise<{ lemma: string }> }) {
   const params = use(props.params);
   const { lemma } = params;
   const [font] = useFont();
-  const translation_ids = useOnlineStorage(useShallow((a) => a.translation_ids));
+  const miscPreferences = useQuery(api.miscPreferences.get);
+  const translation_ids = miscPreferences?.translation_ids ?? [131];
   const [positions, setPositions] = useState<LemmaTableData[]>([]);
   const [lemmaCount, setLemmaCount] = useState<number>(0);
 
@@ -56,7 +57,7 @@ export default function Page(props: { params: Promise<{ lemma: string }> }) {
 
   return (
     <>
-      <div className="mb-6 text-center">
+      <div className="m-6 text-center">
         <div className={cn(font?.className, "text-4xl")}>{buckwalterToArabic(decodeURIComponent(lemma))}</div>
         <div className="text-sm text-gray-500">
           {lemmaCount} occurrence{lemmaCount === 1 ? "" : "s"}

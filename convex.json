@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/convex/schemas/convex.schema.json",
+  "functions": "src/convex/",
+  "aiFiles": {
+    "enabled": true,
+    "skills": {
+      "agents": [
+        "github-copilot"
+      ],
+      "path": ".agents/skills"
+    }
+  }
+}

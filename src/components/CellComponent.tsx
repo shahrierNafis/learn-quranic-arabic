@@ -13,17 +13,17 @@ import getVerseTranslations from "@/utils/getVerseTranslations";
 import Translations from "./Translations";
 
 import Word from "./Word";
-import { useOnlineStorage } from "@/stores/onlineStorage";
-import { useShallow } from "zustand/react/shallow";
 import Verse from "./Verse";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 export default memo(
   function CellComponent({ verse_key, translation_ids }: { verse_key: string; translation_ids: string[] }) {
     const [verse, setVerse] = useState<WORD[]>();
     const [translations, setTranslations] = useState<Awaited<ReturnType<typeof getVerseTranslations>>>();
-    const [showTranslation, showTransliteration] = useOnlineStorage(
-      useShallow((a) => [a.showTranslation, a.showTransliteration]),
-    );
+    const displayPreferences = useQuery(api.displayPreferences.get);
+    const showTranslation = displayPreferences?.showTranslation ?? true;
+    const showTransliteration = displayPreferences?.showTransliteration ?? true;
 
     // set verse
     useEffect(() => {

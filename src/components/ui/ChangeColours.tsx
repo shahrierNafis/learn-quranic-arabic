@@ -7,16 +7,21 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useOnlineStorage } from "@/stores/onlineStorage";
-import { useShallow } from "zustand/react/shallow";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import relations from "@/utils/relations";
 import { PartOfSpeech } from "@/types";
 import { ColourPicker } from "./ColourPicker";
 import { Button } from "./button";
+import { defaultColours } from "@/stores/constants";
 export default function ChangeColours() {
-  const [colours, setColours, resetColours] = useOnlineStorage(
-    useShallow((a) => [a.colours, a.setColours, a.resetColours]),
-  );
+  const colorsData = useQuery(api.colors.get);
+  const updateColors = useMutation(api.colors.update);
+  const resetColorsMut = useMutation(api.colors.reset);
+
+  const colours = colorsData?.colors ?? defaultColours;
+  const setColours = (pos: string, value: string, value2: string) => updateColors({ pos, value, value2 });
+  const resetColours = () => resetColorsMut();
 
   return (
     <>

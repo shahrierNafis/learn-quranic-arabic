@@ -15,7 +15,8 @@ import { useShallow } from "zustand/react/shallow";
 import Translations from "@/components/Translations";
 import useVerseAudio from "@/components/useVerseAudio";
 import { useLocalStorage } from "@/stores/localStorage";
-import { useOnlineStorage } from "@/stores/onlineStorage";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 import Verse from "@/components/Verse";
@@ -30,6 +31,12 @@ import DailyGoalsDialog from "./DailyGoalsDialog";
 import { CircularProgressButton } from "./CircularProgressButton";
 import { validChunkSizes } from "../EasingFactorSelector";
 import { buckwalterToArabic } from "@/utils/arabic-buckwalter-transliteration";
+
+const initialGoalRecords = {
+  xp: { value: 0, name: "XP", goal: 1000, streak: 0 },
+  verse: { value: 0, name: "Quran Verse Count", goal: 10, streak: 0 },
+  word: { value: 0, name: "Frequency List Verse Count", goal: 100, streak: 0 },
+};
 
 export default function Start({
   verse,
@@ -62,6 +69,13 @@ export default function Start({
   const [openDailyGoals, setOpenDailyGoals] = useState(false);
   const verseCompleted: boolean = useLocalStorage.getState().currentVerse.score >= verse.length ** 2;
 
+  const dailyGoalsData = useQuery(api.dailyGoals.get);
+  const updateDailyGoals = useMutation(api.dailyGoals.update);
+  const quranProgressData = useQuery(api.quranProgress.get);
+  const updateQuranProgress = useMutation(api.quranProgress.update);
+  const miscPreferencesData = useQuery(api.miscPreferences.get);
+  const updateMiscPreferences = useMutation(api.miscPreferences.update);
+
   if (verse_key && useLocalStorage.getState().currentVerse.verse_key !== verse_key) {
     useLocalStorage.setState(() => ({
       currentVerse: {
@@ -93,17 +107,14 @@ export default function Start({
   function redo() {
     useLocalStorage.setState((state) => ({ currentVerse: { ...state.currentVerse, score: 0 } }));
     userWords.length !== 0 && reset();
-    order === "quran" &&
-      verse_key &&
-      useOnlineStorage.getState().setQuranProgress(+verse_key?.split(":")[0], +verse_key?.split(":")[1] - 1);
-    order === "frequency" &&
-      currentRank.length &&
-      lemmaDataArr.length &&
-      useOnlineStorage.setState((state) => {
-        const newRanks = [...state.ranks];
-        newRanks[currentRank[0]] = currentRank[1] - 1;
-        return { ranks: newRanks };
-      });
+    if (order === "quran" && verse_key) {
+      updateQuranProgress({ chapter: +verse_key.split(":")[0], progress: +verse_key.split(":")[1] - 1 });
+    }
+    if (order === "frequency" && currentRank.length && lemmaDataArr.length) {
+      const newRanks = [...(miscPreferencesData?.ranks ?? [0])];
+      newRanks[currentRank[0]] = currentRank[1] - 1;
+      updateMiscPreferences({ ranks: newRanks });
+    }
   }
 
   return (
@@ -286,9 +297,9 @@ export default function Start({
       }
 
       // add score
-      useOnlineStorage.setState((state) => {
-        state.goalRecords.xp.value = state.goalRecords.xp.value + score;
-      });
+      const newGoalRecords = { ...(dailyGoalsData?.goalRecords ?? initialGoalRecords) };
+      newGoalRecords.xp.value += score;
+
       const currentVerseScore = useLocalStorage.getState().currentVerse.score;
       useLocalStorage.setState((state) => ({
         currentVerse: {
@@ -298,26 +309,29 @@ export default function Start({
       }));
       const verseNowCompletes = currentVerseScore + score >= verse.length ** 2;
       if (verseNowCompletes) {
-        useOnlineStorage.setState((state) => {
-          state.goalRecords.verse.value = state.goalRecords.verse.value + 1;
-          state.goalRecords.word.value = state.goalRecords.word.value + verse.length;
-        });
+        newGoalRecords.verse.value += 1;
+        newGoalRecords.word.value += verse.length;
+
         if (order === "frequency") {
-          useOnlineStorage.setState((state) => {
-            state.ranks[currentRank[0]] = currentRank[1] + 1;
-            if ([10, lemmaDataArr[currentRank[0]]?.count ?? 10].includes(currentRank[1] + 1)) {
-              toast.success(
-                `Rank up! You reached rank ${currentRank[0] + 1} & mastered the word "${buckwalterToArabic(lemmaDataArr[currentRank[0]].lemma)}"`,
-                {},
-              );
-            }
-          });
+          const newRanks = [...(miscPreferencesData?.ranks ?? [0])];
+          newRanks[currentRank[0]] = currentRank[1] + 1;
+          updateMiscPreferences({ ranks: newRanks });
+          if ([10, lemmaDataArr[currentRank[0]]?.count ?? 10].includes(currentRank[1] + 1)) {
+            toast.success(
+              `Rank up! You reached rank ${currentRank[0] + 1} & mastered the word "${buckwalterToArabic(lemmaDataArr[currentRank[0]].lemma)}"`,
+              {},
+            );
+          }
         } else {
-          verse_key &&
-            useOnlineStorage.getState().setQuranProgress(+verse_key?.split(":")[0], +verse_key?.split(":")[1]);
+          if (verse_key) {
+            updateQuranProgress({ chapter: +verse_key.split(":")[0], progress: +verse_key.split(":")[1] });
+          }
           toast.success(`verse mastered!`, { position: "bottom-right" });
         }
-      } else if (won && !verseCompleted) {
+      }
+      updateDailyGoals({ goalRecords: newGoalRecords });
+
+      if (won && !verseCompleted) {
         toast.message(`Increasing difficulty !!!`, { position: "top-left" });
         setShow(true);
 

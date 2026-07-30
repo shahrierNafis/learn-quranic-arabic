@@ -4,7 +4,8 @@ import { useShallow } from "zustand/react/shallow";
 import _ from "lodash";
 import { Button } from "@/components/ui/button";
 import { LemmaData, WORD } from "@/types";
-import { useOnlineStorage } from "@/stores/onlineStorage";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { useLocalStorage } from "@/stores/localStorage";
 import getChapterLength from "./getChapterLength";
 import getVerseWords from "@/utils/getVerseWords";
@@ -15,17 +16,26 @@ import roundToTwo from "@/utils/roundToTwo";
 import getLemmaDataArr from "./getLemmaDataArr";
 import { buckwalterToArabic } from "@/utils/arabic-buckwalter-transliteration";
 import Nav from "./Nav";
+
 export default function Page() {
   const [verse_key, setVerse_key] = useState<string | null>(null);
   const [verse, setVerse] = useState<WORD[]>([]); // the actual verse
   const [hold, setHold] = useState(false);
 
-  const QuranProgress = useOnlineStorage((state) => state.QuranProgress);
-  const addQuranProgress = useOnlineStorage(useShallow((state) => state.addQuranProgress));
+  const quranProgressData = useQuery(api.quranProgress.get);
+  const updateQuranProgress = useMutation(api.quranProgress.update);
+  const initialQuranProgress = Object.fromEntries(
+    Array.from({ length: 114 }, (_, i) => i + 1).map((chapter) => [chapter, 0]),
+  );
+  const QuranProgress = quranProgressData?.progress ?? initialQuranProgress;
+
+  const miscPreferencesData = useQuery(api.miscPreferences.get);
+  const updateMiscPreferences = useMutation(api.miscPreferences.update);
+  const ranks = miscPreferencesData?.ranks ?? [0];
+
   const chapters = useLocalStorage((state) => state.chapters);
   const correctSoundEffect = useSound("/audio/duolingo-correct.mp3")[0];
   const [order] = useLocalStorage(useShallow((state) => [state.order]));
-  const ranks = useOnlineStorage((state) => state.ranks);
   const [lemmaDataArr, setLemmaDataArr] = useState<LemmaData[]>([]);
 
   useEffect(() => {
@@ -141,13 +151,15 @@ export default function Page() {
                   },
                 }));
                 if (order === "frequency") {
-                  useOnlineStorage.setState((state) => {
-                    const newRanks = [...state.ranks];
-                    newRanks[currentRank[0]] = (newRanks[currentRank[0]] ?? 0) + 1;
-
-                    return { ranks: newRanks };
-                  });
-                } else verse_key && addQuranProgress(+verse_key?.split(":")[0], 1);
+                  const newRanks = [...(miscPreferencesData?.ranks ?? [0])];
+                  newRanks[currentRank[0]] = (newRanks[currentRank[0]] ?? 0) + 1;
+                  updateMiscPreferences({ ranks: newRanks });
+                } else {
+                  if (verse_key) {
+                    const chapter = +verse_key.split(":")[0];
+                    updateQuranProgress({ chapter, progress: QuranProgress[chapter] + 1 });
+                  }
+                }
               }}
               dir="ltr"
             >

@@ -1,7 +1,7 @@
 import React from "react";
 import { WordSegment } from "@/types";
-import { useOnlineStorage } from "@/stores/onlineStorage";
-import { useShallow } from "zustand/react/shallow";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { useTheme } from "next-themes";
 import { buckwalterToArabic } from "@/utils/arabic-buckwalter-transliteration";
 import useFont from "@/utils/useFont";
@@ -10,8 +10,13 @@ import relations from "@/utils/relations";
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { ExternalLink, Highlighter } from "lucide-react";
+import { defaultColours } from "@/stores/constants";
 export default function SegmentInfo({ segment }: { segment: WordSegment }) {
-  const [colours, highlightedRoots] = useOnlineStorage(useShallow((a) => [a.colours, a.highlightedRoots]));
+  const colorsData = useQuery(api.colors.get);
+  const miscPreferences = useQuery(api.miscPreferences.get);
+  const updateMiscPreferences = useMutation(api.miscPreferences.update);
+  const colours = colorsData?.colors ?? defaultColours;
+  const highlightedRoots = miscPreferences?.highlightedRoots ?? [];
   const { theme } = useTheme();
   const [font] = useFont();
 
@@ -83,15 +88,13 @@ export default function SegmentInfo({ segment }: { segment: WordSegment }) {
                             variant={"outline"}
                             size={"icon"}
                             onClick={() => {
-                              useOnlineStorage.setState((state) => {
-                                if (state.highlightedRoots.includes(segment.root!)) {
-                                  return {
-                                    highlightedRoots: state.highlightedRoots.filter((r) => r != segment.root),
-                                  };
-                                } else {
-                                  return { highlightedRoots: [...state.highlightedRoots, segment.root!] };
-                                }
-                              });
+                              if (highlightedRoots.includes(segment.root!)) {
+                                updateMiscPreferences({
+                                  highlightedRoots: highlightedRoots.filter((r) => r != segment.root),
+                                });
+                              } else {
+                                updateMiscPreferences({ highlightedRoots: [...highlightedRoots, segment.root!] });
+                              }
                             }}
                           >
                             <Highlighter className={cn(highlightedRoots.includes(segment.root) && "text-green-500")} />

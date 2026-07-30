@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { Comfortaa } from "next/font/google";
 import "./globals.css";
-import CheckAuth from "@/components/CheckAuth";
+// import CheckAuth from "@/components/CheckAuth";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/app/app-sidebar";
 import { Toaster } from "@/components/ui/sonner";
-import UserDataOutOfSync from "@/components/UserDataOutOfSync";
-import HydrateOnlineStorage from "./HydrateOnlineStorage";
+// import UserDataOutOfSync from "@/components/UserDataOutOfSync";
+// import HydrateOnlineStorage from "./HydrateOnlineStorage";
+import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 
 const comfortaa = Comfortaa({ subsets: ["latin"] });
 
@@ -22,7 +23,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <meta property="og:title" content="Learn Quran/Arabic" />
         <meta property="og:image" content="/image.jpg" />
@@ -32,20 +33,24 @@ export default function RootLayout({
         />
       </head>
       <body className={comfortaa.className}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <CheckAuth />
-          <HydrateOnlineStorage />
-          <SidebarProvider defaultOpen={false}>
-            <AppSidebar />
-            <div className="absolute md:m-4 md:hidden">
-              <SidebarTrigger />
-            </div>
+        <ConvexClientProvider>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+            <SidebarProvider defaultOpen={false}>
+              <AppSidebar />
 
-            <main className="w-full">{children}</main>
-            <UserDataOutOfSync />
-            <Toaster position="bottom-left" richColors />
-          </SidebarProvider>
-        </ThemeProvider>
+              {/* Added container wrapper for proper sidebar layout structure */}
+              <div className="relative flex flex-1 flex-col min-h-screen w-full">
+                <div className="absolute md:m-4 md:hidden">
+                  <SidebarTrigger />
+                </div>
+
+                <main className="w-full flex-1">{children}</main>
+              </div>
+
+              <Toaster position="bottom-left" richColors />
+            </SidebarProvider>
+          </ThemeProvider>
+        </ConvexClientProvider>
       </body>
     </html>
   );

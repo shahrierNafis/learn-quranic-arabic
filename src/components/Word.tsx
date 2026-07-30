@@ -1,7 +1,8 @@
 import { WORD, WordData } from "@/types";
 import React from "react";
-import { useOnlineStorage } from "@/stores/onlineStorage";
-import { useShallow } from "zustand/react/shallow";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { defaultColours } from "@/stores/constants";
 import { useTheme } from "next-themes";
 import useFont from "@/utils/useFont";
 import WordInfo from "./WordInfo";
@@ -25,7 +26,10 @@ function Word({
   asChild?: boolean;
   colorless?: boolean;
 }) {
-  const [colours, highlightedRoots] = useOnlineStorage(useShallow((a) => [a.colours, a.highlightedRoots]));
+  const colorsData = useQuery(api.colors.get);
+  const miscPreferences = useQuery(api.miscPreferences.get);
+  const colours = colorsData?.colors ?? defaultColours;
+  const highlightedRoots = miscPreferences?.highlightedRoots ?? [];
 
   const { systemTheme, theme } = useTheme();
   const [font] = useFont();

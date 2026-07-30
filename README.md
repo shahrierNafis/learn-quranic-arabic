@@ -49,4 +49,4 @@ bunx supabase start
 
 ## createQuranic-corpus-apiData
 
-quran-word-lists/createQuranic-corpus-apiData.ts relies on [quranic-corpus-api server](https://github.com/kaisdukes/quranic-corpus-api)
+quran-data/createQuranic-corpus-apiData.ts relies on [quranic-corpus-api server](https://github.com/kaisdukes/quranic-corpus-api)

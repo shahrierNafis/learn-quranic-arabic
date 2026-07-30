@@ -1,22 +1,11 @@
 "use server";
 import { WordData } from "@/types";
 import { cache } from "react";
+import { RootData } from "@/quran-data/createRootData";
 
-type SegmentData = {
-  [key: number]: {
-    [key: number]: {
-      [key: number]: WordData;
-    };
-  };
-};
+const rootData: RootData = require("@/quran-data/rootData.json");
 
-const rootData: {
-  [key: string]: {
-    [key: string]: string[];
-  };
-} = require("./../rootData.json");
-
-const getRootData = cache(async function (root: string) {
+const getRootData = cache(async function (root: string): Promise<RootData[number]> {
   return rootData[root];
 });
 export default getRootData;

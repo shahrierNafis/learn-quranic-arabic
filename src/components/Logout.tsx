@@ -11,11 +11,11 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button, buttonVariants } from "./ui/button";
-import { createClient } from "@/utils/supabase/clients";
 import { cn } from "@/utils/cn";
+import { useAuthActions } from "@convex-dev/auth/react";
 
 export default function Logout() {
-  const supabase = createClient();
+  const { signOut } = useAuthActions();
   return (
     <>
       <AlertDialog>
@@ -30,7 +30,7 @@ export default function Logout() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => supabase.auth.signOut().then(() => window.location.reload())}
+              onClick={() => void signOut().then(() => window.location.reload())}
               className={buttonVariants({ variant: "destructive" })}
             >
               Yes

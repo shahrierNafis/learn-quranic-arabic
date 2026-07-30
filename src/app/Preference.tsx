@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Settings } from "lucide-react";
 import {
   Dialog,
@@ -15,31 +15,35 @@ import ChangeColours from "@/components/ui/ChangeColours";
 import ChangeFont from "@/components/ui/ChangeFont";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { useOnlineStorage } from "@/stores/onlineStorage";
-import { useShallow } from "zustand/react/shallow";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { Switch } from "@/components/ui/switch";
 import { ModeToggle } from "@/components/ui/ModeToggle";
 import { SetReviewOrder } from "@/components/SetReviewOrder";
 import ChangeReciter from "@/components/ChangeReciter";
 import { SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 export default function Preference() {
-  const [
-    setShowTransliteration,
-    showTransliteration,
-    setShowTranslation,
-    showTranslation,
-    setShowTranslationOnHiddenWords,
-    showTranslationOnHiddenWords,
-  ] = useOnlineStorage(
-    useShallow((a) => [
-      a.setShowTransliteration,
-      a.showTransliteration,
-      a.setShowTranslation,
-      a.showTranslation,
-      a.setShowTranslationOnHiddenWords,
-      a.showTranslationOnHiddenWords,
-    ]),
-  );
+  const displayPreferences = useQuery(api.displayPreferences.get);
+  const updateDisplayPreferences = useMutation(api.displayPreferences.update);
+
+  const showTransliteration = displayPreferences?.showTransliteration ?? false;
+  const showTranslation = displayPreferences?.showTranslation ?? false;
+  const showTranslationOnHiddenWords = displayPreferences?.showTranslationOnHiddenWords ?? false;
+
+  const setShowTransliteration = (val: boolean) => updateDisplayPreferences({ showTransliteration: val });
+  const setShowTranslation = (val: boolean) => updateDisplayPreferences({ showTranslation: val });
+  const setShowTranslationOnHiddenWords = (val: boolean) =>
+    updateDisplayPreferences({ showTranslationOnHiddenWords: val });
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Return a shell skeleton or null during SSR to avoid extension interference
+  if (!mounted) {
+    return <div className="h-10 w-full animate-pulse bg-muted rounded-md" />;
+  }
 
   return (
     <>

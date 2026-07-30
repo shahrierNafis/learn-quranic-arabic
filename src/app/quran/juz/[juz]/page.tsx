@@ -3,39 +3,24 @@ import React, { memo, useEffect, useMemo, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { ColumnDef } from "@tanstack/react-table";
 
-import {
-  flexRender,
-  getCoreRowModel,
-  getPaginationRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
+import { flexRender, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DataTablePagination } from "@/components/ui/DataTablePagination";
 import getJuzData from "./getJuzData";
 import CellComponent from "@/components/CellComponent";
-import { useOnlineStorage } from "@/stores/onlineStorage";
-import { useShallow } from "zustand/react/shallow";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import Header from "../../Header";
 
 export default function Page(props: { params: Promise<{ juz: number }> }) {
   const params = use(props.params);
 
-  const {
-    juz
-  } = params;
+  const { juz } = params;
 
   const router = useRouter();
-  const translation_ids = useOnlineStorage(
-    useShallow((state) => state.translation_ids)
-  );
+  const miscPreferences = useQuery(api.miscPreferences.get);
+  const translation_ids = miscPreferences?.translation_ids ?? [131];
   const columns: ColumnDef<string, string>[] = [
     {
       accessorFn: (index) => index,
@@ -61,14 +46,14 @@ export default function Page(props: { params: Promise<{ juz: number }> }) {
             </>
           );
         },
-        (prev, next) => prev.getValue() == next.getValue()
+        (prev, next) => prev.getValue() == next.getValue(),
       ),
     },
   ];
   const [data, setData] = useState<string[]>([]);
   useEffect(() => {
     getJuzData(juz).then(setData);
-    return () => { };
+    return () => {};
   }, [juz]);
   const table = useReactTable({
     data,
@@ -89,12 +74,7 @@ export default function Page(props: { params: Promise<{ juz: number }> }) {
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
                   );
                 })}
@@ -104,26 +84,15 @@ export default function Page(props: { params: Promise<{ juz: number }> }) {
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
+                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
+                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
+                <TableCell colSpan={columns.length} className="h-24 text-center">
                   No results.
                 </TableCell>
               </TableRow>

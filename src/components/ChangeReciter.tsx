@@ -4,13 +4,16 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "./ui/button";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useOnlineStorage } from "@/stores/onlineStorage";
-import { useShallow } from "zustand/react/shallow";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { Label } from "./ui/label";
 
 export default function ChangeReciter() {
   const [open, setOpen] = React.useState(false);
-  const [reciter_id, setReciter_id] = useOnlineStorage(useShallow((s) => [s.reciter_id, s.setReciter_id]));
+  const miscPreferences = useQuery(api.miscPreferences.get);
+  const updateMiscPreferences = useMutation(api.miscPreferences.update);
+  const reciter_id = miscPreferences?.reciter_id ?? "1";
+  const setReciter_id = (id: string) => updateMiscPreferences({ reciter_id: id });
   // Generates a unique ID for accessible labeling
   const generatedId = React.useId();
 

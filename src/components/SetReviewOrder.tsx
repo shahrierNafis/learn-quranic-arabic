@@ -2,13 +2,21 @@
 
 import * as React from "react";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/utils/cn";
-import { useOnlineStorage } from "@/stores/onlineStorage";
-import { useShallow } from "zustand/react/shallow";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 export function SetReviewOrder({ className }: { className?: string }) {
-  const [reviewOrder, setReviewOrder] = useOnlineStorage(useShallow((state) => [state.reviewOrder, state.setReviewOrder]));
+  const miscPreferences = useQuery(api.miscPreferences.get);
+  const updateMiscPreferences = useMutation(api.miscPreferences.update);
+  const reviewOrder = (miscPreferences?.reviewOrder ?? "next_review ASC") as keyof typeof obj;
+  const setReviewOrder = (order: string) => updateMiscPreferences({ reviewOrder: order });
 
   return (
     <div className={cn(className)}>

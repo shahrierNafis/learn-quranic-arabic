@@ -1,10 +1,22 @@
 "use client";
 import React from "react";
 import Letter from "./Letter";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { useEffect } from "react";
 
 export default function Page() {
   const [maxNumOfRoots, setMaxNumOfRoots] = React.useState(10);
   const [sevenColumns, setSevenColumns] = React.useState<boolean>();
+  const fsrsData = useQuery(api.fsrs.get);
+  const initialize = useMutation(api.fsrs.initialize);
+
+  // Initialize if no data exists
+  useEffect(() => {
+    if (fsrsData === null) {
+      initialize();
+    }
+  }, [fsrsData, initialize]);
 
   React.useEffect(() => {
     if (window.innerWidth > window.innerHeight) {
@@ -13,7 +25,9 @@ export default function Page() {
       setSevenColumns(false);
     }
   }, []);
-
+  if (!fsrsData) {
+    return <div>Loading...</div>;
+  }
   return (
     <div className="max-h-screen max-w-screen">
       <div

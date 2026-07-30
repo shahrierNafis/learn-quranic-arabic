@@ -2,7 +2,8 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { ColumnDef, flexRender, getCoreRowModel, getPaginationRowModel, useReactTable } from "@tanstack/react-table";
-import { useOnlineStorage } from "@/stores/onlineStorage";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import getLemmaDataArr from "./getLemmaDataArr";
 import { LemmaData } from "@/types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -16,24 +17,27 @@ import useFont from "@/utils/useFont";
 import { Checkbox } from "@/components/ui/checkbox";
 
 const Rank = (props: {}) => {
-  const ranks = useOnlineStorage((state) => state.ranks);
+  const miscPreferences = useQuery(api.miscPreferences.get);
+  const updateMiscPreferences = useMutation(api.miscPreferences.update);
+  const ranks = miscPreferences?.ranks ?? [0];
+
   const [lemmaData, setLemmaData] = useState<LemmaData[]>([]);
   const [font] = useFont();
   const [lemmaDataArr, setLemmaDataArr] = useState<LemmaData[]>([]);
 
   const currentRank: [number, number] = useMemo(() => {
     const c = Math.max(
-      lemmaDataArr.findIndex(
-        (element, index) =>
-          (useOnlineStorage.getState().ranks[index] ?? 0) < element.count &&
-          useOnlineStorage.getState().ranks[index] != 10,
-      ),
+      lemmaDataArr.findIndex((element, index) => (ranks[index] ?? 0) < element.count && ranks[index] != 10),
       0,
     );
-    return [c, useOnlineStorage.getState().ranks[c] ?? 0];
-  }, [lemmaDataArr]);
+    return [c, ranks[c] ?? 0];
+  }, [lemmaDataArr, ranks]);
+
   useEffect(() => {
-    getLemmaDataArr().then(setLemmaData);
+    getLemmaDataArr().then((data) => {
+      setLemmaData(data);
+      setLemmaDataArr(data); // Assuming this should be set too since it's used in currentRank
+    });
   }, []);
 
   const data = useMemo(() => {
@@ -95,22 +99,18 @@ const Rank = (props: {}) => {
                 onClick={() => {
                   const input = prompt("set progress", ranks[lemmaEntry.rank - 1] + "");
                   if (input === null) return;
-                  useOnlineStorage.setState((state) => {
-                    const newRanks = [...state.ranks];
-                    newRanks[lemmaEntry.rank - 1] = Number(input);
-                    return { ranks: newRanks };
-                  });
+                  const newRanks = [...ranks];
+                  newRanks[lemmaEntry.rank - 1] = Number(input);
+                  updateMiscPreferences({ ranks: newRanks });
                 }}
               />
               {completed}/{total}
               <Checkbox
                 checked={[10, lemmaEntry.count].includes(ranks[lemmaEntry.rank - 1])}
                 onCheckedChange={(checked) => {
-                  useOnlineStorage.setState((state) => {
-                    const newRanks = [...state.ranks];
-                    newRanks[lemmaEntry.rank - 1] = checked ? Math.min(10, lemmaEntry.count) : 0;
-                    return { ranks: newRanks };
-                  });
+                  const newRanks = [...ranks];
+                  newRanks[lemmaEntry.rank - 1] = checked ? Math.min(10, lemmaEntry.count) : 0;
+                  updateMiscPreferences({ ranks: newRanks });
                 }}
               />
             </div>
@@ -118,7 +118,7 @@ const Rank = (props: {}) => {
         },
       },
     ],
-    [font?.className, ranks],
+    [font?.className, ranks, updateMiscPreferences],
   );
   const [pagination, setPagination] = useState(() => ({
     pageSize: 10,
@@ -158,13 +158,11 @@ const Rank = (props: {}) => {
             variant={"outline"}
             onClick={() => {
               const newRank = +(prompt("set rank?", currentRank[0].toString()) ?? "0");
-              useOnlineStorage.setState((state) => {
-                const newRanks = [...state.ranks];
-                for (const lemmaEntry of lemmaData) {
-                  newRanks[lemmaEntry.rank - 1] = lemmaEntry.rank > newRank ? 0 : Math.min(lemmaEntry.count, 10);
-                }
-                return { ranks: newRanks };
-              });
+              const newRanks = [...ranks];
+              for (const lemmaEntry of lemmaData) {
+                newRanks[lemmaEntry.rank - 1] = lemmaEntry.rank > newRank ? 0 : Math.min(lemmaEntry.count, 10);
+              }
+              updateMiscPreferences({ ranks: newRanks });
             }}
           >
             set rank

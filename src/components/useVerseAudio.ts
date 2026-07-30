@@ -1,10 +1,12 @@
 import { useLocalStorage } from "@/stores/localStorage";
-import { useOnlineStorage } from "@/stores/onlineStorage";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { useEffect, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 
 export default function useVerseAudio(verse_key?: string) {
-  const [reciter_id] = useOnlineStorage(useShallow((s) => [s.reciter_id]));
+  const miscPreferences = useQuery(api.miscPreferences.get);
+  const reciter_id = miscPreferences?.reciter_id ?? "7";
   const [verseAudio, setVerseAudio] = useState<string>();
   const [audioVerse, setAudioVerse] = useLocalStorage(useShallow((s) => [s.audioVerse, s.setAudioVerse]));
 

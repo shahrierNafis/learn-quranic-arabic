@@ -39,7 +39,8 @@ next-env.d.ts
 
 .env
 
-/quran-word-lists/*.json
-/quran-word-lists/*/*.json
-!quran-word-lists/pronounData.json
+/src/quran-data/*.json
+/src/quran-data/*/*.json
+!src/quran-data/pronounData.json
+!src/quran-data/quran_arabic_roots_lane_lexicon_2026-02-12.json
 /src/**.json

@@ -9,7 +9,7 @@ type SegmentData = {
     };
   };
 };
-const data: SegmentData = require("./../data.json");
+const data: SegmentData = require("@/quran-data/data.json");
 
 export default cache(async function getWordData(surah: number, verse: number) {
   return data[surah][verse];

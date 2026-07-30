@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { MultiSelect } from "@/components/MultiSelect";
-import { useOnlineStorage } from "@/stores/onlineStorage";
-import { useShallow } from "zustand/react/shallow";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 export default function SelectTranslation() {
-  const [translation_ids, setTranslation_ids] = useOnlineStorage(
-    useShallow((a) => [a.translation_ids, a.setTranslation_ids]),
-  );
+  const displayPreferences = useQuery(api.displayPreferences.get);
+  const updateDisplayPreferences = useMutation(api.displayPreferences.update);
+  const translation_ids = displayPreferences?.translation_ids ?? ["149"];
+  const setTranslation_ids = (ids: string[]) => updateDisplayPreferences({ translation_ids: ids });
 
   const [translations, setTranslations] = useState<
     {

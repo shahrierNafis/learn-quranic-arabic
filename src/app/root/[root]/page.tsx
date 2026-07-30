@@ -8,8 +8,8 @@ import { buckwalterToArabic } from "@/utils/arabic-buckwalter-transliteration";
 import useFont from "@/utils/useFont";
 import { cn } from "@/lib/utils";
 import CellComponent from "@/components/CellComponent";
-import { useOnlineStorage } from "@/stores/onlineStorage";
-import { useShallow } from "zustand/react/shallow";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 export type TableData = {
   lemma: string;
   positions: string[];
@@ -18,7 +18,10 @@ export type TableData = {
 export default function Page(props: { params: Promise<{ root: string }> }) {
   const params = use(props.params);
   const { root } = params;
-  const translation_ids = useOnlineStorage(useShallow((a) => a.translation_ids));
+  const [font] = useFont();
+  const miscPreferences = useQuery(api.miscPreferences.get);
+  const translation_ids = miscPreferences?.translation_ids ?? [131];
+  const [summary, setSummary] = useState<string>();
 
   const [rootData, setRootData] = useState<
     {
@@ -30,7 +33,8 @@ export default function Page(props: { params: Promise<{ root: string }> }) {
   useEffect(() => {
     getRootData(decodeURIComponent(root))
       .then((rd) => {
-        return Object.entries(rd).map(([lemma, positions]) => ({
+        setSummary(rd.summary_en);
+        return Object.entries(rd.lemmas).map(([lemma, positions]) => ({
           lemma,
           positions,
         }));
@@ -53,7 +57,11 @@ export default function Page(props: { params: Promise<{ root: string }> }) {
           const [font] = useFont();
           return (
             <>
-              <div className={`flex items-center justify-center gap-2`} style={{ paddingLeft: `${row.depth * 2}rem` }} key={row.id}>
+              <div
+                className={`flex items-center justify-center gap-2`}
+                style={{ paddingLeft: `${row.depth * 2}rem` }}
+                key={row.id}
+              >
                 <>
                   {row.getCanExpand() ? (
                     <button className="cursor-pointer" onClick={row.getToggleExpandedHandler()}>
@@ -62,7 +70,9 @@ export default function Page(props: { params: Promise<{ root: string }> }) {
                   ) : (
                     <ChevronRight className="opacity-25" />
                   )}
-                  <div className={cn(font?.className, "text-3xl")}>{row.depth == 0 && buckwalterToArabic((getValue() as string) ?? "")}</div>
+                  <div className={cn(font?.className, "text-3xl")}>
+                    {row.depth == 0 && buckwalterToArabic((getValue() as string) ?? "")}
+                  </div>
                 </>
               </div>
             </>
@@ -91,14 +101,18 @@ export default function Page(props: { params: Promise<{ root: string }> }) {
               </>
             );
           },
-          (prev, next) => prev.getValue() == next.getValue()
+          (prev, next) => prev.getValue() == next.getValue(),
         ),
       },
     ],
-    [translation_ids]
+    [translation_ids],
   );
   return (
     <>
+      <div className="m-6 text-center">
+        <div className={cn(font?.className, "text-4xl")}>{root && buckwalterToArabic(decodeURIComponent(root))}</div>
+        <div className="text-sm text-gray-500">{summary && summary}</div>
+      </div>
       {rootData && (
         <DataTable
           {...{

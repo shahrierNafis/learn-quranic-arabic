@@ -16,7 +16,7 @@ import {
 import Preference from "./Preference";
 import ReadQuranBtn from "./ReadQuranBtn";
 import Link from "@/components/ui/Link";
-import { usePathname } from "next/navigation";
+// import { usePathname } from "next/navigation";
 import AD from "@/app/AD";
 
 // Menu items.
@@ -44,7 +44,7 @@ const items = [
 ];
 
 export function AppSidebar() {
-  const pathname = usePathname();
+  // const pathname = usePathname();
 
   return (
     <Sidebar collapsible="icon">
