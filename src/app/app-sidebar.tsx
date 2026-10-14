@@ -62,7 +62,7 @@ export function AppSidebar() {
               ))}
               <Preference />
               <ReadQuranBtn />
-              <AD />
+              {/*<AD />*/}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
