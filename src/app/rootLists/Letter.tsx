@@ -80,7 +80,14 @@ function Letter(props: { letter: string; maxNumOfRoots: number }) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(open) => {
+        setOpen(open);
+        setRevel([]);
+      }}
+      modal={false}
+    >
       <DialogTrigger
         className={cn(
           "flex items-center justify-center sm:text-5xl border aspect-square hover:ring-2",
