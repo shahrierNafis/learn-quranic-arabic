@@ -37,7 +37,15 @@ function Letter(props: { letter: string; maxNumOfRoots: number }) {
   const [fiveColumns, setFiveColumns] = React.useState<boolean>(false);
   const [open, setOpen] = React.useState(false);
 
-  const numOfRoots = Math.min(rootGroupsByFirstLetter[a2b(props.letter)]?.length || 0, props.maxNumOfRoots);
+  // Check if the letter is a reserved character
+  const reservedChars: { [key: string]: string } = { $: "dollar", _: "underscore" };
+  const buckwalterLetter = a2b(props.letter);
+  let convexBuckwalter = buckwalterLetter;
+  if (buckwalterLetter in reservedChars) {
+    convexBuckwalter = reservedChars[buckwalterLetter];
+  }
+
+  const numOfRoots = Math.min(rootGroupsByFirstLetter[buckwalterLetter]?.length || 0, props.maxNumOfRoots);
 
   const scheduler = fsrs();
   const fsrsData = useQuery(api.fsrs.get);
@@ -45,7 +53,7 @@ function Letter(props: { letter: string; maxNumOfRoots: number }) {
 
   // Find the card data for this letter from the array
   const letterData = Object.entries(fsrsData?.rootGroupsByFirstLetter ?? {}).find(
-    ([letter]) => letter === a2b(props.letter),
+    ([letter]) => letter === convexBuckwalter,
   )?.[1] as Infer<typeof RootGroupSchema>[string];
 
   // Get the card data or create initial if not found
@@ -72,10 +80,12 @@ function Letter(props: { letter: string; maxNumOfRoots: number }) {
     // Update the rootGroupsByFirstLetter array
     const updatedRootGroupsByFirstLetter = {
       ...fsrsData.rootGroupsByFirstLetter,
-      [a2b(props.letter)]: fSRSToStoredCard(newCard),
+      [convexBuckwalter]: fSRSToStoredCard(newCard),
     } as Infer<typeof RootGroupSchema>;
     await updateFsrs({
       rootGroupsByFirstLetter: updatedRootGroupsByFirstLetter,
+    }).catch((err) => {
+      console.error(err);
     });
   };
 
@@ -116,7 +126,7 @@ function Letter(props: { letter: string; maxNumOfRoots: number }) {
             gridTemplateColumns: `repeat(${fiveColumns ? 5 : 2}, minmax(0, 1fr))`,
           }}
         >
-          {rootGroupsByFirstLetter[a2b(props.letter)]?.map((rootEntry, index) =>
+          {rootGroupsByFirstLetter[buckwalterLetter]?.map((rootEntry, index) =>
             index < props.maxNumOfRoots ? (
               <div
                 dir="lte"
